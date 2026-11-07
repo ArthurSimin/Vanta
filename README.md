@@ -62,12 +62,55 @@ adds entries on its own.
 
 - A C++17 compiler (GCC 11+ or Clang 14+)
 - CMake 3.21 or newer
-- Qt 6.5 or newer with the **Widgets**, **Svg**, **Concurrent** and **Network**
+- Qt 6.2 or newer with the **Widgets**, **Svg**, **Concurrent** and **Network**
   modules
 - Ninja (recommended) or Make
 
+Qt 6.2 is the floor on purpose: Vanta avoids anything newer so a single build
+runs on every distribution from Ubuntu 22.04 onward. On Qt 6.2 and 6.3 the
+"Follow system colors" theme falls back to the palette's lightness, because
+`QStyleHints::colorScheme()` arrived in 6.5.
+
 Wine and/or Proton are only needed to launch Windows games. Vanta starts and
 runs fine without them.
+
+## Installing a package
+
+Prebuilt packages are attached to every
+[release](https://github.com/ArthurSimin/Vanta/releases/latest). They are built
+on Ubuntu 22.04 against Qt 6.2, so one package covers a whole family of
+distributions rather than a single release.
+
+| Distribution | Package |
+| --- | --- |
+| Debian 12+, Ubuntu 22.04+ | `vanta_<version>_amd64.deb` |
+| Fedora, openSUSE, RHEL | `vanta-<version>-1.x86_64.rpm` |
+| Arch, Manjaro, CachyOS | `vanta-<version>-1-x86_64.pkg.tar.zst` |
+| Anything else | `vanta-<version>-linux-x86_64.tar.gz` |
+
+```bash
+# Debian / Ubuntu
+sudo apt install ./vanta_1.0.0_amd64.deb
+
+# Fedora / openSUSE
+sudo dnf install ./vanta-1.0.0-1.x86_64.rpm
+
+# Arch / Manjaro / CachyOS
+sudo pacman -U vanta-1.0.0-1-x86_64.pkg.tar.zst
+```
+
+Packages are unsigned, so verify the checksum first:
+
+```bash
+sha256sum -c SHA256SUMS --ignore-missing
+```
+
+The tarball holds the same tree rooted at the archive instead of `/usr`:
+
+```bash
+tar -xzf vanta-1.0.0-linux-x86_64.tar.gz
+sudo cp -a vanta-1.0.0-linux-x86_64/usr/. /usr/local/
+```
 
 ## Building
 
@@ -80,9 +123,6 @@ sudo apt install build-essential cmake ninja-build \
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
-
-On Ubuntu 22.04 the Qt 6 packages may be too old; use a newer release or the
-official Qt online installer if `find_package(Qt6 6.5)` fails.
 
 ### Fedora
 

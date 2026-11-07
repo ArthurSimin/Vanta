@@ -30,8 +30,26 @@ cmake --build build -j"$(nproc)"
 ./build/vanta
 ```
 
-Requirements: CMake ≥ 3.21, a C++17 compiler, Qt ≥ 6.5 with the `Widgets`,
+Requirements: CMake ≥ 3.21, a C++17 compiler, Qt ≥ 6.2 with the `Widgets`,
 `Svg`, `Concurrent` and `Network` modules.
+
+### Why Qt 6.2 is the floor
+
+`find_package(Qt6 6.2 ...)` is deliberate, not stale. Release packages are built
+on Ubuntu 22.04 so that one set of binaries installs across Ubuntu 22.04+,
+Debian 12+, Fedora, openSUSE and Arch. Raising the minimum Qt version raises the
+ABI requirement of the shipped binary and silently drops distributions.
+
+Rules that follow from this:
+
+- Do not call an API newer than Qt 6.2 without a `QT_VERSION_CHECK` guard and a
+  fallback. `QStyleHints::colorScheme()` (6.5) is the existing example.
+- `qt_standard_project_setup()` is guarded with `if(COMMAND ...)` because it
+  only exists from Qt 6.3.
+- The release workflow fails if the binary needs a `Qt_6.x` symbol above 6.2,
+  glibc above 2.35, GLIBCXX above 3.4.30 or CXXABI above 1.3.13. Those are the
+  Ubuntu 22.04 runtime ceilings. A local build with a newer toolchain will
+  exceed them; that is fine for development, but never ship such a binary.
 
 A build is only acceptable when it produces **zero warnings** with the
 `-Wall -Wextra` flags the top-level `CMakeLists.txt` already sets. Warnings are
@@ -122,6 +140,36 @@ src/
 
 The `core`/`ui` split is a hard boundary: `core` must never include a Widgets
 header. It keeps scanning and launching testable without a display.
+
+## Packaging
+
+`packaging/build-packages.sh` turns a `DESTDIR` install tree into a `.deb`, an
+`.rpm` and a pacman `.pkg.tar.zst`. It only builds the formats whose tooling is
+installed, and fails when none can be built.
+
+```bash
+DESTDIR="$PWD/stage" cmake --install build --prefix /usr
+./packaging/build-packages.sh --root stage --version 1.0.0 --out dist
+```
+
+Notes that are easy to get wrong:
+
+- **Qt resources are compiled in** via `resources.qrc`, so packages carry only
+  the binary, the desktop entry, the icon and the docs. Never add a separate
+  data-file install for icons used by the binary.
+- The `.deb` depends on `libqt6*6 | libqt6*6t64` because Ubuntu 24.04 and
+  Debian 13 renamed Qt 6 to the t64 ABI. Dropping either alternative breaks one
+  of the two families.
+- The `.rpm` deliberately has **no explicit Qt Requires**. rpm's dependency
+  generator records the sonames actually linked, which every RPM distribution
+  provides under its own package name; a hardcoded `qt6-qtbase` would break
+  openSUSE.
+- The pacman package is assembled by hand (`.PKGINFO`, `.INSTALL`, `.MTREE`)
+  so the release job does not need pacman on the runner. Ownership is
+  normalised to root and mtimes pinned to `SOURCE_DATE_EPOCH` before `.MTREE`
+  is written.
+- Anything installed by `cmake --install` must also be listed in the RPM
+  `%files` section, or rpmbuild fails on an unpackaged file.
 
 ## Storage rules
 

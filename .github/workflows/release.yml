@@ -13,9 +13,13 @@ permissions:
   contents: write
 
 jobs:
+  # Packages are built on the oldest supported Ubuntu so the binary links
+  # against the oldest glibc and Qt 6 the project supports. That is what makes
+  # one set of packages installable on Ubuntu 22.04+, Debian 12+, Fedora,
+  # openSUSE and Arch instead of only on the build host's release.
   linux:
     name: Build and publish
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check out
@@ -28,14 +32,17 @@ jobs:
             ninja-build \
             libgl1-mesa-dev \
             libxkbcommon-dev \
-            libvulkan-dev
+            libvulkan-dev \
+            libarchive-tools \
+            zstd \
+            dpkg-dev \
+            rpm
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.8.3'
+          version: '6.2.4'
           cache: true
-          modules: 'qtimageformats'
 
       - name: Resolve version
         id: version
@@ -43,10 +50,14 @@ jobs:
           tag="${{ github.event.inputs.tag || github.ref_name }}"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          # A fixed timestamp keeps the packages byte-identical between runs.
+          echo "epoch=$(git log -1 --pretty=%ct)" >> "$GITHUB_OUTPUT"
 
       - name: Configure
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr
 
       - name: Build
         run: |
@@ -60,42 +71,126 @@ jobs:
             exit 1
           fi
 
-      - name: Stage tarball
-        id: stage
+      - name: Verify ABI floor
+        run: |
+          # The whole point of building here is a low ABI requirement. If a
+          # newer symbol slips in, the packages silently stop working on older
+          # distributions, so the release fails instead.
+          binary=build/vanta
+          qt_max="$(objdump -T "$binary" | grep -oE 'Qt_6\.[0-9]+' | sort -uV | tail -1)"
+          glibc_max="$(objdump -T "$binary" | grep -oE 'GLIBC_[0-9.]+' | sort -uV | tail -1)"
+          glibcxx_max="$(objdump -T "$binary" | grep -oE 'GLIBCXX_[0-9.]+' | sort -uV | tail -1)"
+          cxxabi_max="$(objdump -T "$binary" | grep -oE 'CXXABI_[0-9.]+' | sort -uV | tail -1)"
+          echo "requires ${qt_max}, ${glibc_max}, ${glibcxx_max}, ${cxxabi_max}"
+
+          fail() { echo "::error::$1"; exit 1; }
+
+          [[ "$qt_max" == "Qt_6.2" ]] || fail "Expected a Qt 6.2 ABI, got $qt_max"
+
+          # Ubuntu 22.04 ships glibc 2.35, libstdc++ with GLIBCXX_3.4.30 and
+          # CXXABI_1.3.13. Anything above that would not install there.
+          at_most() {
+              [[ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -1)" == "$1" ]]
+          }
+          at_most GLIBC_2.35   "$glibc_max" || fail "Binary needs $glibc_max, newer than the Ubuntu 22.04 baseline (GLIBC_2.35)"
+          at_most GLIBCXX_3.4.30 "$glibcxx_max" || fail "Binary needs $glibcxx_max, newer than the Ubuntu 22.04 baseline (GLIBCXX_3.4.30)"
+          at_most CXXABI_1.3.13  "$cxxabi_max" || fail "Binary needs $cxxabi_max, newer than the Ubuntu 22.04 baseline (CXXABI_1.3.13)"
+
+      - name: Stage install tree
+        run: |
+          rm -rf stage
+          DESTDIR="$PWD/stage" cmake --install build --prefix /usr
+          find stage -type f | sort
+
+      - name: Build packages
+        run: |
+          SOURCE_DATE_EPOCH="${{ steps.version.outputs.epoch }}" \
+          ./packaging/build-packages.sh \
+            --root stage \
+            --version "${{ steps.version.outputs.version }}" \
+            --out dist
+
+      - name: Verify packages
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          deb="dist/vanta_${version}_amd64.deb"
+          rpmpkg="dist/vanta-${version}-1.x86_64.rpm"
+          pac="dist/vanta-${version}-1-x86_64.pkg.tar.zst"
+
+          echo "--- deb metadata"
+          dpkg-deb --info "$deb" | sed -n '1,12p'
+          dpkg-deb --contents "$deb" | grep -E 'bin/vanta|\.desktop|vanta\.svg'
+
+          echo "--- rpm metadata"
+          rpm -qip "$rpmpkg" | sed -n '1,12p'
+          rpm -qlp "$rpmpkg"
+
+          echo "--- pacman metadata"
+          bsdtar -xOf "$pac" .PKGINFO | sed -n '1,14p'
+
+          # The desktop entry and the icon must be inside every package, or the
+          # launcher shows up without a name or icon in the application menu.
+          for p in "$deb" "$rpmpkg" "$pac"; do
+            case "$p" in
+              *.deb) dpkg-deb --contents "$p" > listing.txt ;;
+              *.rpm) rpm -qlp "$p" > listing.txt ;;
+              *)     bsdtar -tf "$p" > listing.txt ;;
+            esac
+            grep -q 'usr/bin/vanta' listing.txt
+            grep -q 'vanta.desktop' listing.txt
+            grep -q 'vanta.svg' listing.txt
+            echo "ok: $(basename "$p")"
+          done
+          rm -f listing.txt
+
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum *.deb *.rpm *.pkg.tar.zst > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Stage portable tarball
         run: |
           version="${{ steps.version.outputs.version }}"
           stage="vanta-${version}-linux-x86_64"
-          mkdir -p "$stage/bin" "$stage/share/applications" \
-                   "$stage/share/icons/hicolor/scalable/apps" \
-                   "$stage/share/doc/vanta"
-          install -m 0755 build/vanta "$stage/bin/vanta"
-          install -m 0644 packaging/vanta.desktop "$stage/share/applications/"
-          install -m 0644 resources/icons/vanta.svg \
-            "$stage/share/icons/hicolor/scalable/apps/vanta.svg"
-          install -m 0644 README.md ONLINEFIX.md LICENSE AGENTS.md "$stage/share/doc/vanta/"
-          install -m 0644 LICENSE "$stage/LICENSE"
-          tar -czf "${stage}.tar.gz" "$stage"
-          sha256sum "${stage}.tar.gz" > "${stage}.tar.gz.sha256"
-          echo "name=$stage" >> "$GITHUB_OUTPUT"
+          rm -rf "$stage"
+          # Same layout as the packages, rooted at the tarball instead of /usr,
+          # so unpacking it and copying the tree into /usr/local just works.
+          # mkdir first: `cp -a usr newdir` would rename usr instead of nesting it.
+          mkdir -p "$stage"
+          cp -a stage/usr "$stage/usr"
+          tar -czf "dist/${stage}.tar.gz" "$stage"
+          ( cd dist && sha256sum "${stage}.tar.gz" >> SHA256SUMS )
 
       - name: Write release notes
         run: |
           version="${{ steps.version.outputs.version }}"
-          stage="${{ steps.stage.outputs.name }}"
+          qt="6.2"
           {
             printf 'Vanta %s — a Linux game launcher for the games you already own.\n\n' "$version"
-            printf '### Install\n\n'
+            printf '### Packages\n\n'
+            printf '| Distribution | Package |\n'
+            printf '| --- | --- |\n'
+            printf '| Debian 12+, Ubuntu 22.04+ | `vanta_%s_amd64.deb` |\n' "$version"
+            printf '| Fedora, openSUSE, RHEL | `vanta-%s-1.x86_64.rpm` |\n' "$version"
+            printf '| Arch, Manjaro, CachyOS | `vanta-%s-1-x86_64.pkg.tar.zst` |\n' "$version"
+            printf '| Any distribution | `vanta-%s-linux-x86_64.tar.gz` |\n\n' "$version"
             printf '```bash\n'
-            printf 'tar -xzf %s.tar.gz\n' "$stage"
-            printf 'sudo install -m 0755 %s/bin/vanta /usr/local/bin/vanta\n' "$stage"
-            printf 'sudo install -m 0644 %s/share/applications/vanta.desktop /usr/share/applications/vanta.desktop\n' "$stage"
-            printf 'sudo install -m 0644 %s/share/icons/hicolor/scalable/apps/vanta.svg /usr/share/icons/hicolor/scalable/apps/vanta.svg\n' "$stage"
+            printf '# Debian / Ubuntu\n'
+            printf 'sudo apt install ./vanta_%s_amd64.deb\n\n' "$version"
+            printf '# Fedora / openSUSE\n'
+            printf 'sudo dnf install ./vanta-%s-1.x86_64.rpm\n\n' "$version"
+            printf '# Arch\n'
+            printf 'sudo pacman -U vanta-%s-1-x86_64.pkg.tar.zst\n' "$version"
             printf '```\n\n'
-            printf 'Built on Ubuntu 24.04 against Qt 6.8 and linked against the system Qt,\n'
-            printf 'so a matching Qt runtime is required.\n\n'
+            printf 'Built against Qt %s and glibc 2.35, so the packages run on any\n' "$qt"
+            printf 'distribution that ships Qt 6.2 or newer. Packages are unsigned; check\n'
+            printf '`SHA256SUMS` before installing.\n\n'
             printf 'Vanta never downloads games. OnlineFix detection reports what it finds\n'
             printf 'and never claims a fix works; see ONLINEFIX.md.\n'
           } > notes.md
+          cat notes.md
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
@@ -107,5 +202,8 @@ jobs:
           generate_release_notes: true
           append_body: true
           files: |
-            ${{ steps.stage.outputs.name }}.tar.gz
-            ${{ steps.stage.outputs.name }}.tar.gz.sha256
+            dist/*.deb
+            dist/*.rpm
+            dist/*.pkg.tar.zst
+            dist/*.tar.gz
+            dist/SHA256SUMS

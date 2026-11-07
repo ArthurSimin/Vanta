@@ -22,9 +22,14 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra)
 endif()
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Widgets Svg Concurrent Network)
+find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets Svg Concurrent Network)
 
-qt_standard_project_setup()
+# qt_standard_project_setup() landed in Qt 6.3. Everything it does for this
+# project (AUTOMOC, AUTORCC, C++17) is already set above, so older Qt releases
+# only need the call skipped rather than emulated.
+if(COMMAND qt_standard_project_setup)
+    qt_standard_project_setup()
+endif()
 
 set(VANTA_SOURCES
     src/main.cpp
@@ -148,7 +153,7 @@ install(FILES packaging/vanta.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
 )
 
-install(FILES README.md ONLINEFIX.md LICENSE
+install(FILES README.md ONLINEFIX.md AGENTS.md LICENSE
     DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/vanta
 )
 

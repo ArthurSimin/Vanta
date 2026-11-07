@@ -50,6 +50,13 @@ A settled screenshot cannot tell you whether the slide happened.
 
 - **`QT_NO_CAST_FROM_ASCII` is on.** `QLabel *l = new QLabel("text")` does not
   compile. Wrap every literal in `QStringLiteral(...)`.
+- **Qt 6.2 is the compatibility floor, not an oversight.** Release packages are
+  built on Ubuntu 22.04 so one binary runs everywhere from Ubuntu 22.04 up. A
+  local build against system Qt 6.12 will link `Qt_6.12` symbols and refuse to
+  start on older distributions — that is expected locally, never in a release.
+  Check with `objdump -T build/vanta | grep -oE 'Qt_6\.[0-9]+' | sort -uV | tail -1`.
+- **`qt_standard_project_setup()` needs Qt 6.3**, so it is wrapped in
+  `if(COMMAND qt_standard_project_setup)`.
 - **`setWindowOpacity` does nothing on a child widget.** For a fade, use
   `QGraphicsOpacityEffect`.
 - **A checkable `QToolButton` with no menu needs `Qt::ToolButtonTextOnly`** and
@@ -67,6 +74,9 @@ A settled screenshot cannot tell you whether the slide happened.
   with `m_populating`; any new rebuild path needs the same guard.
 - **SteamGridDB's shared API key hits per-key 429 limits.** A failure there is
   not a bug in the request.
+- **Packaging needs an install tree, not the build tree.** Run
+  `DESTDIR=... cmake --install` first; `packaging/build-packages.sh` reads that
+  tree and copies it verbatim into each format.
 
 ## Editing discipline
 

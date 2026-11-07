@@ -301,7 +301,6 @@ void GameCard::paintEvent(QPaintEvent *event)
     painter.restore();
 
     if (m_showBadges) {
-        const QColor chipText(255, 255, 255);
         QFont badgeFont = painter.font();
         badgeFont.setPixelSize(10);
         badgeFont.setBold(true);

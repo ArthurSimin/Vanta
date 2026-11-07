@@ -188,7 +188,17 @@ jobs:
             printf 'distribution that ships Qt 6.2 or newer. Packages are unsigned; check\n'
             printf '`SHA256SUMS` before installing.\n\n'
             printf 'Vanta never downloads games. OnlineFix detection reports what it finds\n'
-            printf 'and never claims a fix works; see ONLINEFIX.md.\n'
+            printf 'and never claims a fix works; see ONLINEFIX.md.\n\n'
+            printf '### Verify\n\n'
+            printf '```bash\n'
+            printf 'sha256sum -c SHA256SUMS --ignore-missing\n'
+            printf '```\n\n'
+            printf 'Packages are unsigned. Every binary in them needs only Qt 6.2 and glibc 2.35,\n'
+            printf 'so one package runs across a whole distribution family rather than a single\n'
+            printf 'release.\n\n'
+            printf '**Full Changelog**: %s/commits/%s\n' \
+                "${{ github.server_url }}/${{ github.repository }}" \
+                "${{ steps.version.outputs.tag }}"
           } > notes.md
           cat notes.md
 
@@ -198,9 +208,9 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Vanta ${{ steps.version.outputs.version }}
           draft: false
+          # The body is generated here rather than by the action, so re-running
+          # a release replaces the notes instead of appending a second copy.
           body_path: notes.md
-          generate_release_notes: true
-          append_body: true
           files: |
             dist/*.deb
             dist/*.rpm

@@ -1,0 +1,16 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="/icons">
+    <file alias="vanta.svg">resources/icons/vanta.svg</file>
+    <file alias="vanta-logo.svg">resources/icons/vanta-logo.svg</file>
+    <file alias="check.svg">resources/icons/check.svg</file>
+    <file alias="radio-dot.svg">resources/icons/radio-dot.svg</file>
+  </qresource>
+  <qresource prefix="/icons/brand">
+    <file alias="steam.svg">resources/icons/brand/steam.svg</file>
+    <file alias="gog.svg">resources/icons/brand/gog.svg</file>
+    <file alias="epic.svg">resources/icons/brand/epic.svg</file>
+    <file alias="ea.svg">resources/icons/brand/ea.svg</file>
+    <file alias="ubisoft.svg">resources/icons/brand/ubisoft.svg</file>
+  </qresource>
+</RCC>

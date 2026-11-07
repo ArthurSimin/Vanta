@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g. v1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    name: Build and publish
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            ninja-build \
+            libgl1-mesa-dev \
+            libxkbcommon-dev \
+            libvulkan-dev
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          cache: true
+          modules: 'qtimageformats'
+
+      - name: Resolve version
+        id: version
+        run: |
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          set -o pipefail
+          cmake --build build -j"$(nproc)" 2>&1 | tee build.log
+
+      - name: Fail on warnings
+        run: |
+          if grep -nE '(^|[[:space:]])(warning|error):' build.log; then
+            echo "::error::Release build produced warnings or errors"
+            exit 1
+          fi
+
+      - name: Stage tarball
+        id: stage
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          stage="vanta-${version}-linux-x86_64"
+          mkdir -p "$stage/bin" "$stage/share/applications" \
+                   "$stage/share/icons/hicolor/scalable/apps" \
+                   "$stage/share/doc/vanta"
+          install -m 0755 build/vanta "$stage/bin/vanta"
+          install -m 0644 packaging/vanta.desktop "$stage/share/applications/"
+          install -m 0644 resources/icons/vanta.svg \
+            "$stage/share/icons/hicolor/scalable/apps/vanta.svg"
+          install -m 0644 README.md ONLINEFIX.md LICENSE AGENTS.md "$stage/share/doc/vanta/"
+          install -m 0644 LICENSE "$stage/LICENSE"
+          tar -czf "${stage}.tar.gz" "$stage"
+          sha256sum "${stage}.tar.gz" > "${stage}.tar.gz.sha256"
+          echo "name=$stage" >> "$GITHUB_OUTPUT"
+
+      - name: Write release notes
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          stage="${{ steps.stage.outputs.name }}"
+          {
+            printf 'Vanta %s — a Linux game launcher for the games you already own.\n\n' "$version"
+            printf '### Install\n\n'
+            printf '```bash\n'
+            printf 'tar -xzf %s.tar.gz\n' "$stage"
+            printf 'sudo install -m 0755 %s/bin/vanta /usr/local/bin/vanta\n' "$stage"
+            printf 'sudo install -m 0644 %s/share/applications/vanta.desktop /usr/share/applications/vanta.desktop\n' "$stage"
+            printf 'sudo install -m 0644 %s/share/icons/hicolor/scalable/apps/vanta.svg /usr/share/icons/hicolor/scalable/apps/vanta.svg\n' "$stage"
+            printf '```\n\n'
+            printf 'Built on Ubuntu 24.04 against Qt 6.8 and linked against the system Qt,\n'
+            printf 'so a matching Qt runtime is required.\n\n'
+            printf 'Vanta never downloads games. OnlineFix detection reports what it finds\n'
+            printf 'and never claims a fix works; see ONLINEFIX.md.\n'
+          } > notes.md
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Vanta ${{ steps.version.outputs.version }}
+          draft: false
+          body_path: notes.md
+          generate_release_notes: true
+          append_body: true
+          files: |
+            ${{ steps.stage.outputs.name }}.tar.gz
+            ${{ steps.stage.outputs.name }}.tar.gz.sha256

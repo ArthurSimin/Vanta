@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (${{ matrix.name }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: GCC Release
+            cc: gcc
+            cxx: g++
+            build_type: Release
+          - name: Clang Release
+            cc: clang
+            cxx: clang++
+            build_type: Release
+
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            ninja-build \
+            libgl1-mesa-dev \
+            libxkbcommon-dev \
+            libvulkan-dev
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          cache: true
+          modules: 'qtimageformats'
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Build
+        run: |
+          set -o pipefail
+          cmake --build build -j"$(nproc)" 2>&1 | tee build.log
+
+      - name: Fail on warnings
+        run: |
+          # -Wall -Wextra are set by CMakeLists.txt. Vanta ships warning-free, so
+          # any diagnostic here is a regression rather than noise to ignore.
+          if grep -nE '(^|[[:space:]])(warning|error):' build.log; then
+            echo "::error::Build produced warnings or errors"
+            exit 1
+          fi
+          echo "Build is clean: no warnings, no errors."
+
+      - name: Smoke test (headless)
+        run: |
+          sudo apt-get install --yes --no-install-recommends xvfb xauth
+          export XDG_CONFIG_HOME="$RUNNER_TEMP/config"
+          export XDG_DATA_HOME="$RUNNER_TEMP/data"
+          export XDG_CACHE_HOME="$RUNNER_TEMP/cache"
+          mkdir -p "$XDG_CONFIG_HOME/vanta"
+          Xvfb :99 -screen 0 1280x800x24 &
+          export DISPLAY=:99 QT_QPA_PLATFORM=xcb
+          sleep 2
+          ./build/vanta &
+          VANTA_PID=$!
+          # The window must survive the first seconds and stay alive; a crash on
+          # startup shows up here rather than in a user's session.
+          sleep 8
+          if ! kill -0 "$VANTA_PID" 2>/dev/null; then
+            echo "::error::Vanta exited during startup"
+            exit 1
+          fi
+          kill "$VANTA_PID"
+          wait "$VANTA_PID" 2>/dev/null || true
+          echo "Startup smoke test passed."

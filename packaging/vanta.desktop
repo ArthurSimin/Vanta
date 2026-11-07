@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Vanta
+GenericName=Game Launcher
+Comment=Launch and organise your Linux and Windows game library
+Comment[de]=Linux- und Windows-Spielbibliothek verwalten und starten
+Comment[es]=Organiza y ejecuta tu biblioteca de juegos de Linux y Windows
+Comment[fr]=Organisez et lancez votre bibliothèque de jeux Linux et Windows
+Comment[pt_BR]=Organize e inicie sua biblioteca de jogos Linux e Windows
+Exec=vanta %F
+Icon=vanta
+Terminal=false
+Categories=Game;
+Keywords=game;launcher;wine;proton;steam;library;
+StartupNotify=true
+StartupWMClass=vanta
+X-GNOME-UsesNotifications=true

@@ -19,6 +19,17 @@ namespace {
 constexpr int kRequestTimeoutMs = 25000;
 constexpr int kDownloadTimeoutMs = 180000;
 
+// QStringList::indexOf() lost its case-sensitivity argument in Qt 6, so the
+// lookup is done by hand and stays available on every supported Qt release.
+int indexOfNoCase(const QStringList &values, const QString &needle, int from = 0)
+{
+    for (int index = qMax(0, from); index < values.size(); ++index) {
+        if (values.at(index).compare(needle, Qt::CaseInsensitive) == 0)
+            return index;
+    }
+    return -1;
+}
+
 QDateTime parseDate(const QString &text)
 {
     if (text.isEmpty())
@@ -191,7 +202,7 @@ QString Thunderstore::communitySlug(const QString &input)
                                                  ? QStringLiteral("https://thunderstore.io") + value
                                                  : value);
         QStringList parts = url.path().split(QLatin1Char('/'), Qt::SkipEmptyParts);
-        const int index = parts.indexOf(QStringLiteral("c"), 0, Qt::CaseInsensitive);
+        const int index = indexOfNoCase(parts, QStringLiteral("c"));
         if (index >= 0 && index + 1 < parts.size())
             return parts.at(index + 1).toLower();
         if (parts.size() == 1 && !parts.first().contains(QLatin1Char('.')))
@@ -258,12 +269,12 @@ bool Thunderstore::packageFromLink(const QString &input, QString *community, QSt
                                                  ? QStringLiteral("https://thunderstore.io") + value
                                                  : value);
         QStringList parts = url.path().split(QLatin1Char('/'), Qt::SkipEmptyParts);
-        const int communityIndex = parts.indexOf(QStringLiteral("c"), 0, Qt::CaseInsensitive);
+        const int communityIndex = indexOfNoCase(parts, QStringLiteral("c"));
         if (communityIndex >= 0 && communityIndex + 1 < parts.size() && community)
             *community = parts.at(communityIndex + 1).toLower();
 
         int ownerIndex = -1;
-        const int packageIndex = parts.indexOf(QStringLiteral("p"), 0, Qt::CaseInsensitive);
+        const int packageIndex = indexOfNoCase(parts, QStringLiteral("p"));
         if (packageIndex >= 0 && packageIndex + 2 < parts.size())
             ownerIndex = packageIndex + 1;
         else if (parts.size() >= 3 && parts.first().compare(QStringLiteral("package"), Qt::CaseInsensitive) == 0)

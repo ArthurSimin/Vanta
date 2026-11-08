@@ -21,6 +21,7 @@ public:
     bool hasGame(const QString &id) const;
 
     bool addGame(const Game &game);
+    int addGames(const QList<Game> &games);
     bool updateGame(const Game &game);
     bool removeGame(const QString &id);
     bool updateSettings(const AppSettings &settings);

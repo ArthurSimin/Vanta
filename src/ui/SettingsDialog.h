@@ -10,6 +10,7 @@ class QLineEdit;
 class QListWidget;
 class QPushButton;
 class QSpinBox;
+class GameLibrary;
 class ThemeManager;
 
 class SettingsDialog : public VantaDialog
@@ -17,13 +18,15 @@ class SettingsDialog : public VantaDialog
     Q_OBJECT
 
 public:
-    SettingsDialog(const AppSettings &settings, ThemeManager *theme, QWidget *parent = nullptr);
+    SettingsDialog(const AppSettings &settings, ThemeManager *theme, GameLibrary *library = nullptr, QWidget *parent = nullptr);
 
     AppSettings resultSettings() const { return m_settings; }
     bool replayTutorialRequested() const { return m_replayTutorial; }
 
 signals:
     void runnersChanged();
+    void libraryChanged();
+    void gamesImported(const QList<Game> &games);
 
 private:
     void buildUi();
@@ -33,6 +36,7 @@ private:
     void addProtonPath();
     void removeProtonPath();
     void openRunnersDialog();
+    void openImportDialog();
     void refreshIcons();
     void applyThemePreview();
     void applyThemeChoice(ThemeChoice choice);
@@ -40,6 +44,7 @@ private:
 
     AppSettings m_settings;
     ThemeManager *m_theme = nullptr;
+    GameLibrary *m_library = nullptr;
     ThemeChoice m_originalTheme = ThemeChoice::System;
     bool m_replayTutorial = false;
 
@@ -66,6 +71,7 @@ private:
     QLineEdit *m_coverApiKeyEdit = nullptr;
     QPushButton *m_replayButton = nullptr;
     QPushButton *m_runnersButton = nullptr;
+    QPushButton *m_portButton = nullptr;
     QPushButton *m_cancelButton = nullptr;
     QPushButton *m_saveButton = nullptr;
 };

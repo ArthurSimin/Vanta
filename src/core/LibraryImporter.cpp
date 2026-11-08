@@ -1,0 +1,515 @@
+#include "LibraryImporter.h"
+#include "Library.h"
+
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QLibrary>
+#include <QProcess>
+#include <QRegularExpression>
+#include <QStandardPaths>
+#include <QUuid>
+
+namespace {
+
+QString homePath()
+{
+    return QDir::homePath();
+}
+
+QString canonicalOrClean(const QString &path)
+{
+    if (path.isEmpty())
+        return {};
+    const QFileInfo info(path);
+    if (info.exists())
+        return info.canonicalFilePath();
+    return QDir::cleanPath(path);
+}
+
+QString parseYamlValue(const QString &yamlContent, const QString &key)
+{
+    const QString targetKey = key + QStringLiteral(":");
+    const QStringList lines = yamlContent.split(QLatin1Char('\n'));
+    for (int i = 0; i < lines.size(); ++i) {
+        QString line = lines.at(i).trimmed();
+        if (!line.startsWith(targetKey))
+            continue;
+        QString value = line.mid(targetKey.length()).trimmed();
+        // Handle multiline folded strings in YAML (e.g. wrapped file paths)
+        while (i + 1 < lines.size()) {
+            const QString &nextRaw = lines.at(i + 1);
+            if (nextRaw.startsWith(QStringLiteral("  ")) && !nextRaw.trimmed().contains(QLatin1Char(':'))) {
+                value += QLatin1Char(' ') + nextRaw.trimmed();
+                ++i;
+            } else {
+                break;
+            }
+        }
+        if (value.startsWith(QLatin1Char('\'')) && value.endsWith(QLatin1Char('\'')) && value.length() >= 2)
+            value = value.mid(1, value.length() - 2);
+        else if (value.startsWith(QLatin1Char('"')) && value.endsWith(QLatin1Char('"')) && value.length() >= 2)
+            value = value.mid(1, value.length() - 2);
+        return value.trimmed();
+    }
+    return {};
+}
+
+QString findCandidateExecutableInDirectory(const QString &directory, const QString &preferredName = {})
+{
+    const QDir dir(directory);
+    if (!dir.exists())
+        return {};
+
+    // Search top-level and 1 subdirectory down
+    const QStringList ignorePatterns = {
+        QStringLiteral("unitycrashhandler*"),
+        QStringLiteral("crashreport*"),
+        QStringLiteral("dxsetup*"),
+        QStringLiteral("unins*"),
+        QStringLiteral("uninstall*"),
+        QStringLiteral("setup*")
+    };
+
+    struct Candidate {
+        QString path;
+        qint64 size = 0;
+        int score = 0;
+    };
+    QList<Candidate> candidates;
+
+    auto inspectDir = [&](const QDir &d, int depth) {
+        const QFileInfoList entries = d.entryInfoList(QDir::Files | QDir::Executable, QDir::Size);
+        for (const QFileInfo &entry : entries) {
+            const QString name = entry.fileName().toLower();
+            bool ignore = false;
+            for (const QString &pattern : ignorePatterns) {
+                if (QDir::match(pattern, name)) {
+                    ignore = true;
+                    break;
+                }
+            }
+            if (ignore)
+                continue;
+
+            int score = 0;
+            if (name.endsWith(QStringLiteral(".exe")))
+                score += 50;
+            else if (entry.isExecutable() && !name.contains(QLatin1Char('.')))
+                score += 40;
+
+            if (!preferredName.isEmpty() && name.contains(preferredName.toLower()))
+                score += 100;
+            if (depth == 0)
+                score += 20;
+
+            Candidate c;
+            c.path = entry.absoluteFilePath();
+            c.size = entry.size();
+            c.score = score;
+            candidates.append(c);
+        }
+    };
+
+    inspectDir(dir, 0);
+    const QFileInfoList subdirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QFileInfo &sub : subdirs) {
+        inspectDir(QDir(sub.absoluteFilePath()), 1);
+    }
+
+    if (candidates.isEmpty())
+        return {};
+
+    std::sort(candidates.begin(), candidates.end(), [](const Candidate &a, const Candidate &b) {
+        if (a.score != b.score)
+            return a.score > b.score;
+        return a.size > b.size;
+    });
+
+    return candidates.first().path;
+}
+
+} // namespace
+
+bool LibraryImporter::isGameInLibrary(const Game &candidate, const GameLibrary *library)
+{
+    if (!library)
+        return false;
+
+    const QString candidateExe = canonicalOrClean(candidate.executable);
+    const QString candidateDir = canonicalOrClean(candidate.gameDirectory);
+
+    for (const Game &existing : library->games()) {
+        const QString existingExe = canonicalOrClean(existing.executable);
+        if (!candidateExe.isEmpty() && !existingExe.isEmpty() && candidateExe == existingExe)
+            return true;
+        const QString existingDir = canonicalOrClean(existing.gameDirectory);
+        if (!candidateDir.isEmpty() && !existingDir.isEmpty() && candidateDir == existingDir)
+            return true;
+        if (existing.name.compare(candidate.name, Qt::CaseInsensitive) == 0 && existing.source == candidate.source)
+            return true;
+    }
+    return false;
+}
+
+QList<ImportedGameCandidate> LibraryImporter::scanAll(const GameLibrary *existingLibrary)
+{
+    QList<ImportedGameCandidate> all;
+    all.append(scanLutris());
+    all.append(scanHeroic());
+
+    // Deduplicate against each other
+    QList<ImportedGameCandidate> unique;
+    QSet<QString> seenExecutables;
+    QSet<QString> seenNames;
+
+    for (ImportedGameCandidate &item : all) {
+        const QString exeKey = canonicalOrClean(item.game.executable);
+        const QString nameKey = item.game.name.toLower() + QLatin1Char('|') + item.sourceLauncher;
+        if (!exeKey.isEmpty() && seenExecutables.contains(exeKey))
+            continue;
+        if (seenNames.contains(nameKey))
+            continue;
+
+        if (!exeKey.isEmpty())
+            seenExecutables.insert(exeKey);
+        seenNames.insert(nameKey);
+
+        if (existingLibrary)
+            item.alreadyInLibrary = isGameInLibrary(item.game, existingLibrary);
+
+        unique.append(item);
+    }
+
+    return unique;
+}
+
+QList<ImportedGameCandidate> LibraryImporter::scanLutris()
+{
+    QList<ImportedGameCandidate> results;
+    const QString home = homePath();
+    const QStringList lutrisDirs = {
+        home + QStringLiteral("/.local/share/lutris"),
+        home + QStringLiteral("/.var/app/net.lutris.Lutris/data/lutris")
+    };
+
+    struct LutrisDbRow {
+        QString name;
+        QString slug;
+        QString runner;
+        QString platform;
+        QString directory;
+        QString configpath;
+    };
+
+    for (const QString &lutrisDir : lutrisDirs) {
+        if (!QDir(lutrisDir).exists())
+            continue;
+
+        QList<LutrisDbRow> dbRows;
+        const QString dbPath = QDir(lutrisDir).filePath(QStringLiteral("pga.db"));
+
+        // Query pga.db if sqlite3 CLI is available
+        const QString sqlite3 = QStandardPaths::findExecutable(QStringLiteral("sqlite3"));
+        if (!sqlite3.isEmpty() && QFile::exists(dbPath)) {
+            QProcess process;
+            process.start(sqlite3, {dbPath, QStringLiteral("SELECT name, slug, runner, platform, directory, configpath FROM games WHERE installed = 1;")});
+            if (process.waitForFinished(5000)) {
+                const QString output = QString::fromUtf8(process.readAllStandardOutput());
+                const QStringList lines = output.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+                for (const QString &line : lines) {
+                    const QStringList parts = line.split(QLatin1Char('|'));
+                    if (parts.size() >= 6) {
+                        LutrisDbRow row;
+                        row.name = parts.at(0).trimmed();
+                        row.slug = parts.at(1).trimmed();
+                        row.runner = parts.at(2).trimmed();
+                        row.platform = parts.at(3).trimmed();
+                        row.directory = parts.at(4).trimmed();
+                        row.configpath = parts.at(5).trimmed();
+                        dbRows.append(row);
+                    }
+                }
+            }
+        }
+
+        const QString gamesDir = QDir(lutrisDir).filePath(QStringLiteral("games"));
+        if (dbRows.isEmpty() && QDir(gamesDir).exists()) {
+            // Fallback: discover games directly from YAML files in games/
+            const QFileInfoList ymlFiles = QDir(gamesDir).entryInfoList({QStringLiteral("*.yml")}, QDir::Files);
+            for (const QFileInfo &fileInfo : ymlFiles) {
+                LutrisDbRow row;
+                row.slug = fileInfo.completeBaseName();
+                row.configpath = row.slug;
+                row.name = fileInfo.baseName().replace(QLatin1Char('-'), QLatin1Char(' '));
+                dbRows.append(row);
+            }
+        }
+
+        for (const LutrisDbRow &row : dbRows) {
+            QString yamlPath;
+            if (!row.configpath.isEmpty()) {
+                const QString candidate = QDir(gamesDir).filePath(row.configpath + QStringLiteral(".yml"));
+                if (QFile::exists(candidate))
+                    yamlPath = candidate;
+            }
+            if (yamlPath.isEmpty() && !row.slug.isEmpty()) {
+                const QString candidate = QDir(gamesDir).filePath(row.slug + QStringLiteral(".yml"));
+                if (QFile::exists(candidate))
+                    yamlPath = candidate;
+            }
+
+            QString exe;
+            QString prefix;
+            QString args;
+            if (!yamlPath.isEmpty()) {
+                QFile yFile(yamlPath);
+                if (yFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                    const QString content = QString::fromUtf8(yFile.readAll());
+                    exe = parseYamlValue(content, QStringLiteral("exe"));
+                    prefix = parseYamlValue(content, QStringLiteral("prefix"));
+                    args = parseYamlValue(content, QStringLiteral("args"));
+                }
+            }
+
+            if (exe.isEmpty() && !row.directory.isEmpty() && QDir(row.directory).exists()) {
+                exe = findCandidateExecutableInDirectory(row.directory, row.name);
+            }
+
+            if (exe.isEmpty() && row.directory.isEmpty())
+                continue;
+
+            Game game = Game::create();
+            game.name = row.name.isEmpty() ? (row.slug.isEmpty() ? QStringLiteral("Lutris Game") : row.slug) : row.name;
+            game.source = QStringLiteral("Lutris");
+            game.executable = exe;
+            game.gameDirectory = !row.directory.isEmpty() ? row.directory : QFileInfo(exe).absolutePath();
+            game.workingDirectory = game.gameDirectory;
+            game.winePrefix = prefix;
+            game.launchArguments = args;
+
+            const bool isWindows = exe.endsWith(QStringLiteral(".exe"), Qt::CaseInsensitive)
+                || row.platform.compare(QStringLiteral("Windows"), Qt::CaseInsensitive) == 0;
+            game.platform = isWindows ? Platform::Windows : Platform::Linux;
+            if (row.runner.compare(QStringLiteral("proton"), Qt::CaseInsensitive) == 0)
+                game.runner = RunnerType::Proton;
+            else if (row.runner.compare(QStringLiteral("wine"), Qt::CaseInsensitive) == 0 || isWindows)
+                game.runner = RunnerType::Wine;
+            else
+                game.runner = RunnerType::Native;
+
+            if (!row.slug.isEmpty()) {
+                const QStringList coverCandidates = {
+                    QDir(lutrisDir).filePath(QStringLiteral("coverart/%1.jpg").arg(row.slug)),
+                    QDir(lutrisDir).filePath(QStringLiteral("coverart/%1.png").arg(row.slug)),
+                    QDir(lutrisDir).filePath(QStringLiteral("banners/%1.jpg").arg(row.slug)),
+                    QDir(lutrisDir).filePath(QStringLiteral("banners/%1.png").arg(row.slug))
+                };
+                for (const QString &cPath : coverCandidates) {
+                    if (QFile::exists(cPath)) {
+                        game.coverPath = cPath;
+                        break;
+                    }
+                }
+            }
+
+            ImportedGameCandidate candidate;
+            candidate.game = game;
+            candidate.sourceLauncher = QStringLiteral("Lutris");
+            candidate.originalId = row.slug;
+            results.append(candidate);
+        }
+    }
+    return results;
+}
+
+QList<ImportedGameCandidate> LibraryImporter::scanHeroic()
+{
+    QList<ImportedGameCandidate> results;
+    const QString home = homePath();
+    const QStringList heroicRoots = {
+        home + QStringLiteral("/.config/heroic"),
+        home + QStringLiteral("/.var/app/com.heroicgameslauncher.hgl/config/heroic")
+    };
+
+    for (const QString &root : heroicRoots) {
+        if (!QDir(root).exists())
+            continue;
+
+        // 1. Legendary (Epic Games)
+        const QStringList legendaryPaths = {
+            QDir(root).filePath(QStringLiteral("legendaryConfig/legendary/installed.json")),
+            home + QStringLiteral("/.config/legendary/installed.json")
+        };
+        for (const QString &legendaryPath : legendaryPaths) {
+            QFile file(legendaryPath);
+            if (!file.open(QIODevice::ReadOnly))
+                continue;
+            const QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+            if (!doc.isObject())
+                continue;
+            const QJsonObject rootObj = doc.object();
+            for (auto it = rootObj.begin(); it != rootObj.end(); ++it) {
+                if (!it.value().isObject())
+                    continue;
+                const QJsonObject gameObj = it.value().toObject();
+                const QString title = gameObj.value(QStringLiteral("title")).toString();
+                const QString installPath = gameObj.value(QStringLiteral("install_path")).toString();
+                QString exe = gameObj.value(QStringLiteral("executable")).toString();
+                if (title.isEmpty() || installPath.isEmpty())
+                    continue;
+                if (!QFileInfo(exe).isAbsolute())
+                    exe = QDir(installPath).filePath(exe);
+
+                // Check per-game config
+                QString prefix;
+                const QString gameConfigPath = QDir(root).filePath(
+                    QStringLiteral("GamesConfig/%1.json").arg(it.key()));
+                QFile cfgFile(gameConfigPath);
+                if (cfgFile.open(QIODevice::ReadOnly)) {
+                    const QJsonDocument cfgDoc = QJsonDocument::fromJson(cfgFile.readAll());
+                    if (cfgDoc.isObject()) {
+                        prefix = cfgDoc.object().value(QStringLiteral("winePrefix")).toString();
+                    }
+                }
+
+                Game game = Game::create();
+                game.name = title;
+                game.source = QStringLiteral("Epic Games Store");
+                game.gameDirectory = installPath;
+                game.executable = exe;
+                game.workingDirectory = installPath;
+                game.winePrefix = prefix;
+                game.platform = Platform::Windows;
+                game.runner = RunnerType::Wine;
+
+                const QStringList coverCandidates = {
+                    QDir(root).filePath(QStringLiteral("icons/%1.jpg").arg(title)),
+                    QDir(root).filePath(QStringLiteral("icons/%1.png").arg(title)),
+                    QDir(root).filePath(QStringLiteral("icons/%1.jpg").arg(it.key())),
+                    QDir(root).filePath(QStringLiteral("icons/%1.png").arg(it.key()))
+                };
+                for (const QString &cPath : coverCandidates) {
+                    if (QFile::exists(cPath)) {
+                        game.coverPath = cPath;
+                        break;
+                    }
+                }
+
+                ImportedGameCandidate candidate;
+                candidate.game = game;
+                candidate.sourceLauncher = QStringLiteral("Heroic");
+                candidate.originalId = it.key();
+                results.append(candidate);
+            }
+        }
+
+        // 2. GOG
+        const QString gogPath = QDir(root).filePath(QStringLiteral("gog_store/installed.json"));
+        QFile gogFile(gogPath);
+        if (gogFile.open(QIODevice::ReadOnly)) {
+            const QJsonDocument doc = QJsonDocument::fromJson(gogFile.readAll());
+            QJsonArray gamesArray;
+            if (doc.isObject() && doc.object().contains(QStringLiteral("installed")))
+                gamesArray = doc.object().value(QStringLiteral("installed")).toArray();
+            else if (doc.isArray())
+                gamesArray = doc.array();
+
+            for (const QJsonValue &val : gamesArray) {
+                if (!val.isObject())
+                    continue;
+                const QJsonObject obj = val.toObject();
+                const QString title = obj.value(QStringLiteral("title")).toString();
+                const QString installPath = obj.value(QStringLiteral("install_path")).toString();
+                QString exe = obj.value(QStringLiteral("executable")).toString();
+                if (title.isEmpty() || installPath.isEmpty())
+                    continue;
+                if (!QFileInfo(exe).isAbsolute())
+                    exe = QDir(installPath).filePath(exe);
+
+                Game game = Game::create();
+                game.name = title;
+                game.source = QStringLiteral("GOG");
+                game.gameDirectory = installPath;
+                game.executable = exe;
+                game.workingDirectory = installPath;
+                const bool isWindows = exe.endsWith(QStringLiteral(".exe"), Qt::CaseInsensitive);
+                game.platform = isWindows ? Platform::Windows : Platform::Linux;
+                game.runner = isWindows ? RunnerType::Wine : RunnerType::Native;
+
+                const QString appName = obj.value(QStringLiteral("appName")).toString();
+                const QStringList coverCandidates = {
+                    QDir(root).filePath(QStringLiteral("icons/%1.jpg").arg(title)),
+                    QDir(root).filePath(QStringLiteral("icons/%1.png").arg(title)),
+                    QDir(root).filePath(QStringLiteral("icons/%1.jpg").arg(appName)),
+                    QDir(root).filePath(QStringLiteral("icons/%1.png").arg(appName))
+                };
+                for (const QString &cPath : coverCandidates) {
+                    if (QFile::exists(cPath)) {
+                        game.coverPath = cPath;
+                        break;
+                    }
+                }
+
+                ImportedGameCandidate candidate;
+                candidate.game = game;
+                candidate.sourceLauncher = QStringLiteral("Heroic");
+                candidate.originalId = obj.value(QStringLiteral("appName")).toString();
+                results.append(candidate);
+            }
+        }
+
+        // 3. Sideloaded apps
+        const QString sideloadDir = QDir(root).filePath(QStringLiteral("sideload_apps"));
+        if (QDir(sideloadDir).exists()) {
+            const QFileInfoList configs = QDir(sideloadDir).entryInfoList({QStringLiteral("*.json")}, QDir::Files);
+            for (const QFileInfo &cfile : configs) {
+                QFile sFile(cfile.absoluteFilePath());
+                if (!sFile.open(QIODevice::ReadOnly))
+                    continue;
+                const QJsonDocument doc = QJsonDocument::fromJson(sFile.readAll());
+                if (!doc.isObject())
+                    continue;
+                const QJsonObject obj = doc.object();
+                const QString title = obj.value(QStringLiteral("title")).toString();
+                const QString targetExe = obj.value(QStringLiteral("targetExe")).toString();
+                if (title.isEmpty() || targetExe.isEmpty())
+                    continue;
+
+                Game game = Game::create();
+                game.name = title;
+                game.source = QStringLiteral("Heroic");
+                game.executable = targetExe;
+                game.gameDirectory = QFileInfo(targetExe).absolutePath();
+                game.workingDirectory = game.gameDirectory;
+                game.winePrefix = obj.value(QStringLiteral("winePrefix")).toString();
+                const bool isWindows = targetExe.endsWith(QStringLiteral(".exe"), Qt::CaseInsensitive);
+                game.platform = isWindows ? Platform::Windows : Platform::Linux;
+                game.runner = isWindows ? RunnerType::Wine : RunnerType::Native;
+
+                const QStringList coverCandidates = {
+                    QDir(root).filePath(QStringLiteral("icons/%1.jpg").arg(title)),
+                    QDir(root).filePath(QStringLiteral("icons/%1.png").arg(title)),
+                    QDir(root).filePath(QStringLiteral("icons/%1.jpg").arg(cfile.baseName())),
+                    QDir(root).filePath(QStringLiteral("icons/%1.png").arg(cfile.baseName()))
+                };
+                for (const QString &cPath : coverCandidates) {
+                    if (QFile::exists(cPath)) {
+                        game.coverPath = cPath;
+                        break;
+                    }
+                }
+
+                ImportedGameCandidate candidate;
+                candidate.game = game;
+                candidate.sourceLauncher = QStringLiteral("Heroic");
+                candidate.originalId = cfile.baseName();
+                results.append(candidate);
+            }
+        }
+    }
+    return results;
+}

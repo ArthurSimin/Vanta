@@ -1,6 +1,8 @@
 #include "SettingsDialog.h"
 #include "CoverFetcher.h"
 #include "IconFactory.h"
+#include "Library.h"
+#include "LibraryImportDialog.h"
 #include "RunnerDetector.h"
 #include "RunnerInstallDialog.h"
 #include "Storage.h"
@@ -46,10 +48,11 @@ QFormLayout *formFor(QWidget *parent)
 }
 }
 
-SettingsDialog::SettingsDialog(const AppSettings &settings, ThemeManager *theme, QWidget *parent)
+SettingsDialog::SettingsDialog(const AppSettings &settings, ThemeManager *theme, GameLibrary *library, QWidget *parent)
     : VantaDialog(QStringLiteral("Settings"), theme, parent)
     , m_settings(settings)
     , m_theme(theme)
+    , m_library(library)
 {
     setObjectName(QStringLiteral("settingsDialog"));
     setMinimumSize(760, 620);
@@ -294,6 +297,24 @@ void SettingsDialog::buildUi()
         QStringLiteral("Vanta stores everything under the XDG config and cache directories using atomic writes. "
                        "Library and settings files can be copied to another machine to move your setup."),
         storage));
+
+    auto *importPanel = new QFrame(storage);
+    importPanel->setObjectName(QStringLiteral("infoPanel"));
+    auto *importLayout = new QVBoxLayout(importPanel);
+    importLayout->setContentsMargins(16, 14, 16, 14);
+    importLayout->setSpacing(8);
+    importLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("External library porting"), importPanel));
+    importLayout->addWidget(UiHelp::helpLabel(
+        QStringLiteral("Scan your machine for installed games from Lutris and Heroic Games Launcher, "
+                       "and import them into Vanta automatically."),
+        importPanel));
+    m_portButton = new QPushButton(QStringLiteral("Port external libraries…"), importPanel);
+    m_portButton->setCursor(Qt::PointingHandCursor);
+    UiHelp::makePrimary(m_portButton);
+    connect(m_portButton, &QPushButton::clicked, this, &SettingsDialog::openImportDialog);
+    importLayout->addWidget(m_portButton, 0, Qt::AlignLeft);
+    storageForm->addRow(importPanel);
+
     tabs->addTab(scrollPage(storage, tabs), QStringLiteral("Data"));
 
     auto *buttons = new QHBoxLayout;
@@ -426,6 +447,20 @@ void SettingsDialog::openRunnersDialog()
     refreshRunnerSummary();
 }
 
+void SettingsDialog::openImportDialog()
+{
+    if (!m_library)
+        return;
+    LibraryImportDialog dialog(m_library, m_theme, this);
+    connect(&dialog, &LibraryImportDialog::gamesImportedList, this, [this](const QList<Game> &games) {
+        if (!games.isEmpty()) {
+            emit gamesImported(games);
+            emit libraryChanged();
+        }
+    });
+    dialog.exec();
+}
+
 void SettingsDialog::refreshRunnerSummary()
 {
     if (!m_runnerSummary)
@@ -453,6 +488,8 @@ void SettingsDialog::refreshIcons()
     const ThemeColors &colors = m_theme->colors();
     Icons::setButtonIcon(m_replayButton, Glyph::Play, colors.text, 16);
     Icons::setButtonIcon(m_runnersButton, Glyph::Download, colors.text, 16);
+    if (m_portButton)
+        Icons::setButtonIcon(m_portButton, Glyph::Plus, QColor(Qt::white), 16);
     Icons::setButtonIcon(m_cancelButton, Glyph::Close, colors.text, 16);
     Icons::setButtonIcon(m_saveButton, Glyph::Check, QColor(Qt::white), 16);
 }

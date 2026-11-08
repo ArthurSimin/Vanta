@@ -52,6 +52,22 @@ bool GameLibrary::addGame(const Game &game)
     return true;
 }
 
+int GameLibrary::addGames(const QList<Game> &newGames)
+{
+    int added = 0;
+    for (const Game &game : newGames) {
+        if (game.id.isEmpty() || hasGame(game.id))
+            continue;
+        m_games.append(game);
+        ++added;
+    }
+    if (added > 0) {
+        saveLibrary();
+        emit gamesChanged();
+    }
+    return added;
+}
+
 bool GameLibrary::updateGame(const Game &game)
 {
     const int index = indexOf(game.id);

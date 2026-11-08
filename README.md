@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/vanta-banner.svg" alt="Vanta" width="420">
+</p>
+
 # Vanta
 
 <p align="center">

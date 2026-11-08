@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
-#include "BepInEx.h"
 #include "AddEditDialog.h"
+#include "BepInEx.h"
 #include "Common.h"
 #include "GameDetailsDialog.h"
 #include "IconFactory.h"

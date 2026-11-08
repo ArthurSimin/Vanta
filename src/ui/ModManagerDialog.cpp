@@ -7,18 +7,18 @@
 
 #include <QAbstractItemView>
 #include <QDir>
+#include <QEvent>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFormLayout>
 #include <QFrame>
 #include <QHeaderView>
 #include <QHBoxLayout>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QEvent>
-#include <QKeyEvent>
 #include <QScrollArea>
 #include <QStyle>
 #include <QTableWidget>

@@ -1,5 +1,10 @@
 # Vanta
 
+<p align="center">
+  <img height="56" src="https://raw.githubusercontent.com/ArthurSimin/Badgeworks/main/devin_opencode_badge.svg" alt="Made with OpenCode">
+  <img height="56" src="https://raw.githubusercontent.com/ArthurSimin/Badgeworks/8a1b2c7416b2803778497d1088ec23d47783235f/devin_google_antigravity_badge.svg" alt="Made with Google Antigravity">
+</p>
+
 [![CI](https://github.com/ArthurSimin/Vanta/actions/workflows/ci.yml/badge.svg)](https://github.com/ArthurSimin/Vanta/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/ArthurSimin/Vanta)](https://github.com/ArthurSimin/Vanta/releases/latest)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-7c3aed.svg)](LICENSE)

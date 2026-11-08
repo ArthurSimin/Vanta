@@ -4,6 +4,7 @@
 #include <QNetworkRequest>
 #include <QList>
 #include <QObject>
+#include <QPair>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
@@ -81,6 +82,9 @@ private:
     void searchByName(const QString &gameId, const QString &gameName);
     void requestGrids(const QString &gameId, const QString &steamGridId, const QString &matchedName);
     void downloadImage(const QString &gameId, const QString &imageUrl);
+    void queueNextFetch();
+    void emitFailed(const QString &gameId, const QString &message);
+    void emitFinished(const QString &gameId, const QString &coverPath);
     QNetworkRequest makeRequest(const QUrl &url) const;
     void cleanupReply();
     void cleanupThumbReplies();
@@ -89,6 +93,7 @@ private:
     QNetworkAccessManager *m_network = nullptr;
     QNetworkReply *m_reply = nullptr;
     QList<QNetworkReply *> m_thumbReplies;
+    QList<QPair<QString, QString>> m_fetchQueue;
     QString m_apiKey;
     QString m_pendingGameId;
     QString m_pendingGameName;

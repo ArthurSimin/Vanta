@@ -7,6 +7,14 @@
 
 int main(int argc, char *argv[])
 {
+    for (int i = 1; i < argc; ++i) {
+        const QString arg = QString::fromLocal8Bit(argv[i]);
+        if (arg == QStringLiteral("--version") || arg == QStringLiteral("-v")) {
+            fprintf(stdout, "Vanta %s\n", VANTA_VERSION);
+            return 0;
+        }
+    }
+
     QApplication app(argc, argv);
     QApplication::setApplicationName(QStringLiteral("Vanta"));
     QApplication::setApplicationDisplayName(QStringLiteral("Vanta"));

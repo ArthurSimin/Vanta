@@ -11,6 +11,7 @@
 #include <QNetworkRequest>
 #include <QRegularExpression>
 #include <QStandardPaths>
+#include <QTimer>
 #include <QUrl>
 #include <QUrlQuery>
 #include <algorithm>
@@ -293,6 +294,7 @@ void CoverFetcher::cleanupThumbReplies()
 
 void CoverFetcher::cancel()
 {
+    m_fetchQueue.clear();
     cleanupReply();
     cleanupThumbReplies();
     m_pendingGameId.clear();
@@ -301,17 +303,24 @@ void CoverFetcher::cancel()
 
 void CoverFetcher::fetchCover(const QString &gameId, const QString &gameName)
 {
-    m_mode = Mode::SaveFirst;
     if (gameId.isEmpty() || gameName.trimmed().isEmpty())
         return;
-    if (m_reply) {
-        emit failed(gameId, QStringLiteral("A cover lookup is already running."));
-        return;
-    }
     if (!hasApiKey()) {
         emit failed(gameId, QStringLiteral("No SteamGridDB API key is configured."));
         return;
     }
+    if (m_reply) {
+        for (const auto &item : m_fetchQueue) {
+            if (item.first == gameId)
+                return;
+        }
+        if (m_pendingGameId != gameId) {
+            m_fetchQueue.append(qMakePair(gameId, gameName.trimmed()));
+        }
+        return;
+    }
+
+    m_mode = Mode::SaveFirst;
     m_pendingGameId = gameId;
     m_pendingGameName = gameName.trimmed();
     emit started(gameId);
@@ -324,8 +333,7 @@ void CoverFetcher::listCoverArt(const QString &gameId, const QString &gameName)
     if (gameId.isEmpty() || gameName.trimmed().isEmpty())
         return;
     if (m_reply) {
-        emit failed(gameId, QStringLiteral("A cover lookup is already running."));
-        return;
+        cleanupReply();
     }
     if (!hasApiKey()) {
         emit failed(gameId, QStringLiteral("No SteamGridDB API key is configured."));
@@ -343,11 +351,44 @@ void CoverFetcher::downloadCoverArt(const QString &gameId, const CoverArt &art)
     if (gameId.isEmpty() || art.fullUrl.isEmpty())
         return;
     if (m_reply) {
-        emit failed(gameId, QStringLiteral("A cover download is already running."));
-        return;
+        cleanupReply();
     }
+    m_pendingGameId = gameId;
     emit started(gameId);
     downloadImage(gameId, art.fullUrl);
+}
+
+void CoverFetcher::queueNextFetch()
+{
+    m_pendingGameId.clear();
+    m_pendingGameName.clear();
+    if (m_fetchQueue.isEmpty())
+        return;
+
+    const auto next = m_fetchQueue.takeFirst();
+    QTimer::singleShot(150, this, [this, next]() {
+        if (!m_reply) {
+            fetchCover(next.first, next.second);
+        } else {
+            m_fetchQueue.prepend(next);
+        }
+    });
+}
+
+void CoverFetcher::emitFailed(const QString &gameId, const QString &message)
+{
+    emit failed(gameId, message);
+    if (m_mode == Mode::SaveFirst) {
+        queueNextFetch();
+    }
+}
+
+void CoverFetcher::emitFinished(const QString &gameId, const QString &coverPath)
+{
+    emit finished(gameId, coverPath);
+    if (m_mode == Mode::SaveFirst) {
+        queueNextFetch();
+    }
 }
 
 void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
@@ -365,14 +406,14 @@ void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
         cleanupReply();
 
         if (error != QNetworkReply::NoError) {
-            emit failed(gameId, describeFailure(
+            emitFailed(gameId, describeFailure(
                 status, QStringLiteral("SteamGridDB could not be searched")));
             return;
         }
 
         const QJsonObject root = QJsonDocument::fromJson(payload).object();
         if (!root.value(QStringLiteral("success")).toBool()) {
-            emit failed(gameId, QStringLiteral("SteamGridDB returned no results for “%1”.").arg(gameName));
+            emitFailed(gameId, QStringLiteral("SteamGridDB returned no results for “%1”.").arg(gameName));
             return;
         }
 
@@ -393,7 +434,7 @@ void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
         }
 
         if (best.gameId.isEmpty() || best.score < 45) {
-            emit failed(gameId, QStringLiteral("No SteamGridDB match was close enough to “%1”.").arg(gameName));
+            emitFailed(gameId, QStringLiteral("No SteamGridDB match was close enough to “%1”.").arg(gameName));
             return;
         }
 
@@ -427,7 +468,7 @@ void CoverFetcher::requestGrids(const QString &gameId, const QString &steamGridI
         cleanupReply();
 
         if (error != QNetworkReply::NoError) {
-            emit failed(gameId, describeFailure(
+            emitFailed(gameId, describeFailure(
                 status, QStringLiteral("SteamGridDB has no grid list for the matched game")));
             return;
         }
@@ -453,7 +494,7 @@ void CoverFetcher::requestGrids(const QString &gameId, const QString &steamGridI
         }
 
         if (artworks.isEmpty()) {
-            emit failed(gameId, QStringLiteral("SteamGridDB has no portrait grid for this game yet."));
+            emitFailed(gameId, QStringLiteral("SteamGridDB has no portrait grid for this game yet."));
             return;
         }
 
@@ -507,21 +548,21 @@ void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl)
         cleanupReply();
 
         if (error != QNetworkReply::NoError || payload.isEmpty()) {
-            emit failed(gameId, QStringLiteral("The cover image could not be downloaded."));
+            emitFailed(gameId, QStringLiteral("The cover image could not be downloaded."));
             return;
         }
 
         const QString path = suggestedCoverPath(gameId, detectImageExtension(payload));
         QFile file(path);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            emit failed(gameId, QStringLiteral("The cover image could not be saved to %1.").arg(path));
+            emitFailed(gameId, QStringLiteral("The cover image could not be saved to %1.").arg(path));
             return;
         }
         file.write(payload);
         file.close();
         if (QFileInfo(path).size() <= 0) {
             QFile::remove(path);
-            emit failed(gameId, QStringLiteral("The downloaded cover image was empty."));
+            emitFailed(gameId, QStringLiteral("The downloaded cover image was empty."));
             return;
         }
         // A previous fetch may have saved the same cover under another extension.
@@ -531,6 +572,6 @@ void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl)
             if (stale != path && QFileInfo::exists(stale))
                 QFile::remove(stale);
         }
-        emit finished(gameId, path);
+        emitFinished(gameId, path);
     });
 }

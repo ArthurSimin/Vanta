@@ -421,8 +421,10 @@ void Sidebar::rebuild()
     m_groupRows.clear();
     m_groupOrder.clear();
     while (QLayoutItem *item = m_groupsLayout->takeAt(0)) {
-        if (QWidget *widget = item->widget())
-            widget->deleteLater();
+        if (QWidget *widget = item->widget()) {
+            widget->hide();
+            delete widget;
+        }
         delete item;
     }
 

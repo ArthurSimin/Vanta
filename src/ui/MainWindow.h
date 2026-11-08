@@ -53,6 +53,7 @@ private:
     void saveWindowState();
 
     void refreshLibrary();
+    void refreshLibraryImmediately();
     void refreshSidebar();
     void refreshStatus();
     void refreshIcons();
@@ -75,6 +76,9 @@ private:
     void openSettingsDialog();
     void openAboutDialog();
     void openRunnerInstallDialog();
+    void openLibraryImportDialog();
+    void handleGamesImported(const QList<Game> &imported);
+    void fetchMissingCovers();
     void showContextMenu(const QString &gameId, const QPoint &globalPosition);
     void showTutorial(int startIndex = 0);
     void showTutorialSteps();
@@ -157,5 +161,6 @@ private:
     bool m_pendingSteamSkipped = false;
     QStringList m_pendingDiagnostics;
     bool m_launchCancelled = false;
+    QTimer *m_refreshTimer = nullptr;
     bool m_shuttingDown = false;
 };

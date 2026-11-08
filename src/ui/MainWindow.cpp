@@ -16,6 +16,7 @@
 #include "CoverFetcher.h"
 #include "CoverPickerDialog.h"
 #include "GameSelectionBar.h"
+#include "LibraryImportDialog.h"
 #include "TutorialOverlay.h"
 #include "Version.h"
 
@@ -481,6 +482,20 @@ void MainWindow::saveWindowState()
 
 void MainWindow::refreshLibrary()
 {
+    if (!m_refreshTimer) {
+        m_refreshTimer = new QTimer(this);
+        m_refreshTimer->setSingleShot(true);
+        m_refreshTimer->setInterval(40);
+        connect(m_refreshTimer, &QTimer::timeout, this, &MainWindow::refreshLibraryImmediately);
+    }
+    if (!m_refreshTimer->isActive())
+        m_refreshTimer->start();
+}
+
+void MainWindow::refreshLibraryImmediately()
+{
+    if (m_refreshTimer && m_refreshTimer->isActive())
+        m_refreshTimer->stop();
     refreshSidebar();
     applyFilter();
     refreshStatus();
@@ -633,9 +648,13 @@ void MainWindow::refreshIcons()
     connect(scanAction, &QAction::triggered, this, [this] { scanLibrary(false); });
     auto *rescanAction = m_mainMenu->addAction(QStringLiteral("Rescan all games"));
     connect(rescanAction, &QAction::triggered, this, [this] { scanLibrary(true); });
+    auto *coversAction = m_mainMenu->addAction(QStringLiteral("Fetch missing covers"));
+    connect(coversAction, &QAction::triggered, this, &MainWindow::fetchMissingCovers);
     m_mainMenu->addSeparator();
     auto *runnersAction = m_mainMenu->addAction(QStringLiteral("Download runners…"));
     connect(runnersAction, &QAction::triggered, this, &MainWindow::openRunnerInstallDialog);
+    auto *portAction = m_mainMenu->addAction(QStringLiteral("Port external libraries…"));
+    connect(portAction, &QAction::triggered, this, &MainWindow::openLibraryImportDialog);
     auto *settingsAction = m_mainMenu->addAction(QStringLiteral("Settings…"));
     connect(settingsAction, &QAction::triggered, this, &MainWindow::openSettingsDialog);
     auto *tutorialAction = m_mainMenu->addAction(QStringLiteral("Show tutorial"));
@@ -1031,8 +1050,10 @@ void MainWindow::openOnlineFixDialog(const QString &gameId)
 
 void MainWindow::openSettingsDialog()
 {
-    SettingsDialog dialog(m_library.settings(), &m_theme, this);
+    SettingsDialog dialog(m_library.settings(), &m_theme, &m_library, this);
     connect(&dialog, &SettingsDialog::runnersChanged, this, [this] { refreshStatus(); });
+    connect(&dialog, &SettingsDialog::libraryChanged, this, [this] { refreshLibrary(); });
+    connect(&dialog, &SettingsDialog::gamesImported, this, &MainWindow::handleGamesImported);
     if (dialog.exec() != QDialog::Accepted)
         return;
 
@@ -1072,6 +1093,51 @@ void MainWindow::openRunnerInstallDialog()
         setStatusMessage(QStringLiteral("Runner discovery refreshed."));
     });
     dialog.exec();
+}
+
+void MainWindow::openLibraryImportDialog()
+{
+    LibraryImportDialog dialog(&m_library, &m_theme, this);
+    connect(&dialog, &LibraryImportDialog::gamesImportedList, this, &MainWindow::handleGamesImported);
+    dialog.exec();
+}
+
+void MainWindow::handleGamesImported(const QList<Game> &imported)
+{
+    if (imported.isEmpty())
+        return;
+
+    refreshLibrary();
+    setStatusMessage(QStringLiteral("Ported %1 game%2.")
+                         .arg(QString::number(imported.size()),
+                              imported.size() == 1 ? QString() : QStringLiteral("s")));
+
+    for (const Game &game : imported) {
+        if (m_library.settings().automaticScanning)
+            scanGame(game.id, false);
+        if (m_library.settings().fetchCoversAutomatically && game.coverPath.trimmed().isEmpty())
+            fetchCoverForGame(game.id, game.name);
+    }
+}
+
+void MainWindow::fetchMissingCovers()
+{
+    if (!m_coverFetcher)
+        return;
+    int count = 0;
+    for (const Game &game : m_library.games()) {
+        if (game.coverPath.trimmed().isEmpty()) {
+            fetchCoverForGame(game.id, game.name);
+            ++count;
+        }
+    }
+    if (count > 0) {
+        setStatusMessage(QStringLiteral("Queued cover lookups for %1 game%2.")
+                             .arg(QString::number(count),
+                                  count == 1 ? QString() : QStringLiteral("s")));
+    } else {
+        setStatusMessage(QStringLiteral("All games in the library already have covers."));
+    }
 }
 
 void MainWindow::showContextMenu(const QString &gameId, const QPoint &globalPosition)

@@ -78,6 +78,8 @@ private:
     QLabel *m_categoryLabel = nullptr;
     QLabel *m_descriptionLabel = nullptr;
     QLabel *m_dependencyLabel = nullptr;
+    QLabel *m_compatibilityLabel = nullptr;
+    QLabel *m_dependencyHint = nullptr;
     QComboBox *m_versionCombo = nullptr;
     QPushButton *m_installButton = nullptr;
     QPushButton *m_pageButton = nullptr;
@@ -102,6 +104,7 @@ private:
 
     QList<ThunderstoreVersion> m_installQueue;
     QList<ModInstallPlan> m_plans;
+    QStringList m_dependencyNotes;
     int m_installIndex = 0;
     bool m_installSkippedBepInEx = false;
 };

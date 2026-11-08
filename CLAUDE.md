@@ -99,6 +99,12 @@ A settled screenshot cannot tell you whether the slide happened.
 - **Thunderstore community slugs are guessed, not authoritative.** A wrong guess
   returns an empty package list or a 503 "No cache available"; the dialog treats
   both as "check the community slug", never as an empty community.
+- **BepInExPack is a loader, not a plugin.** Its files belong at the game root
+  and overwrite `BepInEx/core`. It is skipped as a dependency, but an explicit
+  request for it must confirm the loader replacement instead of being refused.
+- **A pinned dependency version may not exist.** Communities keep the newest
+  releases only, so the resolver falls back to the newest one and must report
+  the substitution rather than silently installing something else.
 - **A failed download must not leave files behind.** Packages are held in memory
   and parsed before the install plan runs, so cancelling mid-sequence writes
   nothing.

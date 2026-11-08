@@ -177,9 +177,15 @@ parses package links, resolves dependencies depth-first and downloads versions.
 Two behaviours are deliberate:
 
 - `BepInExPack` is skipped when BepInEx is already installed, because
-  reinstalling the pack would overwrite the user's core files and config.
+  reinstalling the pack would overwrite the user's core files and config. When
+  the user asks for the pack itself, that rule inverts: it is the supported way
+  to install or change the loader, so the dialog confirms the replacement of the
+  installed core DLLs and the normal backup path protects the old files.
 - `r2modman` is refused. It is a mod manager application, not a BepInEx plugin,
   and installing it into `plugins/` would do nothing.
+- A dependency pinned to a version the community does not publish falls back to
+  its newest release, and the result message names both versions. A pinned
+  version is a request from the package author, never a guarantee.
 
 The community is guessed from the game name on first use and remembered in
 `Game::thunderstoreCommunity`, so the browser opens on the right community next

@@ -81,10 +81,13 @@ public:
 
     // Resolves dependencies depth-first and returns them in install order, with
     // the deepest dependency first. `missing` receives references that are not
-    // present in the supplied community list. The root package is not included.
+    // present in the supplied community list. `notes` receives the cases where a
+    // pinned dependency version is not available and a different one is used
+    // instead, so the caller can tell the user. The root package is not included.
     static QList<ThunderstoreVersion> resolveDependencies(const ThunderstorePackage &root,
                                                           const QList<ThunderstorePackage> &packages,
-                                                          QStringList *missing);
+                                                          QStringList *missing,
+                                                          QStringList *notes = nullptr);
 
     void setCommunity(const QString &community);
     QString community() const { return m_community; }

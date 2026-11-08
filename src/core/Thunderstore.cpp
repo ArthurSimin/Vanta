@@ -335,7 +335,8 @@ ThunderstoreDependency Thunderstore::parseDependency(const QString &text)
 
 QList<ThunderstoreVersion> Thunderstore::resolveDependencies(const ThunderstorePackage &root,
                                                              const QList<ThunderstorePackage> &packages,
-                                                             QStringList *missing)
+                                                             QStringList *missing,
+                                                             QStringList *notes)
 {
     QHash<QString, const ThunderstorePackage *> byKey;
     for (const ThunderstorePackage &package : packages)
@@ -374,6 +375,18 @@ QList<ThunderstoreVersion> Thunderstore::resolveDependencies(const ThunderstoreP
                         selected = candidate;
                         break;
                     }
+                }
+                // A pinned version is a request, not a guarantee: communities
+                // keep the newest release in the list and authors often do not
+                // publish the exact build a package was tested against. Falling
+                // back to the newest release is still useful, but it has to be
+                // visible instead of silent.
+                if (selected.versionNumber.compare(dependency.version, Qt::CaseInsensitive) != 0
+                    && notes) {
+                    notes->append(QStringLiteral("%1 %2 is not published here; Vanta installed %3 instead.")
+                                      .arg(dependency.owner + QLatin1Char('-') + dependency.name,
+                                           dependency.version,
+                                           selected.versionNumber));
                 }
             }
             if (selected.fullName.isEmpty())

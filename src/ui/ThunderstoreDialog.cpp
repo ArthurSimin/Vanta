@@ -244,21 +244,39 @@ void ThunderstoreDialog::buildUi()
     m_dependencyLabel->setWordWrap(true);
     m_dependencyLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     detailLayout->addWidget(m_dependencyLabel);
-    detailLayout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Dependencies that are listed in this community are downloaded first. "
-                       "The BepInEx pack is skipped when BepInEx is already installed."),
-        detailPanel));
+    m_compatibilityLabel = UiHelp::helpLabel(QString(), detailPanel);
+    detailLayout->addWidget(m_compatibilityLabel);
+    m_dependencyHint = UiHelp::mutedLabel(
+        QStringLiteral("Listed dependencies are downloaded first; the BepInEx pack is skipped when "
+                       "BepInEx is already installed."),
+        detailPanel);
+    m_dependencyHint->setWordWrap(true);
+    detailLayout->addWidget(m_dependencyHint);
     detailLayout->addStretch(1);
+
+    auto *detailScroll = new QScrollArea(this);
+    detailScroll->setWidgetResizable(true);
+    detailScroll->setFrameShape(QFrame::NoFrame);
+    detailScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    detailScroll->setWidget(detailPanel);
+
+    // The install row sits outside the scroll area: long descriptions and
+    // dependency lists must never push the primary action out of reach.
+    auto *detailColumn = new QWidget(this);
+    auto *detailColumnLayout = new QVBoxLayout(detailColumn);
+    detailColumnLayout->setContentsMargins(0, 0, 0, 0);
+    detailColumnLayout->setSpacing(9);
+    detailColumnLayout->addWidget(detailScroll, 1);
 
     auto *detailButtons = new QHBoxLayout;
     detailButtons->setSpacing(8);
-    m_installButton = new QPushButton(QStringLiteral("Install"), detailPanel);
+    m_installButton = new QPushButton(QStringLiteral("Install"), detailColumn);
     m_installButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_installButton);
     connect(m_installButton, &QPushButton::clicked, this, &ThunderstoreDialog::installSelected);
     detailButtons->addWidget(m_installButton);
 
-    m_pageButton = new QPushButton(QStringLiteral("Open page"), detailPanel);
+    m_pageButton = new QPushButton(QStringLiteral("Open page"), detailColumn);
     m_pageButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makeFlat(m_pageButton);
     connect(m_pageButton, &QPushButton::clicked, this, [this] {
@@ -268,15 +286,10 @@ void ThunderstoreDialog::buildUi()
     });
     detailButtons->addWidget(m_pageButton);
     detailButtons->addStretch(1);
-    detailLayout->addLayout(detailButtons);
+    detailColumnLayout->addLayout(detailButtons);
 
-    auto *detailScroll = new QScrollArea(this);
-    detailScroll->setWidgetResizable(true);
-    detailScroll->setFrameShape(QFrame::NoFrame);
-    detailScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    detailScroll->setWidget(detailPanel);
-    detailScroll->setMinimumWidth(350);
-    split->addWidget(detailScroll, 2);
+    detailColumn->setMinimumWidth(350);
+    split->addWidget(detailColumn, 2);
     bodyLayout()->addLayout(split, 1);
 
     auto *statusRow = new QHBoxLayout;
@@ -789,6 +802,9 @@ void ThunderstoreDialog::updateVersionDetails()
             lines.append(QStringLiteral("• ") + dependency);
         m_dependencyLabel->setText(lines.join(QLatin1Char('\n')));
     }
+    m_compatibilityLabel->setText(
+        QStringLiteral("Vanta cannot tell which game version a Thunderstore release was built for. "
+                       "Check the mod page when the game has received an update."));
     m_installButton->setText(QStringLiteral("Install %1").arg(version.versionNumber));
     m_installButton->setEnabled(!m_busy);
     m_versionCombo->setEnabled(!m_busy);
@@ -831,8 +847,9 @@ void ThunderstoreDialog::beginInstall(const ThunderstorePackage &package,
     }
 
     QStringList missing;
+    QStringList notes;
     const QList<ThunderstoreVersion> dependencies =
-        Thunderstore::resolveDependencies(package, m_packages, &missing);
+        Thunderstore::resolveDependencies(package, m_packages, &missing, &notes);
     // An already installed BepInEx satisfies its own dependency even if the
     // community happens to omit the pack from its package list.
     QStringList required;
@@ -852,6 +869,30 @@ void ThunderstoreDialog::beginInstall(const ThunderstorePackage &package,
         return;
     }
 
+    // The pack is a loader, not a plugin: its files belong at the game root and
+    // replace the core DLLs of an existing installation. That is how BepInEx is
+    // updated, but it must never happen as a side effect of "install this mod",
+    // so an explicit request for the pack is confirmed on its own.
+    if (isBepInExPack(version)) {
+        if (!m_install.isValid()) {
+            setStatus(QStringLiteral("Installing %1 %2…").arg(package.name, version.versionNumber), false);
+        } else {
+            const auto reply = QMessageBox::question(
+                this, QStringLiteral("Replace the BepInEx loader?"),
+                QStringLiteral("BepInEx is already installed.\n\n"
+                               "%1 %2 copies its own core DLLs, winhttp proxy and doorstop files over the "
+                               "installed loader. Plugins and their config are left alone, and every replaced "
+                               "file is backed up under BepInEx/.vanta-backups first.\n\n"
+                               "Continue only if you want to change the loader version.")
+                    .arg(package.name, version.versionNumber),
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (reply != QMessageBox::Yes) {
+                setStatus(QStringLiteral("Nothing was changed. The installed BepInEx loader was kept."), false);
+                return;
+            }
+        }
+    }
+
     clearInstallQueue();
     for (const ThunderstoreVersion &dependency : dependencies) {
         if (m_install.isValid() && isBepInExPack(dependency)) {
@@ -861,6 +902,7 @@ void ThunderstoreDialog::beginInstall(const ThunderstorePackage &package,
         m_installQueue.append(dependency);
     }
     m_installQueue.append(version);
+    m_dependencyNotes = notes;
     m_installIndex = 0;
     m_installing = true;
     setBusy(true);
@@ -967,10 +1009,14 @@ void ThunderstoreDialog::finishInstall()
     } else {
         message = QStringLiteral("Installed %1 file(s) for %2.").arg(written.size()).arg(rootName);
     }
-    if (skippedBepInEx)
+    if (skippedBepInEx && !written.isEmpty())
         message += QStringLiteral(" BepInEx was already present, so its pack was not reinstalled.");
     if (!m_install.isValid())
         message += QStringLiteral(" BepInEx is still not installed, so these files will not load until it is.");
+    if (!m_dependencyNotes.isEmpty()) {
+        message += QLatin1Char(' ');
+        message += m_dependencyNotes.join(QLatin1Char(' '));
+    }
     if (!backupRoot.isEmpty())
         message += QStringLiteral(" Replaced files were backed up under %1.")
                        .arg(QDir::toNativeSeparators(backupRoot));
@@ -1005,6 +1051,7 @@ void ThunderstoreDialog::clearInstallQueue()
 {
     m_installQueue.clear();
     m_plans.clear();
+    m_dependencyNotes.clear();
     m_installIndex = 0;
     m_installSkippedBepInEx = false;
 }

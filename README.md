@@ -297,6 +297,11 @@ game folder) and reports whether the doorstop files (`winhttp.dll`,
   package together with everything it needs. A package link can also be pasted
   directly. `BepInExPack` is skipped when BepInEx is already installed, and
   `r2modman` is refused because it is a mod manager, not a BepInEx plugin.
+  Installing the `BepInExPack` itself is the supported way to bootstrap a game
+  that has no loader yet; if BepInEx is already present, Vanta asks before the
+  pack replaces the installed core DLLs, and backs every replaced file up.
+  A dependency pinned to a release that the community does not publish is
+  installed at the newest available release, and the result says so.
 - **Backups.** If an install would overwrite an existing file, Vanta asks first
   and then copies the old file to
   `BepInEx/.vanta-backups/<timestamp>/` before writing. The dialog reports the

@@ -76,10 +76,7 @@ runs fine without them.
 
 ## Installing a package
 
-Prebuilt packages are attached to every
-[release](https://github.com/ArthurSimin/Vanta/releases/latest). They are built
-on Ubuntu 22.04 against Qt 6.2, so one package covers a whole family of
-distributions rather than a single release.
+Just head over to [Releases](https://github.com/ArthurSimin/Vanta/releases) and grab the correct package for your distribution. Prebuilt packages are attached to every release, built on Ubuntu 22.04 against Qt 6.2 so one package covers a whole family of distributions rather than a single release.
 
 | Distribution | Package |
 | --- | --- |
@@ -90,13 +87,13 @@ distributions rather than a single release.
 
 ```bash
 # Debian / Ubuntu
-sudo apt install ./vanta_1.0.0_amd64.deb
+sudo apt install ./vanta_<version>_amd64.deb
 
 # Fedora / openSUSE
-sudo dnf install ./vanta-1.0.0-1.x86_64.rpm
+sudo dnf install ./vanta-<version>-1.x86_64.rpm
 
 # Arch / Manjaro / CachyOS
-sudo pacman -U vanta-1.0.0-1-x86_64.pkg.tar.zst
+sudo pacman -U vanta-<version>-1-x86_64.pkg.tar.zst
 ```
 
 Packages are unsigned, so verify the checksum first:
@@ -108,8 +105,8 @@ sha256sum -c SHA256SUMS --ignore-missing
 The tarball holds the same tree rooted at the archive instead of `/usr`:
 
 ```bash
-tar -xzf vanta-1.0.0-linux-x86_64.tar.gz
-sudo cp -a vanta-1.0.0-linux-x86_64/usr/. /usr/local/
+tar -xzf vanta-<version>-linux-x86_64.tar.gz
+sudo cp -a vanta-<version>-linux-x86_64/usr/. /usr/local/
 ```
 
 ## Building

@@ -8,7 +8,7 @@
 # what it built and fails when nothing could be built at all.
 #
 # Usage:
-#   packaging/build-packages.sh --root <install-root> --version 1.0.1 --out dist
+#   packaging/build-packages.sh --root <install-root> --version 1.0.2 --out dist
 
 set -euo pipefail
 
@@ -86,7 +86,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: $MAINTAINER
 Installed-Size: $size
-Depends: libc6 (>= 2.34), libstdc++6, libqt6core6 (>= 6.2.4) | libqt6core6t64 (>= 6.2.4), libqt6gui6 (>= 6.2.4) | libqt6gui6t64 (>= 6.2.4), libqt6widgets6 (>= 6.2.4) | libqt6widgets6t64 (>= 6.2.4), libqt6network6 (>= 6.2.4) | libqt6network6t64 (>= 6.2.4), libqt6svg6 (>= 6.2.4) | libqt6svg6t64 (>= 6.2.4), libqt6concurrent6 (>= 6.2.4) | libqt6concurrent6t64 (>= 6.2.4)
+Depends: libc6 (>= 2.34), libstdc++6, zlib1g, libqt6core6 (>= 6.2.4) | libqt6core6t64 (>= 6.2.4), libqt6gui6 (>= 6.2.4) | libqt6gui6t64 (>= 6.2.4), libqt6widgets6 (>= 6.2.4) | libqt6widgets6t64 (>= 6.2.4), libqt6network6 (>= 6.2.4) | libqt6network6t64 (>= 6.2.4), libqt6svg6 (>= 6.2.4) | libqt6svg6t64 (>= 6.2.4), libqt6concurrent6 (>= 6.2.4) | libqt6concurrent6t64 (>= 6.2.4)
 Recommends: hicolor-icon-theme
 Homepage: $PROJECT_URL
 Description: $SUMMARY
@@ -212,6 +212,7 @@ arch = x86_64
 license = AGPL-3.0-only
 depend = qt6-base
 depend = qt6-svg
+depend = zlib
 EOF
 
     cat > "$work/.INSTALL" <<'EOF'

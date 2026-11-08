@@ -2,16 +2,16 @@
   <img src="assets/vanta-banner.svg" alt="Vanta" width="420">
 </p>
 
-# Vanta
-
 <p align="center">
   <img height="56" src="https://raw.githubusercontent.com/ArthurSimin/Badgeworks/main/devin_opencode_badge.svg" alt="Made with OpenCode">
   <img height="56" src="https://raw.githubusercontent.com/ArthurSimin/Badgeworks/8a1b2c7416b2803778497d1088ec23d47783235f/devin_google_antigravity_badge.svg" alt="Made with Google Antigravity">
 </p>
 
-[![CI](https://github.com/ArthurSimin/Vanta/actions/workflows/ci.yml/badge.svg)](https://github.com/ArthurSimin/Vanta/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/ArthurSimin/Vanta)](https://github.com/ArthurSimin/Vanta/releases/latest)
-[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-7c3aed.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/ArthurSimin/Vanta/actions/workflows/ci.yml"><img src="https://github.com/ArthurSimin/Vanta/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/ArthurSimin/Vanta/releases/latest"><img src="https://img.shields.io/github/v/release/ArthurSimin/Vanta" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-7c3aed.svg" alt="License: AGPL-3.0"></a>
+</p>
 
 Vanta is a Linux game launcher written in C++17 with Qt 6 Widgets. It keeps a
 local library of the games you already own, launches native Linux builds and

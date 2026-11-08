@@ -10,7 +10,7 @@ Windows builds through Wine or Proton, discovers the runners other launchers
 have already installed, and reports what it finds inside a game folder — without
 ever downloading a game or claiming that a detected fix works.
 
-![Vanta main window on a fresh start, before any game has been added](docs/screenshot-main.png)
+![Vanta main window showing the game library](docs/screenshot-main.png)
 
 The screenshot shows a fresh start: Vanta ships with an empty library and never
 adds entries on its own.

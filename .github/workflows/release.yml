@@ -34,6 +34,7 @@ jobs:
             libxkbcommon-dev \
             libvulkan-dev \
             libarchive-tools \
+            zlib1g-dev \
             zstd \
             dpkg-dev \
             rpm
@@ -189,6 +190,13 @@ jobs:
             printf '`SHA256SUMS` before installing.\n\n'
             printf 'Vanta never downloads games. OnlineFix detection reports what it finds\n'
             printf 'and never claims a fix works; see ONLINEFIX.md.\n\n'
+            printf '### Mods\n\n'
+            printf 'Games with BepInEx can now be managed from the launcher. Open **Mods…**\n'
+            printf 'from the game context menu or **Game details** to enable or disable a\n'
+            printf 'plugin, import a local `.dll` or `.zip`, or browse the game community on\n'
+            printf 'Thunderstore and install a package with its dependencies. Toggling only\n'
+            printf 'renames a file between `.dll` and `.dll.disabled`; replaced files are\n'
+            printf 'backed up under `BepInEx/.vanta-backups/` first.\n\n'
             printf '### Verify\n\n'
             printf '```bash\n'
             printf 'sha256sum -c SHA256SUMS --ignore-missing\n'

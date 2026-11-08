@@ -42,7 +42,8 @@ jobs:
             ninja-build \
             libgl1-mesa-dev \
             libxkbcommon-dev \
-            libvulkan-dev
+            libvulkan-dev \
+            zlib1g-dev
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4

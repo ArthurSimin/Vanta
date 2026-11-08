@@ -3,9 +3,11 @@
 #include "RunnerInstaller.h"
 #include "ThemeManager.h"
 
+#include <QComboBox>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMessageBox>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QScrollArea>
@@ -86,7 +88,7 @@ void RunnerInstallDialog::buildUi()
     m_installWineButton->setCursor(Qt::PointingHandCursor);
     m_installWineButton->setProperty("packageAvailable", manager.available);
     m_installWineButton->setEnabled(manager.available);
-    connect(m_installWineButton, &QPushButton::clicked, m_installer, &RunnerInstaller::installSystemWine);
+    connect(m_installWineButton, &QPushButton::clicked, this, &RunnerInstallDialog::onInstallWineClicked);
     packageLayout->addWidget(m_installWineButton, 0, Qt::AlignLeft);
     layout->addWidget(packagePanel);
 
@@ -108,8 +110,14 @@ void RunnerInstallDialog::buildUi()
     wineRow->addLayout(wineText, 1);
     m_wineButton = new QPushButton(QStringLiteral("Download Wine"), downloadPanel);
     m_wineButton->setCursor(Qt::PointingHandCursor);
-    connect(m_wineButton, &QPushButton::clicked, m_installer, &RunnerInstaller::downloadPortableWine);
+    connect(m_wineButton, &QPushButton::clicked, this, &RunnerInstallDialog::onWineButtonClicked);
     wineRow->addWidget(m_wineButton, 0, Qt::AlignVCenter);
+    m_downloadWineSecondary = new QPushButton(QStringLiteral("Download build…"), downloadPanel);
+    m_downloadWineSecondary->setCursor(Qt::PointingHandCursor);
+    m_downloadWineSecondary->setVisible(false);
+    UiHelp::makeFlat(m_downloadWineSecondary);
+    connect(m_downloadWineSecondary, &QPushButton::clicked, m_installer, &RunnerInstaller::downloadPortableWine);
+    wineRow->addWidget(m_downloadWineSecondary, 0, Qt::AlignVCenter);
     downloadLayout->addLayout(wineRow);
 
     downloadLayout->addWidget(UiHelp::separator(downloadPanel));
@@ -126,8 +134,14 @@ void RunnerInstallDialog::buildUi()
     m_protonButton = new QPushButton(QStringLiteral("Download Proton"), downloadPanel);
     m_protonButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_protonButton);
-    connect(m_protonButton, &QPushButton::clicked, m_installer, &RunnerInstaller::downloadProton);
+    connect(m_protonButton, &QPushButton::clicked, this, &RunnerInstallDialog::onProtonButtonClicked);
     protonRow->addWidget(m_protonButton, 0, Qt::AlignVCenter);
+    m_downloadProtonSecondary = new QPushButton(QStringLiteral("Download GE-Proton…"), downloadPanel);
+    m_downloadProtonSecondary->setCursor(Qt::PointingHandCursor);
+    m_downloadProtonSecondary->setVisible(false);
+    UiHelp::makeFlat(m_downloadProtonSecondary);
+    connect(m_downloadProtonSecondary, &QPushButton::clicked, m_installer, &RunnerInstaller::downloadProton);
+    protonRow->addWidget(m_downloadProtonSecondary, 0, Qt::AlignVCenter);
     downloadLayout->addLayout(protonRow);
 
     downloadLayout->addWidget(UiHelp::helpLabel(
@@ -175,6 +189,157 @@ void RunnerInstallDialog::buildUi()
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::accept);
     buttons->addWidget(m_closeButton);
     bodyLayout()->addLayout(buttons);
+    updateButtons();
+}
+
+void RunnerInstallDialog::updateButtons()
+{
+    const bool systemWine = RunnerInstaller::isSystemWineInstalled();
+    const PackageManagerInfo manager = RunnerInstaller::detectPackageManager();
+    if (systemWine) {
+        m_packageStatus->setProperty("class", QString());
+        m_packageStatus->setText(QStringLiteral("System Wine is installed (%1).")
+                                     .arg(manager.available ? manager.displayName : QStringLiteral("detected on PATH")));
+        m_commandLabel->setText(manager.available ? RunnerInstaller::uninstallCommandLine(manager) : QString());
+        m_installWineButton->setText(QStringLiteral("Uninstall Wine with the package manager"));
+        m_installWineButton->setProperty("installed", true);
+        UiHelp::makeDanger(m_installWineButton);
+    } else {
+        if (manager.available) {
+            m_packageStatus->setProperty("class", QString());
+            m_packageStatus->setText(QStringLiteral("Detected package manager: %1").arg(manager.displayName));
+            m_commandLabel->setText(RunnerInstaller::installCommandLine(manager));
+        } else {
+            m_packageStatus->setProperty("class", QStringLiteral("warning"));
+            m_packageStatus->setText(QStringLiteral("No supported package manager was detected. Use the portable Wine download below."));
+            m_commandLabel->setText(QStringLiteral("No package manager command is available."));
+        }
+        m_installWineButton->setText(QStringLiteral("Install Wine with the package manager"));
+        m_installWineButton->setProperty("installed", false);
+        m_installWineButton->setProperty("class", QVariant());
+        m_installWineButton->style()->unpolish(m_installWineButton);
+        m_installWineButton->style()->polish(m_installWineButton);
+    }
+    m_packageStatus->style()->unpolish(m_packageStatus);
+    m_packageStatus->style()->polish(m_packageStatus);
+    m_installWineButton->setEnabled(manager.available && !m_busy);
+
+    const bool portableWine = RunnerInstaller::isPortableWineInstalled();
+    if (portableWine) {
+        m_wineButton->setText(QStringLiteral("Uninstall Wine"));
+        m_wineButton->setProperty("installed", true);
+        UiHelp::makeDanger(m_wineButton);
+        if (m_downloadWineSecondary)
+            m_downloadWineSecondary->setVisible(true);
+    } else {
+        m_wineButton->setText(QStringLiteral("Download Wine"));
+        m_wineButton->setProperty("installed", false);
+        m_wineButton->setProperty("class", QVariant());
+        m_wineButton->style()->unpolish(m_wineButton);
+        m_wineButton->style()->polish(m_wineButton);
+        if (m_downloadWineSecondary)
+            m_downloadWineSecondary->setVisible(false);
+    }
+
+    const auto protonList = RunnerInstaller::installedProtonInstallations();
+    if (!protonList.isEmpty()) {
+        m_protonButton->setText(QStringLiteral("Uninstall Proton"));
+        m_protonButton->setProperty("installed", true);
+        UiHelp::makeDanger(m_protonButton);
+        if (m_downloadProtonSecondary)
+            m_downloadProtonSecondary->setVisible(true);
+    } else {
+        m_protonButton->setText(QStringLiteral("Download Proton"));
+        m_protonButton->setProperty("installed", false);
+        UiHelp::makePrimary(m_protonButton);
+        if (m_downloadProtonSecondary)
+            m_downloadProtonSecondary->setVisible(false);
+    }
+}
+
+void RunnerInstallDialog::onInstallWineClicked()
+{
+    if (m_installWineButton->property("installed").toBool()) {
+        const auto reply = QMessageBox::question(
+            this,
+            QStringLiteral("Uninstall Wine"),
+            QStringLiteral("Are you sure you want to uninstall Wine using the package manager?"),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+            m_installer->uninstallSystemWine();
+    } else {
+        m_installer->installSystemWine();
+    }
+}
+
+void RunnerInstallDialog::onWineButtonClicked()
+{
+    if (m_wineButton->property("installed").toBool()) {
+        const auto reply = QMessageBox::question(
+            this,
+            QStringLiteral("Uninstall Portable Wine"),
+            QStringLiteral("Are you sure you want to uninstall portable Wine?\nThis will remove the build from Vanta's runner folder."),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+            m_installer->uninstallPortableWine();
+    } else {
+        m_installer->downloadPortableWine();
+    }
+}
+
+void RunnerInstallDialog::onProtonButtonClicked()
+{
+    if (m_protonButton->property("installed").toBool()) {
+        const auto protonList = RunnerInstaller::installedProtonInstallations();
+        if (protonList.isEmpty()) {
+            m_installer->downloadProton();
+            return;
+        }
+        if (protonList.size() == 1) {
+            const auto &p = protonList.first();
+            const auto reply = QMessageBox::question(
+                this,
+                QStringLiteral("Uninstall Proton"),
+                QStringLiteral("Are you sure you want to uninstall %1?\nLocation: %2\nThis will remove the runner files.").arg(p.first, p.second),
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+            if (reply == QMessageBox::Yes)
+                m_installer->uninstallProton(p.second);
+        } else {
+            VantaDialog pickDialog(QStringLiteral("Uninstall Proton"), m_theme, this);
+            pickDialog.setMinimumWidth(480);
+            auto *pickLayout = pickDialog.bodyLayout();
+            pickLayout->addWidget(UiHelp::helpLabel(
+                QStringLiteral("Multiple Proton installations were detected. Select the version you wish to uninstall:"),
+                &pickDialog));
+            auto *combo = new QComboBox(&pickDialog);
+            for (const auto &p : protonList) {
+                combo->addItem(QStringLiteral("%1 (%2)").arg(p.first, p.second), p.second);
+            }
+            pickLayout->addWidget(combo);
+            auto *btnBox = new QHBoxLayout;
+            btnBox->addStretch(1);
+            auto *cancelBtn = new QPushButton(QStringLiteral("Cancel"), &pickDialog);
+            cancelBtn->setCursor(Qt::PointingHandCursor);
+            connect(cancelBtn, &QPushButton::clicked, &pickDialog, &QDialog::reject);
+            btnBox->addWidget(cancelBtn);
+            auto *uninstBtn = new QPushButton(QStringLiteral("Uninstall"), &pickDialog);
+            uninstBtn->setCursor(Qt::PointingHandCursor);
+            uninstBtn->setProperty("class", QStringLiteral("danger"));
+            connect(uninstBtn, &QPushButton::clicked, &pickDialog, &QDialog::accept);
+            btnBox->addWidget(uninstBtn);
+            pickLayout->addLayout(btnBox);
+            if (pickDialog.exec() == QDialog::Accepted) {
+                const QString selectedPath = combo->currentData().toString();
+                if (!selectedPath.isEmpty())
+                    m_installer->uninstallProton(selectedPath);
+            }
+        }
+    } else {
+        m_installer->downloadProton();
+    }
 }
 
 void RunnerInstallDialog::setBusy(bool busy)
@@ -182,7 +347,11 @@ void RunnerInstallDialog::setBusy(bool busy)
     m_busy = busy;
     m_installWineButton->setEnabled(!busy && m_installWineButton->property("packageAvailable").toBool());
     m_wineButton->setEnabled(!busy);
+    if (m_downloadWineSecondary)
+        m_downloadWineSecondary->setEnabled(!busy);
     m_protonButton->setEnabled(!busy);
+    if (m_downloadProtonSecondary)
+        m_downloadProtonSecondary->setEnabled(!busy);
     m_cancelButton->setVisible(busy);
     m_closeButton->setEnabled(!busy);
     m_progress->setVisible(busy);
@@ -224,6 +393,8 @@ void RunnerInstallDialog::showCompleted(const QString &message)
     m_progress->setVisible(false);
     m_sizeLabel->setVisible(false);
     setStatus(message, QStringLiteral("success"));
+    updateButtons();
+    refreshIcons();
     emit runnersChanged();
 }
 
@@ -233,6 +404,8 @@ void RunnerInstallDialog::showFailure(const QString &message)
     m_progress->setVisible(false);
     m_sizeLabel->setVisible(false);
     setStatus(message, QStringLiteral("danger"));
+    updateButtons();
+    refreshIcons();
     emit runnersChanged();
 }
 
@@ -241,9 +414,26 @@ void RunnerInstallDialog::refreshIcons()
     if (!m_theme)
         return;
     const ThemeColors &colors = m_theme->colors();
-    Icons::setButtonIcon(m_installWineButton, Glyph::Download, colors.text, 16);
-    Icons::setButtonIcon(m_wineButton, Glyph::Wine, colors.text, 16);
-    Icons::setButtonIcon(m_protonButton, Glyph::Proton, QColor(Qt::white), 16);
+    if (m_installWineButton->property("installed").toBool())
+        Icons::setButtonIcon(m_installWineButton, Glyph::Trash, colors.danger, 16);
+    else
+        Icons::setButtonIcon(m_installWineButton, Glyph::Download, colors.text, 16);
+
+    if (m_wineButton->property("installed").toBool())
+        Icons::setButtonIcon(m_wineButton, Glyph::Trash, colors.danger, 16);
+    else
+        Icons::setButtonIcon(m_wineButton, Glyph::Wine, colors.text, 16);
+
+    if (m_protonButton->property("installed").toBool())
+        Icons::setButtonIcon(m_protonButton, Glyph::Trash, colors.danger, 16);
+    else
+        Icons::setButtonIcon(m_protonButton, Glyph::Proton, QColor(Qt::white), 16);
+
+    if (m_downloadWineSecondary)
+        Icons::setButtonIcon(m_downloadWineSecondary, Glyph::Download, colors.text, 14);
+    if (m_downloadProtonSecondary)
+        Icons::setButtonIcon(m_downloadProtonSecondary, Glyph::Download, colors.text, 14);
+
     Icons::setButtonIcon(m_cancelButton, Glyph::Close, colors.text, 16);
     Icons::setButtonIcon(m_closeButton, Glyph::Check, colors.text, 16);
 }

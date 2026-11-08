@@ -182,8 +182,10 @@ Notes that are easy to get wrong:
   a crash mid-write must not destroy a library.
 - Persisted JSON is schema-versioned. Bumping a field's meaning requires a
   migration path, not a silent reinterpretation.
-- Never write outside the XDG directories except to a game's own prefix or an
-  OnlineFix INI the user explicitly confirmed.
+- Never write outside the XDG directories except to a game's own prefix, an
+  OnlineFix INI the user explicitly confirmed, or runner directories (such as
+  Steam's compatibilitytools.d or Vanta's managed runners) when the user explicitly
+  requests runner uninstallation.
 
 ## OnlineFix safety rules
 

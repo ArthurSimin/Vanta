@@ -34,11 +34,20 @@ public:
     static PackageManagerInfo detectPackageManager();
     static QStringList installArguments(const PackageManagerInfo &manager);
     static QString installCommandLine(const PackageManagerInfo &manager);
+    static QStringList uninstallArguments(const PackageManagerInfo &manager);
+    static QString uninstallCommandLine(const PackageManagerInfo &manager);
     static QString managedRunnerRoot(RunnerType type);
 
+    static bool isSystemWineInstalled();
+    static bool isPortableWineInstalled();
+    static QList<QPair<QString, QString>> installedProtonInstallations();
+
     void installSystemWine();
+    void uninstallSystemWine();
     void downloadPortableWine();
+    void uninstallPortableWine();
     void downloadProton();
+    void uninstallProton(const QString &directoryPath);
     void cancel();
 
 signals:
@@ -50,7 +59,7 @@ signals:
     void cancelled();
 
 private:
-    enum class Operation { None, FetchingRelease, Downloading, Extracting, InstallingPackage };
+    enum class Operation { None, FetchingRelease, Downloading, Extracting, InstallingPackage, UninstallingPackage };
 
     void fetchLatestRelease(RunnerType type);
     void handleReleaseReply(QNetworkReply *reply);
@@ -60,6 +69,7 @@ private:
     void handleExtractionFinished(int exitCode, QProcess::ExitStatus status);
     void startPackageInstall();
     void handlePackageFinished(int exitCode, QProcess::ExitStatus status);
+    void handlePackageUninstallFinished(int exitCode, QProcess::ExitStatus status);
     void validateManagedRunner();
     void beginOperation(Operation operation, const QString &message);
     void resetOperation(bool removeTemporaryFile);

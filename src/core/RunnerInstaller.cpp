@@ -151,6 +151,17 @@ QStringList elevatedCommand(const PackageManagerInfo &manager)
     return command;
 }
 
+QStringList elevatedUninstallCommand(const PackageManagerInfo &manager)
+{
+    QStringList command;
+    const QString tool = elevationTool();
+    if (!tool.isEmpty())
+        command.append(tool);
+    command.append(manager.executable);
+    command.append(RunnerInstaller::uninstallArguments(manager));
+    return command;
+}
+
 QString firstExistingRunnerInRoot(const QString &root, RunnerType type)
 {
     const QDir directory(root);
@@ -333,6 +344,100 @@ QString RunnerInstaller::installCommandLine(const PackageManagerInfo &manager)
     return commandLine(elevatedCommand(manager));
 }
 
+QStringList RunnerInstaller::uninstallArguments(const PackageManagerInfo &manager)
+{
+    if (manager.id == QStringLiteral("pacman"))
+        return {QStringLiteral("-R"), QStringLiteral("--noconfirm"), manager.packageName};
+    if (manager.id == QStringLiteral("zypper"))
+        return {QStringLiteral("--non-interactive"), QStringLiteral("remove"), manager.packageName};
+    if (manager.id == QStringLiteral("apk"))
+        return {QStringLiteral("del"), manager.packageName};
+    if (manager.id == QStringLiteral("eopkg"))
+        return {QStringLiteral("remove"), QStringLiteral("-y"), manager.packageName};
+    if (manager.id == QStringLiteral("xbps-install"))
+        return {QStringLiteral("-y"), manager.packageName};
+    return {QStringLiteral("remove"), QStringLiteral("-y"), manager.packageName};
+}
+
+QString RunnerInstaller::uninstallCommandLine(const PackageManagerInfo &manager)
+{
+    if (!manager.available)
+        return QStringLiteral("No supported package manager was detected.");
+    if (!isRoot() && elevationTool().isEmpty()) {
+        QStringList command = {QStringLiteral("sudo"), manager.executable};
+        command.append(uninstallArguments(manager));
+        return commandLine(command);
+    }
+    return commandLine(elevatedUninstallCommand(manager));
+}
+
+bool RunnerInstaller::isSystemWineInstalled()
+{
+    const QString wine = QStandardPaths::findExecutable(QStringLiteral("wine"));
+    if (!wine.isEmpty())
+        return true;
+    const QString wine64 = QStandardPaths::findExecutable(QStringLiteral("wine64"));
+    if (!wine64.isEmpty())
+        return true;
+    return QFile::exists(QStringLiteral("/usr/bin/wine"));
+}
+
+bool RunnerInstaller::isPortableWineInstalled()
+{
+    const QString root = managedRunnerRoot(RunnerType::Wine);
+    if (!QDir(root).exists())
+        return false;
+    const QString wine = firstExistingRunnerInRoot(root, RunnerType::Wine);
+    return !wine.isEmpty();
+}
+
+QList<QPair<QString, QString>> RunnerInstaller::installedProtonInstallations()
+{
+    QList<QPair<QString, QString>> results;
+    QSet<QString> seen;
+
+    const QString managed = managedRunnerRoot(RunnerType::Proton);
+    if (QDir(managed).exists()) {
+        const QFileInfoList children = QDir(managed).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+        for (const QFileInfo &child : children) {
+            const QString candidate = RunnerDetector::protonExecutable(child.absoluteFilePath());
+            if (!candidate.isEmpty()) {
+                const QString base = RunnerDetector::protonBaseDirectory(candidate);
+                if (!seen.contains(base)) {
+                    seen.insert(base);
+                    results.append({child.fileName(), base});
+                }
+            }
+        }
+        if (results.isEmpty()) {
+            const QString candidate = RunnerDetector::protonExecutable(managed);
+            if (!candidate.isEmpty()) {
+                results.append({QStringLiteral("Managed Proton"), managed});
+                seen.insert(managed);
+            }
+        }
+    }
+
+    for (const QString &searchDir : RunnerDetector::protonSearchDirectories()) {
+        const QDir dir(searchDir);
+        if (!dir.exists())
+            continue;
+        const QFileInfoList children = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+        for (const QFileInfo &child : children) {
+            const QString candidate = RunnerDetector::protonExecutable(child.absoluteFilePath());
+            if (!candidate.isEmpty()) {
+                const QString base = RunnerDetector::protonBaseDirectory(candidate);
+                if (!seen.contains(base)) {
+                    seen.insert(base);
+                    results.append({child.fileName(), base});
+                }
+            }
+        }
+    }
+
+    return results;
+}
+
 QString RunnerInstaller::managedRunnerRoot(RunnerType type)
 {
     const QString root = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
@@ -386,6 +491,88 @@ void RunnerInstaller::installSystemWine()
         process->deleteLater();
     });
     process->start(program, command);
+}
+
+void RunnerInstaller::uninstallSystemWine()
+{
+    if (busy())
+        return;
+    const PackageManagerInfo manager = detectPackageManager();
+    if (!manager.available) {
+        emit failed(QStringLiteral("No supported package manager was detected on this system."));
+        return;
+    }
+    if (!isRoot() && elevationTool().isEmpty()) {
+        emit failed(QStringLiteral("No graphical elevation tool (pkexec) or sudo was found. Run this command in a terminal:\n%1")
+                        .arg(uninstallCommandLine(manager)));
+        return;
+    }
+
+    QStringList command = elevatedUninstallCommand(manager);
+    if (command.isEmpty())
+        return;
+    const QString program = command.takeFirst();
+    beginOperation(Operation::UninstallingPackage,
+                   QStringLiteral("Uninstalling Wine with %1…").arg(manager.displayName));
+    m_processOutput.clear();
+
+    auto *process = new QProcess(this);
+    m_process = process;
+    process->setProcessChannelMode(QProcess::MergedChannels);
+    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+            [this, process](int exitCode, QProcess::ExitStatus status) {
+        m_processOutput = QString::fromLocal8Bit(process->readAll());
+        if (m_process == process)
+            m_process = nullptr;
+        handlePackageUninstallFinished(exitCode, status);
+        process->deleteLater();
+    });
+    connect(process, &QProcess::errorOccurred, this, [this, process, manager](QProcess::ProcessError error) {
+        if (error != QProcess::FailedToStart || m_operation != Operation::UninstallingPackage)
+            return;
+        if (m_process == process)
+            m_process = nullptr;
+        failOperation(QStringLiteral("The package manager could not be started. Run this command manually:\n%1")
+                          .arg(uninstallCommandLine(manager)));
+        process->deleteLater();
+    });
+    process->start(program, command);
+}
+
+void RunnerInstaller::uninstallPortableWine()
+{
+    if (busy())
+        return;
+    const QString root = managedRunnerRoot(RunnerType::Wine);
+    if (!QDir(root).exists()) {
+        failOperation(QStringLiteral("Portable Wine is not installed."));
+        return;
+    }
+    beginOperation(Operation::Extracting, QStringLiteral("Uninstalling portable Wine…"));
+    QDir dir(root);
+    if (dir.removeRecursively()) {
+        completeOperation(QStringLiteral("Portable Wine was uninstalled successfully."));
+    } else {
+        failOperation(QStringLiteral("Could not remove the folder %1.").arg(root));
+    }
+}
+
+void RunnerInstaller::uninstallProton(const QString &directoryPath)
+{
+    if (busy())
+        return;
+    if (directoryPath.isEmpty() || !QDir(directoryPath).exists()) {
+        failOperation(QStringLiteral("The specified Proton directory was not found."));
+        return;
+    }
+    const QString name = QFileInfo(directoryPath).fileName();
+    beginOperation(Operation::Extracting, QStringLiteral("Uninstalling %1…").arg(name));
+    QDir dir(directoryPath);
+    if (dir.removeRecursively()) {
+        completeOperation(QStringLiteral("Uninstalled %1 successfully.").arg(name));
+    } else {
+        failOperation(QStringLiteral("Could not remove the folder %1.").arg(directoryPath));
+    }
 }
 
 void RunnerInstaller::downloadPortableWine()
@@ -651,6 +838,22 @@ void RunnerInstaller::handlePackageFinished(int exitCode, QProcess::ExitStatus s
         return;
     }
     completeOperation(QStringLiteral("Wine was installed successfully: %1").arg(wine));
+}
+
+void RunnerInstaller::handlePackageUninstallFinished(int exitCode, QProcess::ExitStatus status)
+{
+    if (m_operation != Operation::UninstallingPackage)
+        return;
+    if (status != QProcess::NormalExit || exitCode != 0) {
+        QString detail = m_processOutput.trimmed();
+        if (detail.size() > 4000)
+            detail = detail.right(4000);
+        failOperation(detail.isEmpty()
+            ? QStringLiteral("The package manager did not uninstall Wine successfully.")
+            : QStringLiteral("The package manager did not uninstall Wine successfully:\n\n%1").arg(detail));
+        return;
+    }
+    completeOperation(QStringLiteral("System Wine was uninstalled."));
 }
 
 void RunnerInstaller::beginOperation(Operation operation, const QString &message)

@@ -24,6 +24,10 @@ protected:
 
 private:
     void buildUi();
+    void updateButtons();
+    void onInstallWineClicked();
+    void onWineButtonClicked();
+    void onProtonButtonClicked();
     void setBusy(bool busy);
     void setStatus(const QString &text, const QString &kind = QString());
     void updateDownloadProgress(qint64 received, qint64 total);
@@ -41,7 +45,9 @@ private:
     QWidget *m_progressPanel = nullptr;
     QPushButton *m_installWineButton = nullptr;
     QPushButton *m_wineButton = nullptr;
+    QPushButton *m_downloadWineSecondary = nullptr;
     QPushButton *m_protonButton = nullptr;
+    QPushButton *m_downloadProtonSecondary = nullptr;
     QPushButton *m_cancelButton = nullptr;
     QPushButton *m_closeButton = nullptr;
     bool m_busy = false;

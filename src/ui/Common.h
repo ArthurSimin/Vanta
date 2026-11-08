@@ -55,9 +55,9 @@ public:
 
     void setDialogTitle(const QString &title);
     void applyPalette();
+    QVBoxLayout *bodyLayout() const { return m_bodyLayout; }
 
 protected:
-    QVBoxLayout *bodyLayout() const { return m_bodyLayout; }
     QWidget *headerWidget() const { return m_header; }
     ThemeManager *themeManager() const { return m_theme; }
     void showEvent(QShowEvent *event) override;

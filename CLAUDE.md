@@ -6,7 +6,7 @@ running here.
 
 ## Quick orientation
 
-Vanta is a C++17 / Qt 6 Widgets Linux game launcher. ~17.5k lines across
+Vanta is a C++17 / Qt 6 Widgets Linux game launcher. ~21k lines across
 `src/core` (no Widgets, testable) and `src/ui` (Widgets only, no I/O).
 
 ```bash
@@ -91,6 +91,17 @@ A settled screenshot cannot tell you whether the slide happened.
 - **Imported covers are referenced in place.** Lutris and Heroic artwork is not
   copied into the XDG data directory, so deleting the source launcher's files
   breaks those covers. Re-fetching through the cover picker replaces the path.
+- **The scan cache knows nothing about mod installs.** `MainWindow` re-runs
+  `BepInEx::detect()` before a launch instead of trusting `scanResult`, otherwise
+  a mod installed in the manager would not enable the `winhttp=n,b` override.
+- **`QTableWidget` swallows Space and Enter.** The mod list uses an event filter
+  on the table to make Space toggle the selected row; a `QShortcut` never fires.
+- **Thunderstore community slugs are guessed, not authoritative.** A wrong guess
+  returns an empty package list or a 503 "No cache available"; the dialog treats
+  both as "check the community slug", never as an empty community.
+- **A failed download must not leave files behind.** Packages are held in memory
+  and parsed before the install plan runs, so cancelling mid-sequence writes
+  nothing.
 - **Packaging needs an install tree, not the build tree.** Run
   `DESTDIR=... cmake --install` first; `packaging/build-packages.sh` reads that
   tree and copies it verbatim into each format.
@@ -107,7 +118,8 @@ A settled screenshot cannot tell you whether the slide happened.
 - No TODOs, stubs or placeholder branches. If it is not finished, do not land
   it.
 - Back up before any write into a game folder, and never let the scanner
-  modify anything.
+  modify anything. The mod manager may rename a DLL to enable or disable it, but
+  it never edits, deletes, or follows a symlink.
 
 ## Reporting results
 

@@ -73,6 +73,7 @@ private:
     void openEditDialog(const QString &gameId);
     void openDetailsDialog(const QString &gameId);
     void openOnlineFixDialog(const QString &gameId);
+    void openModManager(const QString &gameId);
     void openSettingsDialog();
     void openAboutDialog();
     void openRunnerInstallDialog();

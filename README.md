@@ -42,6 +42,14 @@ adds entries on its own.
 - **Runner installation.** A built-in dialog can install Wine with your
   distribution's package manager, or download a portable Wine build or the latest
   GE-Proton release from its official GitHub release page.
+- **BepInEx and mods.** Vanta detects a BepInEx installation next to the
+  executable, lists its plugins and patchers, and enables or disables a mod by
+  renaming it between `.dll` and `.dll.disabled`. You never rename or move files
+  yourself, and DLL contents are never changed. Mods can be added from a local
+  `.dll` or `.zip`, and the built-in Thunderstore browser lists the game's
+  community, searches packages, resolves dependencies and installs them into the
+  game folder. Anything that would be replaced is first copied to
+  `BepInEx/.vanta-backups/<timestamp>/`.
 - **OnlineFix support.** Vanta ports the launcher-side behaviour of OnlineFix
   Linux: signature detection, INI updates with backups, the FreeTP app-id swap,
   `ExtraProtection=false`, the Photon Newtonsoft link and launch-only Wine DLL
@@ -73,6 +81,7 @@ adds entries on its own.
 - CMake 3.21 or newer
 - Qt 6.2 or newer with the **Widgets**, **Svg**, **Concurrent** and **Network**
   modules
+- zlib, used to read mod ZIP archives
 - Ninja (recommended) or Make
 
 Qt 6.2 is the floor on purpose: Vanta avoids anything newer so a single build
@@ -264,6 +273,41 @@ Managed runners are unpacked under
 immediately. Downloads run through `QNetworkAccessManager` with progress,
 cancellation and a size/`bin/` sanity check after extraction.
 
+### Mods and BepInEx
+
+Right-click a Windows game and choose **Mods…**, or open the same dialog from
+**Game details**. Vanta looks for `BepInEx` next to the executable (and in the
+game folder) and reports whether the doorstop files (`winhttp.dll`,
+`doorstop_config.ini`, `.doorstop_version`) are present.
+
+- **Enable and disable.** Every plugin and patcher is listed with its kind and
+  state. Ticking a row, pressing **Toggle**, or pressing Space on a selected row
+  renames the file between `name.dll` and `name.dll.disabled`. The DLL bytes are
+  never modified and nothing is deleted, so a mod can always be restored the same
+  way. Symbolic links are never followed or renamed.
+- **Add mod file…** imports a single `.dll` or a `.zip`. A ZIP is inspected in
+  memory first: entries are mapped into `BepInEx/plugins`, `BepInEx/patchers`,
+  `BepInEx/config` or the game root, `BepInExPack/` wrappers are stripped, and
+  documentation files such as `manifest.json`, `README.md` and `CHANGELOG.md` are
+  skipped. The archive reader rejects ZIP64, encrypted entries, absolute paths,
+  `..` traversal and symbolic links, so it cannot write outside the game folder.
+- **Browse Thunderstore…** opens the community browser. Vanta guesses the
+  community from the game name (or remembers the one you pick), lists its
+  packages, searches by name, shows versions and dependencies, and installs a
+  package together with everything it needs. A package link can also be pasted
+  directly. `BepInExPack` is skipped when BepInEx is already installed, and
+  `r2modman` is refused because it is a mod manager, not a BepInEx plugin.
+- **Backups.** If an install would overwrite an existing file, Vanta asks first
+  and then copies the old file to
+  `BepInEx/.vanta-backups/<timestamp>/` before writing. The dialog reports the
+  backup folder. All downloads are parsed before anything is written, so a failed
+  install leaves the game folder untouched.
+
+Enabling BepInEx compatibility (the `winhttp=n,b` DLL override) is still a
+per-game setting in the Runner tab. Vanta turns it on the first time it finds
+BepInEx for a game you launch, and the launch plan only applies it while BepInEx
+files are actually present.
+
 ## Files
 
 | Purpose | Path |
@@ -281,12 +325,15 @@ overwriting your data.
 
 ## Privacy
 
-Vanta makes network requests in exactly two situations, both of which you start:
+Vanta makes network requests in exactly three situations, all of which you start:
 
 1. Downloading a runner (GitHub release metadata and the release asset).
 2. Downloading cover art from [SteamGridDB](https://www.steamgriddb.com/), which
    sends only the game name you asked it to look up. Turn off "Fetch missing
    cover art automatically" in Settings → Covers to keep lookups entirely manual.
+3. Browsing or installing from [Thunderstore](https://thunderstore.io/), which
+   sends the community slug, the package or search text you entered, and the
+   package downloads themselves. Opening the mod manager alone makes no request.
 
 Nothing else leaves the machine. There is no telemetry, no analytics, no update
 check and no account.
@@ -309,6 +356,11 @@ and, for Windows executables, the PE header architecture.
 - Cover matching is a heuristic. A title that shares a name with a sequel or a
   spin-off can resolve to the wrong entry; the editor always shows the matched
   name before you save, and you can browse for your own image instead.
+- The mod manager understands BepInEx 5 and 6 layouts by file name. It cannot
+  tell whether a plugin actually loads, whether it matches the game version, or
+  whether a Thunderstore package is compatible with the installed BepInEx build.
+- Thunderstore support covers BepInEx communities. Games that use a different
+  loader (MelonLoader, and packs that only ship `r2modman`) are not supported.
 
 ## Credits
 

@@ -47,6 +47,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets Svg Concurrent Network)
+# zlib reads the deflate stream inside mod ZIP archives. It is present on every
+# supported distribution because Qt itself links it, but the archive reader
+# needs it directly.
+find_package(ZLIB REQUIRED)
 
 # qt_standard_project_setup() landed in Qt 6.3. Everything it does for this
 # project (AUTOMOC, AUTORCC, C++17) is already set above, so older Qt releases
@@ -60,6 +64,12 @@ set(VANTA_SOURCES
 
     src/core/Game.cpp
     src/core/Game.h
+    src/core/BepInEx.cpp
+    src/core/BepInEx.h
+    src/core/ModInstaller.cpp
+    src/core/ModInstaller.h
+    src/core/Thunderstore.cpp
+    src/core/Thunderstore.h
     src/core/CoverFetcher.cpp
     src/core/CoverFetcher.h
     src/core/IniFile.cpp
@@ -112,6 +122,10 @@ set(VANTA_SOURCES
     src/ui/LaunchProgressDialog.h
     src/ui/LibraryImportDialog.cpp
     src/ui/LibraryImportDialog.h
+    src/ui/ModManagerDialog.cpp
+    src/ui/ModManagerDialog.h
+    src/ui/ThunderstoreDialog.cpp
+    src/ui/ThunderstoreDialog.h
     src/ui/LibraryView.cpp
     src/ui/LibraryView.h
     src/ui/MainWindow.cpp
@@ -152,6 +166,7 @@ target_link_libraries(vanta PRIVATE
     Qt6::Svg
     Qt6::Concurrent
     Qt6::Network
+    ZLIB::ZLIB
 )
 
 target_compile_definitions(vanta PRIVATE

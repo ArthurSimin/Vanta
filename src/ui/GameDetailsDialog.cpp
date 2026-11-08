@@ -155,6 +155,12 @@ void GameDetailsDialog::buildUi()
     connect(m_onlineFixButton, &QPushButton::clicked, this, [this] { setAction(Action::OnlineFix); });
     actions->addWidget(m_onlineFixButton);
 
+    m_modsButton = new QPushButton(QStringLiteral("Mods…"), content);
+    m_modsButton->setCursor(Qt::PointingHandCursor);
+    m_modsButton->setVisible(m_game.platform == Platform::Windows || runnerIsWineLike(m_game.runner));
+    connect(m_modsButton, &QPushButton::clicked, this, [this] { setAction(Action::Mods); });
+    actions->addWidget(m_modsButton);
+
     m_scanButton = new QPushButton(QStringLiteral("Scan"), content);
     m_scanButton->setCursor(Qt::PointingHandCursor);
     connect(m_scanButton, &QPushButton::clicked, this, [this] { setAction(Action::Scan); });
@@ -366,6 +372,7 @@ void GameDetailsDialog::refreshIcons()
     Icons::setButtonIcon(m_stopButton, Glyph::Stop, colors.danger, 17);
     Icons::setButtonIcon(m_editButton, Glyph::Pencil, colors.text, 16);
     Icons::setButtonIcon(m_onlineFixButton, Glyph::Shield, colors.text, 16);
+    Icons::setButtonIcon(m_modsButton, Glyph::Download, colors.text, 16);
     Icons::setButtonIcon(m_scanButton, Glyph::Scan, colors.text, 16);
     Icons::setButtonIcon(m_folderButton, Glyph::Folder, colors.text, 16);
     Icons::setButtonIcon(m_prefixButton, Glyph::Wine, colors.text, 16);

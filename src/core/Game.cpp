@@ -78,6 +78,7 @@ QJsonObject Game::toJson() const
     object.insert(QStringLiteral("steamOverlay"), steamOverlay);
     object.insert(QStringLiteral("useSteamRuntime"), useSteamRuntime);
     object.insert(QStringLiteral("bepinexCompatibility"), bepinexCompatibility);
+    object.insert(QStringLiteral("thunderstoreCommunity"), thunderstoreCommunity);
     object.insert(QStringLiteral("wineDllOverrides"), wineDllOverrides);
     object.insert(QStringLiteral("coverPath"), coverPath);
     object.insert(QStringLiteral("onlineFixMode"), onlineFixModeName(onlineFixMode));
@@ -122,6 +123,7 @@ Game Game::fromJson(const QJsonObject &object)
     game.steamOverlay = object.value(QStringLiteral("steamOverlay")).toBool(true);
     game.useSteamRuntime = object.value(QStringLiteral("useSteamRuntime")).toBool(false);
     game.bepinexCompatibility = object.value(QStringLiteral("bepinexCompatibility")).toBool(false);
+    game.thunderstoreCommunity = object.value(QStringLiteral("thunderstoreCommunity")).toString();
     game.wineDllOverrides = object.value(QStringLiteral("wineDllOverrides")).toString();
     game.coverPath = object.value(QStringLiteral("coverPath")).toString();
     game.onlineFixMode = onlineFixModeFromName(object.value(QStringLiteral("onlineFixMode")).toString());

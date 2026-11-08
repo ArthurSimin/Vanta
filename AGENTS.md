@@ -31,7 +31,7 @@ cmake --build build -j"$(nproc)"
 ```
 
 Requirements: CMake ≥ 3.21, a C++17 compiler, Qt ≥ 6.2 with the `Widgets`,
-`Svg`, `Concurrent` and `Network` modules.
+`Svg`, `Concurrent` and `Network` modules, and zlib.
 
 ### Why Qt 6.2 is the floor
 
@@ -118,6 +118,9 @@ src/
     LibraryImporter.*   Read-only Lutris/Heroic discovery and porting
     OnlineFix.*         Signature detection and confirmed INI writes
     SteamPrecondition.* Steam-closed prompts before an OnlineFix launch
+    BepInEx.*           Installation detection, plugin listing, safe toggle
+    ModInstaller.*      ZIP reading, install planning, backups, atomic writes
+    Thunderstore.*      Community lookup, package listing, dependency resolution
     IniFile.*           INI parsing that preserves formatting
     CoverFetcher.*      SteamGridDB search, artwork listing, downloads
     ThemeManager.*      ThemeColors, palettes and the QSS
@@ -138,6 +141,8 @@ src/
     AddEditDialog.*     Add/edit form, executable-only path entry
     GameDetailsDialog.* Read-only detail sheet
     OnlineFixDialog.*   Detection report and confirmed actions
+    ModManagerDialog.*  BepInEx mod list, toggle, local import, Thunderstore entry
+    ThunderstoreDialog.* Community browser, package search, dependency install
     LaunchProgressDialog.* Staged launch feedback
     IconFactory.*       Glyph and brand SVG rendering
     Common.*            Small shared UI helpers
@@ -159,6 +164,27 @@ of a normal library and buried the games the user actually added. Porting only
 adds entries to Vanta's own library, marks candidates that are already present,
 and references discovered cover files in place rather than copying them.
 
+### Mod manager and Thunderstore
+
+`BepInEx` detects an installation relative to the executable and the game folder,
+and lists `plugins/` and `patchers/`. Enabling and disabling is a rename between
+`.dll` and `.dll.disabled`; see the mod safety rules below for what may never
+happen. `ModInstaller` turns a `.dll` or `.zip` into an install plan and only
+touches the disk after the plan is complete. `Thunderstore` is a plain network
+client with no UI: it resolves a community slug from a name, lists packages,
+parses package links, resolves dependencies depth-first and downloads versions.
+
+Two behaviours are deliberate:
+
+- `BepInExPack` is skipped when BepInEx is already installed, because
+  reinstalling the pack would overwrite the user's core files and config.
+- `r2modman` is refused. It is a mod manager application, not a BepInEx plugin,
+  and installing it into `plugins/` would do nothing.
+
+The community is guessed from the game name on first use and remembered in
+`Game::thunderstoreCommunity`, so the browser opens on the right community next
+time.
+
 ## Packaging
 
 `packaging/build-packages.sh` turns a `DESTDIR` install tree into a `.deb`, an
@@ -167,7 +193,7 @@ installed, and fails when none can be built.
 
 ```bash
 DESTDIR="$PWD/stage" cmake --install build --prefix /usr
-./packaging/build-packages.sh --root stage --version 1.0.0 --out dist
+./packaging/build-packages.sh --root stage --version 1.0.2 --out dist
 ```
 
 Notes that are easy to get wrong:
@@ -188,6 +214,9 @@ Notes that are easy to get wrong:
   is written.
 - Anything installed by `cmake --install` must also be listed in the RPM
   `%files` section, or rpmbuild fails on an unpackaged file.
+- zlib is a direct dependency for mod ZIP reading. The Debian package names it
+  explicitly (`zlib1g`) and the pacman package lists `zlib`; the RPM relies on
+  its soname generator as it does for Qt.
 
 ## Storage rules
 
@@ -201,7 +230,8 @@ Notes that are easy to get wrong:
 - Persisted JSON is schema-versioned. Bumping a field's meaning requires a
   migration path, not a silent reinterpretation.
 - Never write outside the XDG directories except to a game's own prefix, an
-  OnlineFix INI the user explicitly confirmed, or runner directories (such as
+  OnlineFix INI the user explicitly confirmed, a mod file the user installed or
+  toggled in the mod manager, or runner directories (such as
   Steam's compatibilitytools.d or Vanta's managed runners) when the user explicitly
   requests runner uninstallation.
 
@@ -223,6 +253,30 @@ These are non-negotiable. A change that violates them is rejected.
 - Do not add DRM circumvention, licence bypasses, or key generation. Vanta
   launches games the user already has; OnlineFix support exists because the
   launcher-side configuration is legitimate to reproduce.
+
+## Mod safety rules
+
+The mod manager writes into game folders, so it follows the same discipline as
+OnlineFix. A change that violates these rules is rejected.
+
+- **Enabling and disabling never edits a DLL.** The only operation is a rename
+  between `name.dll` and `name.dll.disabled`. Nothing is deleted, and symbolic
+  links are never followed, renamed, or replaced.
+- **Install planning happens before any write.** A ZIP is read and validated in
+  memory first. The reader rejects ZIP64, encrypted entries, absolute paths,
+  `..` traversal and symlink entries, and every extracted path must resolve
+  inside the game/BepInEx tree.
+- **Back up before replacing.** Any existing file that an install would overwrite
+  is copied to `BepInEx/.vanta-backups/<timestamp>/` first, and the dialog
+  reports the folder. No backup, no write.
+- **All writes are atomic.** Files are written to a temporary name in the target
+  directory and renamed into place, so a failure cannot leave a half-written
+  plugin.
+- **No network without user action.** Opening the mod manager makes no request.
+  Thunderstore is contacted only when the user loads a community, searches, or
+  installs a package.
+- **Never claim a mod works.** The UI reports what is installed, enabled, or
+  replaced. It cannot know whether a plugin loads at runtime.
 
 ## UI conventions
 

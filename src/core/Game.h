@@ -29,6 +29,7 @@ struct Game
     bool steamOverlay = true;
     bool useSteamRuntime = false;
     bool bepinexCompatibility = false;
+    QString thunderstoreCommunity;
     QString wineDllOverrides;
     QString coverPath;
     OnlineFixMode onlineFixMode = OnlineFixMode::Auto;

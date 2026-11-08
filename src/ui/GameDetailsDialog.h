@@ -18,6 +18,7 @@ public:
         Stop,
         Edit,
         OnlineFix,
+        Mods,
         Scan,
         OpenFolder,
         OpenPrefix
@@ -47,6 +48,7 @@ private:
     QPushButton *m_stopButton = nullptr;
     QPushButton *m_editButton = nullptr;
     QPushButton *m_onlineFixButton = nullptr;
+    QPushButton *m_modsButton = nullptr;
     QPushButton *m_scanButton = nullptr;
     QPushButton *m_folderButton = nullptr;
     QPushButton *m_prefixButton = nullptr;

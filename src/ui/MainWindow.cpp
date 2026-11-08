@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "AboutDialog.h"
+#include "BepInEx.h"
 #include "AddEditDialog.h"
 #include "Common.h"
 #include "GameDetailsDialog.h"
@@ -7,6 +8,7 @@
 #include "LaunchPlan.h"
 #include "LaunchProgressDialog.h"
 #include "LibraryView.h"
+#include "ModManagerDialog.h"
 #include "OnlineFixDialog.h"
 #include "RunnerInstallDialog.h"
 #include "SettingsDialog.h"
@@ -1015,6 +1017,9 @@ void MainWindow::openDetailsDialog(const QString &gameId)
     case GameDetailsDialog::Action::OnlineFix:
         openOnlineFixDialog(gameId);
         break;
+    case GameDetailsDialog::Action::Mods:
+        openModManager(gameId);
+        break;
     case GameDetailsDialog::Action::Scan:
         scanGame(gameId, true);
         break;
@@ -1046,6 +1051,43 @@ void MainWindow::openOnlineFixDialog(const QString &gameId)
         return;
     }
     setStatusMessage(QStringLiteral("Updated the OnlineFix policy for %1.").arg(updated.name));
+}
+
+void MainWindow::openModManager(const QString &gameId)
+{
+    bool found = false;
+    const Game game = m_library.gameById(gameId, &found);
+    if (!found)
+        return;
+
+    ModManagerDialog dialog(game, &m_theme, this);
+    connect(&dialog, &ModManagerDialog::modsChanged, this, [this, gameId] {
+        bool exists = false;
+        Game updated = m_library.gameById(gameId, &exists);
+        if (!exists)
+            return;
+        if (!updated.bepinexCompatibility) {
+            updated.bepinexCompatibility = true;
+            updated.modifiedAt = QDateTime::currentDateTime();
+            m_library.updateGame(updated);
+        }
+        m_scanner.invalidate(gameId);
+        if (m_library.settings().automaticScanning)
+            scanGame(gameId, false);
+    });
+    connect(&dialog, &ModManagerDialog::communityResolved, this,
+            [this, gameId](const QString &community) {
+                bool exists = false;
+                Game updated = m_library.gameById(gameId, &exists);
+                if (!exists || community.trimmed().isEmpty()
+                    || updated.thunderstoreCommunity == community) {
+                    return;
+                }
+                updated.thunderstoreCommunity = community;
+                updated.modifiedAt = QDateTime::currentDateTime();
+                m_library.updateGame(updated);
+            });
+    dialog.exec();
 }
 
 void MainWindow::openSettingsDialog()
@@ -1168,6 +1210,10 @@ void MainWindow::showContextMenu(const QString &gameId, const QPoint &globalPosi
     connect(scanAction, &QAction::triggered, this, [this, gameId] { scanGame(gameId, true); });
     auto *onlineFixAction = menu.addAction(QStringLiteral("OnlineFix…"));
     connect(onlineFixAction, &QAction::triggered, this, [this, gameId] { openOnlineFixDialog(gameId); });
+    if (game.platform == Platform::Windows || runnerIsWineLike(game.runner)) {
+        auto *modsAction = menu.addAction(QStringLiteral("Mods…"));
+        connect(modsAction, &QAction::triggered, this, [this, gameId] { openModManager(gameId); });
+    }
     auto *coverAction = menu.addAction(QStringLiteral("Choose cover art…"));
     connect(coverAction, &QAction::triggered, this, [this, gameId] { chooseCoverArt(gameId); });
     menu.addSeparator();
@@ -1503,13 +1549,10 @@ void MainWindow::performLaunch()
     QString error;
     const ScanResult *scanResult = m_scanner.resultFor(game.id);
     bool bepinexDetected = scanResult && scanResult->bepinexDetected;
-    if (!bepinexDetected) {
-        const QString directory = game.effectiveDirectory();
-        bepinexDetected = !directory.isEmpty()
-            && (QFileInfo::exists(QDir(directory).filePath(QStringLiteral("BepInEx")))
-                || QFileInfo::exists(QDir(QFileInfo(game.executable).absolutePath())
-                                         .filePath(QStringLiteral("BepInEx"))));
-    }
+    // The scan cache can be older than a mod installation made in the mod
+    // manager, so confirm with the live detector before deciding on winhttp=n,b.
+    if (!bepinexDetected)
+        bepinexDetected = BepInEx::detect(game.effectiveDirectory(), game.executable).isValid();
     const LaunchPlan plan = LaunchPlanBuilder::build(game, m_library.settings(), info, m_pendingApplyFix,
                                                      bepinexDetected, &error);
     if (!plan.isValid()) {

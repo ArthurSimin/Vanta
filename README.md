@@ -12,7 +12,7 @@ ever downloading a game or claiming that a detected fix works.
 
 ![Vanta main window showing the game library](docs/screenshot-main.png)
 
-The screenshot shows a fresh start: Vanta ships with an empty library and never
+The screenshot shows a Vanta installation with only one game: Vanta ships with an empty library and never
 adds entries on its own.
 
 ## Features

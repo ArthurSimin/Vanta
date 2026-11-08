@@ -6,7 +6,7 @@ running here.
 
 ## Quick orientation
 
-Vanta is a C++17 / Qt 6 Widgets Linux game launcher. ~16k lines across
+Vanta is a C++17 / Qt 6 Widgets Linux game launcher. ~17.5k lines across
 `src/core` (no Widgets, testable) and `src/ui` (Widgets only, no I/O).
 
 ```bash
@@ -74,6 +74,23 @@ A settled screenshot cannot tell you whether the slide happened.
   with `m_populating`; any new rebuild path needs the same guard.
 - **SteamGridDB's shared API key hits per-key 429 limits.** A failure there is
   not a bug in the request.
+- **`CoverFetcher` handles one lookup at a time.** Batch calls (scan results,
+  "Fetch missing covers") are appended to `m_fetchQueue` and drained with a
+  150 ms gap; calling `fetchCover()` directly while `m_reply` is active would
+  reject the request with "already running". Queue instead of retrying.
+- **Rebuilding the sidebar must `delete` the old rows, not `deleteLater()`.**
+  Queued deletion leaves the previous widgets visible for a frame, so repeated
+  library refreshes stack duplicate headings and paint over each other.
+- **Library refreshes are debounced.** A multi-game scan emits `gamesChanged()`
+  for every game; `MainWindow::refreshLibrary()` coalesces them behind a 40 ms
+  single-shot timer. Rebuilding the sidebar and grid per signal freezes the
+  event loop and rewrites the cache far more often than needed.
+- **Lutris import prefers the `sqlite3` CLI.** Without it, `LibraryImporter`
+  falls back to the YAML files in `lutris/games/`, which is less complete but
+  still works. Do not turn the optional tool into a hard dependency.
+- **Imported covers are referenced in place.** Lutris and Heroic artwork is not
+  copied into the XDG data directory, so deleting the source launcher's files
+  breaks those covers. Re-fetching through the cover picker replaces the path.
 - **Packaging needs an install tree, not the build tree.** Run
   `DESTDIR=... cmake --install` first; `packaging/build-packages.sh` reads that
   tree and copies it verbatim into each format.

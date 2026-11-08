@@ -114,7 +114,8 @@ src/
     Launcher.*          Process launch, playtime accounting, signals
     LaunchPlan.*        Builds the argv/env for a launch
     RunnerDetector.*    Finds Wine/Proton installs across launchers
-    RunnerInstaller.*   Installs Wine or GE-Proton
+    RunnerInstaller.*   Installs and uninstalls Wine/GE-Proton
+    LibraryImporter.*   Read-only Lutris/Heroic discovery and porting
     OnlineFix.*         Signature detection and confirmed INI writes
     SteamPrecondition.* Steam-closed prompts before an OnlineFix launch
     IniFile.*           INI parsing that preserves formatting
@@ -130,6 +131,10 @@ src/
     LibraryView.*       Switches grid/list, empty states
     GameSelectionBar.*  Bottom detail strip with slide animation
     CoverPickerDialog.* Artwork grid with preview
+    LibraryImportDialog.* External library picker with duplicate marking
+    RunnerInstallDialog.* Runner download/uninstall with version picker
+    SettingsDialog.*    Preferences and runner/import entry points
+    Sidebar.*           Source grouping and filter list
     AddEditDialog.*     Add/edit form, executable-only path entry
     GameDetailsDialog.* Read-only detail sheet
     OnlineFixDialog.*   Detection report and confirmed actions
@@ -140,6 +145,19 @@ src/
 
 The `core`/`ui` split is a hard boundary: `core` must never include a Widgets
 header. It keeps scanning and launching testable without a display.
+
+### External library import
+
+`LibraryImporter` is **read-only against other launchers**. It queries Lutris'
+`pga.db` through the optional `sqlite3` CLI (falling back to the YAML files in
+`games/`), reads Heroic's JSON configuration, and discovers local covers under
+Lutris' `coverart/`/`banners/` and Heroic's `icons/` directories. It never
+writes to, moves, or deletes anything owned by Lutris or Heroic.
+
+Steam and Bottles are deliberately not scanned; importing them duplicated most
+of a normal library and buried the games the user actually added. Porting only
+adds entries to Vanta's own library, marks candidates that are already present,
+and references discovered cover files in place rather than copying them.
 
 ## Packaging
 

@@ -1,7 +1,31 @@
 cmake_minimum_required(VERSION 3.21)
 
+# The version is the single source of truth for the binary, the packages and the
+# About dialog. Release builds pass -DVANTA_VERSION=<tag without v> so a tagged
+# build reports exactly what was released; otherwise default to 1.0.1.
+set(VANTA_VERSION "1.0.1" CACHE STRING "Version reported by the application")
+
+find_package(Git QUIET)
+if(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe --tags --exact-match
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        OUTPUT_VARIABLE VANTA_GIT_EXACT_TAG
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if(VANTA_GIT_EXACT_TAG MATCHES "^v?([0-9].*)")
+        set(VANTA_VERSION "${CMAKE_MATCH_1}" CACHE STRING "Version reported by the application" FORCE)
+    endif()
+endif()
+
+string(REGEX MATCH "^[0-9]+(\\.[0-9]+)*" VANTA_NUMERIC_VERSION "${VANTA_VERSION}")
+if(NOT VANTA_NUMERIC_VERSION)
+    set(VANTA_NUMERIC_VERSION "1.0.1")
+endif()
+
 project(Vanta
-    VERSION 1.0.0
+    VERSION ${VANTA_NUMERIC_VERSION}
     DESCRIPTION "Linux game launcher with Wine, Proton, and OnlineFix support"
     LANGUAGES CXX
 )
@@ -46,6 +70,8 @@ set(VANTA_SOURCES
     src/core/LaunchPlan.h
     src/core/Library.cpp
     src/core/Library.h
+    src/core/LibraryImporter.cpp
+    src/core/LibraryImporter.h
     src/core/OnlineFix.cpp
     src/core/OnlineFix.h
     src/core/RunnerDetector.cpp
@@ -84,6 +110,8 @@ set(VANTA_SOURCES
     src/ui/IconFactory.h
     src/ui/LaunchProgressDialog.cpp
     src/ui/LaunchProgressDialog.h
+    src/ui/LibraryImportDialog.cpp
+    src/ui/LibraryImportDialog.h
     src/ui/LibraryView.cpp
     src/ui/LibraryView.h
     src/ui/MainWindow.cpp
@@ -130,6 +158,7 @@ target_compile_definitions(vanta PRIVATE
     QT_NO_CAST_FROM_ASCII
     QT_NO_CAST_TO_ASCII
     QT_USE_QSTRINGBUILDER
+    VANTA_VERSION="${VANTA_VERSION}"
 )
 
 set_target_properties(vanta PROPERTIES

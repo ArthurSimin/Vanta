@@ -8,7 +8,7 @@
 # what it built and fails when nothing could be built at all.
 #
 # Usage:
-#   packaging/build-packages.sh --root <install-root> --version 1.0.0 --out dist
+#   packaging/build-packages.sh --root <install-root> --version 1.0.1 --out dist
 
 set -euo pipefail
 

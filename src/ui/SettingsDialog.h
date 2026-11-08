@@ -66,6 +66,7 @@ private:
     QLineEdit *m_winePathEdit = nullptr;
     QListWidget *m_protonList = nullptr;
     QLabel *m_runnerSummary = nullptr;
+    QComboBox *m_wineLogCombo = nullptr;
     QLabel *m_dataPaths = nullptr;
     QCheckBox *m_fetchCoversCheck = nullptr;
     QLineEdit *m_coverApiKeyEdit = nullptr;

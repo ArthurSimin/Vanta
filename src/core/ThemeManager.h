@@ -28,6 +28,10 @@ struct ThemeColors
     QColor success;
     QColor tooltip;
     QColor shadow;
+    // The log viewer is deliberately a dark terminal in both themes, so it
+    // reads like a terminal and never washes out the output.
+    QColor terminal;
+    QColor terminalText;
 };
 
 class ThemeManager : public QObject

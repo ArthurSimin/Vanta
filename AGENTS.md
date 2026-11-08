@@ -121,6 +121,7 @@ src/
     BepInEx.*           Installation detection, plugin listing, safe toggle
     ModInstaller.*      ZIP reading, install planning, backups, atomic writes
     Thunderstore.*      Community lookup, package listing, dependency resolution
+    LaunchLogs.*        Per-launch log store under the XDG data directory
     IniFile.*           INI parsing that preserves formatting
     CoverFetcher.*      SteamGridDB search, artwork listing, downloads
     ThemeManager.*      ThemeColors, palettes and the QSS
@@ -143,6 +144,7 @@ src/
     OnlineFixDialog.*   Detection report and confirmed actions
     ModManagerDialog.*  BepInEx mod list, toggle, local import, Thunderstore entry
     ThunderstoreDialog.* Community browser, package search, dependency install
+    LogsDialog.*        Terminal-styled launch log viewer
     LaunchProgressDialog.* Staged launch feedback
     IconFactory.*       Glyph and brand SVG rendering
     Common.*            Small shared UI helpers
@@ -191,6 +193,26 @@ The community is guessed from the game name on first use and remembered in
 `Game::thunderstoreCommunity`, so the browser opens on the right community next
 time.
 
+### Launch logs
+
+`LaunchLogs` is a separate store, not part of `Storage`: one plain text file per
+launch under `$XDG_DATA_HOME/vanta/logs/<game id>/<timestamp>.log`. `Launcher`
+writes the file when a launch ends and emits its path alongside the existing
+diagnostics, so the UI can offer it after the process is gone.
+
+Two rules keep the viewer honest:
+
+- The log is what Vanta ran (command, workdir, environment overrides, plan
+  diagnostics) followed by what the process printed. It is evidence, not a
+  verdict; never label it a cause of failure.
+- `LogsDialog` only reads. **Clear logs** deletes stored logs for that game and
+  nothing else; it never touches the game folder or the prefix.
+
+`WINEDEBUG` is driven by `AppSettings::wineLogLevel` (Settings → Runners). The
+default `Errors only` is `-all,err+all`: Wine's `err` channel stays visible while
+`fixme` chatter — hundreds of lines per launch — is suppressed. Do not restore
+the old unconditional `WINEDEBUG=-all`, because it leaves the viewer empty.
+
 ## Packaging
 
 `packaging/build-packages.sh` turns a `DESTDIR` install tree into a `.deb`, an
@@ -228,7 +250,7 @@ Notes that are easy to get wrong:
 
 - All state lives under XDG paths, resolved once in `Storage`:
   - config: `$XDG_CONFIG_HOME/vanta/` (`library.json`, `settings.json`)
-  - data: `$XDG_DATA_HOME/vanta/` (covers, installed runners)
+  - data: `$XDG_DATA_HOME/vanta/` (covers, installed runners, launch logs)
   - cache: `$XDG_CACHE_HOME/vanta/` (`scan-cache.json`)
 - JSON writes are **atomic**: write to a temporary file in the same directory,
   `fsync`, then `rename` over the target. Never truncate the real file first —

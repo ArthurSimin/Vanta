@@ -28,6 +28,7 @@ enum class CoverSize { Small, Medium, Large };
 enum class OnlineFixPrompt { Ask, AlwaysApply, NeverApply };
 enum class CompatibilityFilter { All, Detected, NeedsAttention, NotDetected };
 enum class InstallFilter { All, Installed, Missing };
+enum class WineLogLevel { Off, Errors, Warnings, Trace };
 
 QString runnerName(RunnerType type);
 QString platformName(Platform platform);
@@ -41,6 +42,8 @@ QString coverSizeName(CoverSize size);
 QString onlineFixPromptName(OnlineFixPrompt prompt);
 QString compatibilityFilterName(CompatibilityFilter filter);
 QString installFilterName(InstallFilter filter);
+QString wineLogLevelName(WineLogLevel level);
+QString wineDebugValue(WineLogLevel level);
 
 RunnerType runnerFromName(const QString &name);
 Platform platformFromName(const QString &name);
@@ -51,6 +54,7 @@ SortMode sortModeFromName(const QString &name);
 ThemeChoice themeChoiceFromName(const QString &name);
 CoverSize coverSizeFromName(const QString &name);
 OnlineFixPrompt onlineFixPromptFromName(const QString &name);
+WineLogLevel wineLogLevelFromName(const QString &name);
 
 bool runnerIsWineLike(RunnerType type);
 bool scanNeedsAttention(ScanState state);

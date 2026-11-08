@@ -241,6 +241,18 @@ void SettingsDialog::buildUi()
     connect(m_runnersButton, &QPushButton::clicked, this, &SettingsDialog::openRunnersDialog);
     runnersForm->addRow(QString(), m_runnersButton);
 
+    m_wineLogCombo = new QComboBox(runners);
+    m_wineLogCombo->addItem(wineLogLevelName(WineLogLevel::Off), static_cast<int>(WineLogLevel::Off));
+    m_wineLogCombo->addItem(wineLogLevelName(WineLogLevel::Errors), static_cast<int>(WineLogLevel::Errors));
+    m_wineLogCombo->addItem(wineLogLevelName(WineLogLevel::Warnings), static_cast<int>(WineLogLevel::Warnings));
+    m_wineLogCombo->addItem(wineLogLevelName(WineLogLevel::Trace), static_cast<int>(WineLogLevel::Trace));
+    runnersForm->addRow(QStringLiteral("Wine log detail"), m_wineLogCombo);
+    runnersForm->addRow(UiHelp::helpLabel(
+        QStringLiteral("Controls how much Wine writes to the launch log. “Errors only” keeps real failures visible "
+                       "without the fixme noise. Every launch keeps the full output in the log viewer, so raising "
+                       "this is only useful while diagnosing a problem."),
+        runners));
+
     m_runnerSummary = UiHelp::helpLabel(QString(), runners);
     m_runnerSummary->setTextInteractionFlags(Qt::TextSelectableByMouse);
     runnersForm->addRow(m_runnerSummary);
@@ -357,6 +369,8 @@ void SettingsDialog::loadFromSettings()
     m_winePathEdit->setText(m_settings.customWinePath);
     m_fetchCoversCheck->setChecked(m_settings.fetchCoversAutomatically);
     m_coverApiKeyEdit->setText(m_settings.steamGridDbApiKey);
+    index = m_wineLogCombo->findData(static_cast<int>(m_settings.wineLogLevel));
+    m_wineLogCombo->setCurrentIndex(index >= 0 ? index : 1);
     m_protonList->clear();
     for (const QString &path : m_settings.customProtonPaths)
         m_protonList->addItem(path);
@@ -398,6 +412,11 @@ void SettingsDialog::saveAndAccept()
     m_settings.steamGridDbApiKey = m_coverApiKeyEdit->text().trimmed();
 
     m_settings.customWinePath = m_winePathEdit->text().trimmed();
+
+    const int logIndex = m_wineLogCombo->currentIndex();
+    if (logIndex >= 0)
+        m_settings.wineLogLevel = static_cast<WineLogLevel>(m_wineLogCombo->itemData(logIndex).toInt());
+
     QStringList protons;
     for (int row = 0; row < m_protonList->count(); ++row) {
         const QString path = m_protonList->item(row)->text().trimmed();

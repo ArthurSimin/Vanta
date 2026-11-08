@@ -81,6 +81,7 @@ struct AppSettings
     bool windowMaximized = false;
     QString steamGridDbApiKey;
     bool fetchCoversAutomatically = true;
+    WineLogLevel wineLogLevel = WineLogLevel::Errors;
 
     QJsonObject toJson() const;
     static AppSettings fromJson(const QJsonObject &object);

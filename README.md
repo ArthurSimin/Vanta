@@ -74,6 +74,9 @@ adds entries on its own.
   replayed from the sidebar or Settings.
 - **Honest diagnostics.** Launch failures keep the composed command line, the
   prefix path and the OnlineFix patch log so you can see exactly what happened.
+- **Launch logs.** Every launch stores the runner output, and a terminal-styled
+  viewer opens the newest one so a game that closed on its own can still be
+  diagnosed. See [Launch logs](#launch-logs).
 
 ## Requirements
 
@@ -313,6 +316,37 @@ per-game setting in the Runner tab. Vanta turns it on the first time it finds
 BepInEx for a game you launch, and the launch plan only applies it while BepInEx
 files are actually present.
 
+### Launch logs
+
+Every launch keeps its output. Right-click a game and choose **Logs…**, use the
+**Logs…** entry in the main menu, or press the **Logs…** button in the game
+details sheet, and the terminal-styled viewer shows the log of that game's
+newest launch. The launch dropdown above the pane switches between earlier
+launches for the same game.
+
+A log starts with a short header (game, runner, start and finish time, exit
+code, result), then the exact command Vanta composed, the working directory, the
+environment overrides and every diagnostic from the launch plan. After that
+comes the output of the process itself, with `stderr` separated. The viewer opens
+scrolled to the newest line, because that is where a failure usually appears.
+
+- **Wine output.** Settings → Runners → **Wine log detail** controls what Wine
+  writes: `Off` (`WINEDEBUG=-all`), `Errors only` (the default, `-all,err+all`),
+  `Warnings and errors`, or `Everything (verbose)`. Wine's `fixme` chatter is
+  suppressed at the default level, which keeps real failures readable.
+- **Storage.** Logs live under `$XDG_DATA_HOME/vanta/logs/<game id>/`, one plain
+  text file per launch. The newest 20 launches per game are kept and older ones
+  are pruned. Nothing points outside the log directory: the viewer only reads,
+  and **Clear logs** deletes stored logs of that game and nothing else.
+- **After a crash.** When a game exits with a non-zero code or crashes, Vanta
+  offers to open the log for that launch instead of only showing a diagnostic
+  box. A close from the Play button is reported as stopped, not crashed.
+- **Native games.** Their output is captured the same way; the Logs entry simply
+  appears once a log exists.
+
+A log records what Vanta ran and what the process printed. It cannot prove why a
+game failed, and Vanta makes no such claim.
+
 ## Files
 
 | Purpose | Path |
@@ -322,6 +356,7 @@ files are actually present.
 | Scan cache | `$XDG_CACHE_HOME/vanta/scan-cache.json` |
 | Managed runners | `$XDG_DATA_HOME/vanta/runners/` |
 | Downloaded cover art | `$XDG_DATA_HOME/vanta/covers/` |
+| Launch logs | `$XDG_DATA_HOME/vanta/logs/<game id>/` |
 
 All JSON is written atomically with `QSaveFile` (temporary file, `fsync`,
 rename), so a crash never leaves a half-written library. A corrupt file is

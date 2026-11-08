@@ -108,6 +108,10 @@ A settled screenshot cannot tell you whether the slide happened.
 - **A failed download must not leave files behind.** Packages are held in memory
   and parsed before the install plan runs, so cancelling mid-sequence writes
   nothing.
+- **Wine prints nothing useful at `WINEDEBUG=-all`.** The log viewer would be
+  empty. The setting defaults to `-all,err+all`; the `err` channel alone is what
+  makes a crash diagnosable, and adding `warn` produces hundreds of lines per
+  launch.
 - **Packaging needs an install tree, not the build tree.** Run
   `DESTDIR=... cmake --install` first; `packaging/build-packages.sh` reads that
   tree and copies it verbatim into each format.

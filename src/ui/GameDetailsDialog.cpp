@@ -62,6 +62,13 @@ GameDetailsDialog::GameDetailsDialog(const Game &game, const ScanResult *scanRes
         connect(m_theme, &ThemeManager::themeChanged, this, &GameDetailsDialog::refreshIcons);
 }
 
+void GameDetailsDialog::setLogsAvailable(bool available)
+{
+    m_logsAvailable = available;
+    if (m_logsButton)
+        m_logsButton->setVisible(available);
+}
+
 void GameDetailsDialog::setRunning(bool running)
 {
     if (m_running == running)
@@ -312,6 +319,12 @@ void GameDetailsDialog::buildUi()
 
     auto *footer = new QHBoxLayout;
     footer->setSpacing(8);
+    m_logsButton = new QPushButton(QStringLiteral("Logs…"), this);
+    m_logsButton->setCursor(Qt::PointingHandCursor);
+    m_logsButton->setVisible(m_logsAvailable);
+    connect(m_logsButton, &QPushButton::clicked, this, [this] { setAction(Action::Logs); });
+    footer->addWidget(m_logsButton);
+
     m_folderButton = new QPushButton(QStringLiteral("Open folder"), this);
     m_folderButton->setCursor(Qt::PointingHandCursor);
     connect(m_folderButton, &QPushButton::clicked, this, [this] { setAction(Action::OpenFolder); });
@@ -373,6 +386,7 @@ void GameDetailsDialog::refreshIcons()
     Icons::setButtonIcon(m_editButton, Glyph::Pencil, colors.text, 16);
     Icons::setButtonIcon(m_onlineFixButton, Glyph::Shield, colors.text, 16);
     Icons::setButtonIcon(m_modsButton, Glyph::Download, colors.text, 16);
+    Icons::setButtonIcon(m_logsButton, Glyph::Terminal, colors.text, 16);
     Icons::setButtonIcon(m_scanButton, Glyph::Scan, colors.text, 16);
     Icons::setButtonIcon(m_folderButton, Glyph::Folder, colors.text, 16);
     Icons::setButtonIcon(m_prefixButton, Glyph::Wine, colors.text, 16);

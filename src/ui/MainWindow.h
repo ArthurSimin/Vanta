@@ -74,6 +74,8 @@ private:
     void openDetailsDialog(const QString &gameId);
     void openOnlineFixDialog(const QString &gameId);
     void openModManager(const QString &gameId);
+    void openLogs(const QString &gameId, const QString &path = QString());
+    void openLogsForSelection();
     void openSettingsDialog();
     void openAboutDialog();
     void openRunnerInstallDialog();
@@ -94,9 +96,11 @@ private:
     void performLaunch();
     void abortLaunch(const QString &message, const QString &detail = QString());
     void closeLaunchDialog();
+    void createLaunchDialog(const QString &gameId, const QString &gameName);
     void updateRunningState();
     void handleGameFinished(const QString &gameId, qint64 elapsedSeconds, int exitCode,
-                            bool crashed, bool stopped, const QString &diagnostic);
+                            bool crashed, bool stopped, const QString &diagnostic,
+                            const QString &logPath);
     void showDiagnostics(const QString &title, const QString &message, const QString &detail);
 
     void scanGame(const QString &gameId, bool force);

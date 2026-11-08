@@ -29,8 +29,10 @@ public:
 signals:
     void gameStarted(const QString &gameId, const QDateTime &startedAt);
     void gameFinished(const QString &gameId, qint64 elapsedSeconds, int exitCode,
-                      bool crashed, bool stopped, const QString &diagnostic);
-    void launchFailed(const QString &gameId, const QString &message, const QString &diagnostic);
+                      bool crashed, bool stopped, const QString &diagnostic,
+                      const QString &logPath);
+    void launchFailed(const QString &gameId, const QString &message, const QString &diagnostic,
+                      const QString &logPath);
     void gameStopping(const QString &gameId);
 
 private:
@@ -48,6 +50,7 @@ private:
         LaunchPlan plan;
         QString gameName;
         QString executableBaseName;
+        QDateTime startedAt;
     };
 
     void collectOutput(const QString &gameId);
@@ -56,6 +59,8 @@ private:
     void completeInstance(const QString &gameId, int exitCode, QProcess::ExitStatus exitStatus);
     void emitFailure(const QString &gameId, const QString &message);
     QString outputLog(const Instance &instance) const;
+    QString persistLog(const QString &gameId, const Instance &instance, int exitCode, bool crashed,
+                       bool stopped, const QString &output) const;
 
     QHash<QString, Instance> m_instances;
 };

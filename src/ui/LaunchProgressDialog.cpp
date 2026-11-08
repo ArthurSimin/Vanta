@@ -66,6 +66,14 @@ void LaunchProgressDialog::buildUi()
     auto *footer = new QHBoxLayout;
     footer->setSpacing(8);
     footer->addStretch(1);
+    m_logsButton = new QPushButton(QStringLiteral("Open log"), this);
+    m_logsButton->setCursor(Qt::PointingHandCursor);
+    m_logsButton->setVisible(false);
+    connect(m_logsButton, &QPushButton::clicked, this, [this] {
+        if (!m_logPath.isEmpty())
+            emit logRequested(m_logPath);
+    });
+    footer->addWidget(m_logsButton);
     m_cancelButton = new QPushButton(QStringLiteral("Cancel"), this);
     m_cancelButton->setCursor(Qt::PointingHandCursor);
     connect(m_cancelButton, &QPushButton::clicked, this, [this] {
@@ -117,6 +125,13 @@ void LaunchProgressDialog::showFailure(const QString &message)
     m_message->setText(message);
     m_cancelButton->setVisible(false);
     m_closeButton->setVisible(true);
+    m_logsButton->setVisible(!m_logPath.isEmpty());
+}
+
+void LaunchProgressDialog::setLogPath(const QString &path)
+{
+    m_logPath = path;
+    m_logsButton->setVisible(m_finished && !path.isEmpty());
 }
 
 void LaunchProgressDialog::showSuccess(const QString &message)
@@ -155,4 +170,5 @@ void LaunchProgressDialog::refreshIcons()
     const ThemeColors &colors = m_theme->colors();
     Icons::setButtonIcon(m_cancelButton, Glyph::Close, colors.text, 16);
     Icons::setButtonIcon(m_closeButton, Glyph::Check, colors.text, 16);
+    Icons::setButtonIcon(m_logsButton, Glyph::Terminal, colors.text, 16);
 }

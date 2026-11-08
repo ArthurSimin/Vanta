@@ -5,9 +5,11 @@
 #include "Common.h"
 #include "GameDetailsDialog.h"
 #include "IconFactory.h"
+#include "LaunchLogs.h"
 #include "LaunchPlan.h"
 #include "LaunchProgressDialog.h"
 #include "LibraryView.h"
+#include "LogsDialog.h"
 #include "ModManagerDialog.h"
 #include "OnlineFixDialog.h"
 #include "RunnerInstallDialog.h"
@@ -432,13 +434,27 @@ void MainWindow::connectSignals()
         setStatusMessage(QStringLiteral("Game started."));
     });
     connect(&m_launcher, &GameLauncher::launchFailed, this,
-            [this](const QString &gameId, const QString &message, const QString &diagnostic) {
-        Q_UNUSED(gameId);
+            [this](const QString &gameId, const QString &message, const QString &diagnostic,
+                   const QString &logPath) {
         updateRunningState();
-        if (m_launchDialog)
+        if (m_launchDialog) {
+            m_launchDialog->setLogPath(logPath);
             m_launchDialog->showFailure(message);
-        else
+            return;
+        }
+        if (logPath.isEmpty()) {
             showDiagnostics(QStringLiteral("Launch failed"), message, diagnostic);
+            return;
+        }
+        // The launch dialog is already gone, so offer the log directly instead
+        // of a diagnostic box that duplicates what the log records.
+        const auto reply = QMessageBox::question(
+            this, QStringLiteral("Launch failed"),
+            QStringLiteral("%1\n\nThe launch log has the full command and any output from the process. "
+                           "Open it now?").arg(message),
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+        if (reply == QMessageBox::Yes)
+            openLogs(gameId, logPath);
     });
     connect(&m_launcher, &GameLauncher::gameStopping, this, [this](const QString &gameId) {
         Q_UNUSED(gameId);
@@ -652,6 +668,8 @@ void MainWindow::refreshIcons()
     connect(rescanAction, &QAction::triggered, this, [this] { scanLibrary(true); });
     auto *coversAction = m_mainMenu->addAction(QStringLiteral("Fetch missing covers"));
     connect(coversAction, &QAction::triggered, this, &MainWindow::fetchMissingCovers);
+    auto *logsAction = m_mainMenu->addAction(QStringLiteral("Logs…"));
+    connect(logsAction, &QAction::triggered, this, &MainWindow::openLogsForSelection);
     m_mainMenu->addSeparator();
     auto *runnersAction = m_mainMenu->addAction(QStringLiteral("Download runners…"));
     connect(runnersAction, &QAction::triggered, this, &MainWindow::openRunnerInstallDialog);
@@ -1001,6 +1019,7 @@ void MainWindow::openDetailsDialog(const QString &gameId)
         return;
 
     GameDetailsDialog dialog(game, m_scanner.resultFor(gameId), m_launcher.isRunning(gameId), &m_theme, this);
+    dialog.setLogsAvailable(runnerIsWineLike(game.runner) || !LaunchLogs::list(gameId, 1).isEmpty());
     const int result = dialog.exec();
     if (result != QDialog::Accepted)
         return;
@@ -1019,6 +1038,9 @@ void MainWindow::openDetailsDialog(const QString &gameId)
         break;
     case GameDetailsDialog::Action::Mods:
         openModManager(gameId);
+        break;
+    case GameDetailsDialog::Action::Logs:
+        openLogs(gameId);
         break;
     case GameDetailsDialog::Action::Scan:
         scanGame(gameId, true);
@@ -1088,6 +1110,54 @@ void MainWindow::openModManager(const QString &gameId)
                 m_library.updateGame(updated);
             });
     dialog.exec();
+}
+
+void MainWindow::openLogs(const QString &gameId, const QString &path)
+{
+    bool found = false;
+    const Game game = m_library.gameById(gameId, &found);
+    if (!found)
+        return;
+
+    LogsDialog dialog(game.id, game.name, &m_theme, this);
+    if (!path.isEmpty())
+        dialog.selectLog(path);
+    dialog.exec();
+}
+
+void MainWindow::openLogsForSelection()
+{
+    if (!m_selectedGameId.isEmpty()) {
+        openLogs(m_selectedGameId);
+        return;
+    }
+
+    // No card is selected, so fall back to the game with the newest log
+    // instead of making the user hunt for one first.
+    QString fallbackId;
+    QDateTime newest;
+    for (const Game &game : m_library.games()) {
+        const QList<LaunchLogEntry> entries = LaunchLogs::list(game.id, 1);
+        if (entries.isEmpty())
+            continue;
+        const QDateTime stamp = entries.first().finishedAt;
+        if (fallbackId.isEmpty() || !newest.isValid() || stamp > newest) {
+            fallbackId = game.id;
+            newest = stamp;
+        }
+    }
+    if (!fallbackId.isEmpty()) {
+        openLogs(fallbackId);
+        return;
+    }
+
+    QMessageBox box(this);
+    box.setIcon(QMessageBox::Information);
+    box.setWindowTitle(QStringLiteral("Logs"));
+    box.setText(QStringLiteral("No launch log has been recorded yet. Start a game once and Vanta will keep the "
+                               "runner output so you can inspect it here afterwards."));
+    box.setStandardButtons(QMessageBox::Ok);
+    box.exec();
 }
 
 void MainWindow::openSettingsDialog()
@@ -1214,6 +1284,8 @@ void MainWindow::showContextMenu(const QString &gameId, const QPoint &globalPosi
         auto *modsAction = menu.addAction(QStringLiteral("Mods…"));
         connect(modsAction, &QAction::triggered, this, [this, gameId] { openModManager(gameId); });
     }
+    auto *logsAction = menu.addAction(QStringLiteral("Logs…"));
+    connect(logsAction, &QAction::triggered, this, [this, gameId] { openLogs(gameId); });
     auto *coverAction = menu.addAction(QStringLiteral("Choose cover art…"));
     connect(coverAction, &QAction::triggered, this, [this, gameId] { chooseCoverArt(gameId); });
     menu.addSeparator();
@@ -1448,13 +1520,11 @@ void MainWindow::runSteamPrecondition()
     }
 }
 
-void MainWindow::startSteamAndWait()
+void MainWindow::createLaunchDialog(const QString &gameId, const QString &gameName)
 {
-    closeLaunchDialog();
-    m_launchDialog = new LaunchProgressDialog(m_library.gameById(m_pendingGameId).name, &m_theme, this);
-    m_launchDialog->setMessage(QStringLiteral("Starting Steam…"));
-    m_launchDialog->setIndeterminate();
-    m_launchDialog->setDetail(QStringLiteral("Vanta will launch the game once Steam is running and signed in."));
+    if (m_launchDialog)
+        return;
+    m_launchDialog = new LaunchProgressDialog(gameName, &m_theme, this);
     connect(m_launchDialog, &LaunchProgressDialog::cancelRequested, this, [this] {
         m_launchCancelled = true;
         if (m_steamPrecondition)
@@ -1462,6 +1532,19 @@ void MainWindow::startSteamAndWait()
         closeLaunchDialog();
         setStatusMessage(QStringLiteral("Launch cancelled."));
     });
+    connect(m_launchDialog, &LaunchProgressDialog::logRequested, this, [this, gameId](const QString &path) {
+        openLogs(gameId, path);
+    });
+    m_launchDialog->show();
+}
+
+void MainWindow::startSteamAndWait()
+{
+    closeLaunchDialog();
+    createLaunchDialog(m_pendingGameId, m_library.gameById(m_pendingGameId).name);
+    m_launchDialog->setMessage(QStringLiteral("Starting Steam…"));
+    m_launchDialog->setIndeterminate();
+    m_launchDialog->setDetail(QStringLiteral("Vanta will launch the game once Steam is running and signed in."));
 
     m_steamPrecondition = new SteamPrecondition(this);
     connect(m_steamPrecondition, &SteamPrecondition::progress, this, [this](const QString &message) {
@@ -1478,7 +1561,6 @@ void MainWindow::startSteamAndWait()
             return;
         abortLaunch(message);
     });
-    m_launchDialog->show();
     m_steamPrecondition->ensureRunning();
 }
 
@@ -1503,14 +1585,7 @@ void MainWindow::applyPatchesAndLaunch()
                 QStringLiteral("Steam is not running. Online features will not work for this session."));
         }
         const OnlineFixInfo info = onlineFixInfoFor(game);
-        if (!m_launchDialog) {
-            m_launchDialog = new LaunchProgressDialog(game.name, &m_theme, this);
-            connect(m_launchDialog, &LaunchProgressDialog::cancelRequested, this, [this] {
-                m_launchCancelled = true;
-                closeLaunchDialog();
-            });
-            m_launchDialog->show();
-        }
+        createLaunchDialog(game.id, game.name);
         m_launchDialog->setMessage(QStringLiteral("Applying OnlineFix configuration…"));
         m_launchDialog->setIndeterminate();
         const PatchResult patch = OnlineFixPatcher::apply(game, info);
@@ -1560,15 +1635,7 @@ void MainWindow::performLaunch()
         return;
     }
 
-    if (!m_launchDialog) {
-        m_launchDialog = new LaunchProgressDialog(game.name, &m_theme, this);
-        connect(m_launchDialog, &LaunchProgressDialog::cancelRequested, this, [this] {
-            m_launchCancelled = true;
-            closeLaunchDialog();
-            setStatusMessage(QStringLiteral("Launch cancelled."));
-        });
-        m_launchDialog->show();
-    }
+    createLaunchDialog(game.id, game.name);
     m_launchDialog->setMessage(QStringLiteral("Starting the game…"));
     m_launchDialog->setIndeterminate();
     QStringList detail = m_pendingDiagnostics;
@@ -1634,7 +1701,8 @@ void MainWindow::showDiagnostics(const QString &title, const QString &message, c
 }
 
 void MainWindow::handleGameFinished(const QString &gameId, qint64 elapsedSeconds, int exitCode,
-                                    bool crashed, bool stopped, const QString &diagnostic)
+                                    bool crashed, bool stopped, const QString &diagnostic,
+                                    const QString &logPath)
 {
     bool found = false;
     Game game = m_library.gameById(gameId, &found);
@@ -1651,11 +1719,23 @@ void MainWindow::handleGameFinished(const QString &gameId, qint64 elapsedSeconds
         return;
     }
     if (crashed) {
+        const QString name = found ? game.name : QStringLiteral("The game");
         setStatusMessage(QStringLiteral("The game exited unexpectedly (code %1).").arg(exitCode), 12000);
-        showDiagnostics(QStringLiteral("Game exited unexpectedly"),
-                        QStringLiteral("%1 exited with code %2. Diagnostics from the launch are below.")
-                            .arg(found ? game.name : QStringLiteral("The game")).arg(exitCode),
-                        diagnostic);
+        if (logPath.isEmpty()) {
+            showDiagnostics(QStringLiteral("Game exited unexpectedly"),
+                            QStringLiteral("%1 exited with code %2. Diagnostics from the launch are below.")
+                                .arg(name).arg(exitCode),
+                            diagnostic);
+            return;
+        }
+        const auto reply = QMessageBox::question(
+            this, QStringLiteral("Game exited unexpectedly"),
+            QStringLiteral("%1 exited with code %2. Vanta saved the launch log, including everything the "
+                           "runner printed, so you can see what happened.\n\nOpen the log now?")
+                .arg(name).arg(exitCode),
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+        if (reply == QMessageBox::Yes)
+            openLogs(gameId, logPath);
         return;
     }
     setStatusMessage(QStringLiteral("Game closed."));

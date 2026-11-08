@@ -230,7 +230,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
         plan.composedOverrides = overrides;
         setEnvironment(QStringLiteral("WINEPREFIX"), plan.winePrefix);
         setEnvironment(QStringLiteral("WINEDLLOVERRIDES"), overrides);
-        setEnvironment(QStringLiteral("WINEDEBUG"), QStringLiteral("-all"));
+        setEnvironment(QStringLiteral("WINEDEBUG"), wineDebugValue(settings.wineLogLevel));
         plan.wineServer = wineServerFor(game, QString());
     } else if (game.runner == RunnerType::Proton) {
         if (!executableInfo.exists() || !executableInfo.isFile()) {
@@ -250,7 +250,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
         command << proton << QStringLiteral("run") << executable;
         command << postArgs;
         setEnvironment(QStringLiteral("WINEDLLOVERRIDES"), overrides);
-        setEnvironment(QStringLiteral("WINEDEBUG"), QStringLiteral("-all"));
+        setEnvironment(QStringLiteral("WINEDEBUG"), wineDebugValue(settings.wineLogLevel));
         setEnvironment(QStringLiteral("STEAM_COMPAT_DATA_PATH"), plan.prefixBase);
         setEnvironment(QStringLiteral("STEAM_COMPAT_CLIENT_INSTALL_PATH"), SteamIntegration::steamInstallRoot());
         if (game.wineD3D)

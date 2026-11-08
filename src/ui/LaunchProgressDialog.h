@@ -22,8 +22,13 @@ public:
     void showSuccess(const QString &message);
     void finishAndClose();
 
+    // The viewer is offered from the failure state, where the log is the only
+    // thing that still explains why the process is gone.
+    void setLogPath(const QString &path);
+
 signals:
     void cancelRequested();
+    void logRequested(const QString &path);
 
 protected:
     void reject() override;
@@ -39,5 +44,7 @@ private:
     QProgressBar *m_progress = nullptr;
     QPushButton *m_cancelButton = nullptr;
     QPushButton *m_closeButton = nullptr;
+    QPushButton *m_logsButton = nullptr;
+    QString m_logPath;
     bool m_finished = false;
 };

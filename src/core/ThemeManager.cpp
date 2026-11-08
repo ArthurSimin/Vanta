@@ -123,6 +123,8 @@ void ThemeManager::resolveColors()
         m_colors.success = QColor(QStringLiteral("#4ade80"));
         m_colors.tooltip = QColor(QStringLiteral("#261b35"));
         m_colors.shadow = QColor(0, 0, 0, 120);
+        m_colors.terminal = QColor(QStringLiteral("#08060d"));
+        m_colors.terminalText = QColor(QStringLiteral("#d8f5e0"));
     } else {
         m_colors.dark = false;
         m_colors.window = QColor(QStringLiteral("#f7f4fc"));
@@ -144,6 +146,8 @@ void ThemeManager::resolveColors()
         m_colors.success = QColor(QStringLiteral("#15803d"));
         m_colors.tooltip = QColor(QStringLiteral("#ffffff"));
         m_colors.shadow = QColor(35, 18, 60, 55);
+        m_colors.terminal = QColor(QStringLiteral("#120e1a"));
+        m_colors.terminalText = QColor(QStringLiteral("#d8f5e0"));
     }
 }
 
@@ -188,6 +192,8 @@ void ThemeManager::resolveSystemColors()
     m_colors.success = m_dark ? QColor(QStringLiteral("#4ade80")) : QColor(QStringLiteral("#15803d"));
     m_colors.tooltip = tooltipBase.isValid() ? tooltipBase : m_colors.surfaceRaised;
     m_colors.shadow = QColor(0, 0, 0, m_dark ? 130 : 60);
+    m_colors.terminal = m_dark ? QColor(QStringLiteral("#08060d")) : QColor(QStringLiteral("#161022"));
+    m_colors.terminalText = QColor(QStringLiteral("#d8f5e0"));
 }
 
 void ThemeManager::apply()
@@ -253,6 +259,8 @@ QString ThemeManager::styleSheet() const
     const QString warning = color(m_colors.warning);
     const QString success = color(m_colors.success);
     const QString tooltip = color(m_colors.tooltip);
+    const QString terminal = color(m_colors.terminal);
+    const QString terminalText = color(m_colors.terminalText);
 
     return QStringLiteral(R"QSS(
 * {
@@ -731,6 +739,32 @@ QPlainTextEdit[monospace="true"], QTextEdit[monospace="true"] {
     font-size: 11px;
     background: %WINDOW%;
 }
+QFrame#terminalPanel {
+    background: %TERMINAL%;
+    border: 1px solid %BORDERSTRONG%;
+    border-radius: 13px;
+}
+QWidget#terminalTitleBar {
+    background: %RAISED%;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom: 1px solid %BORDER%;
+}
+QLabel#terminalPath {
+    color: %MUTED%;
+    font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+    font-size: 11px;
+}
+QPlainTextEdit#terminalView {
+    background: %TERMINAL%;
+    color: %TERMINALTEXT%;
+    border: none;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    padding: 10px 12px;
+    selection-background-color: %ACCENT%;
+    selection-color: #ffffff;
+}
 QLabel[monospace="true"] {
     font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
     font-size: 11px;
@@ -880,5 +914,7 @@ QPushButton#tutorialSkip:hover {
         .replace(QStringLiteral("%DANGER%"), danger)
         .replace(QStringLiteral("%WARNING%"), warning)
         .replace(QStringLiteral("%SUCCESS%"), success)
-        .replace(QStringLiteral("%TOOLTIP%"), tooltip);
+        .replace(QStringLiteral("%TOOLTIP%"), tooltip)
+        .replace(QStringLiteral("%TERMINAL%"), terminal)
+        .replace(QStringLiteral("%TERMINALTEXT%"), terminalText);
 }

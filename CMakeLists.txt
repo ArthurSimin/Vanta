@@ -70,6 +70,8 @@ set(VANTA_SOURCES
     src/core/ModInstaller.h
     src/core/Thunderstore.cpp
     src/core/Thunderstore.h
+    src/core/LaunchLogs.cpp
+    src/core/LaunchLogs.h
     src/core/CoverFetcher.cpp
     src/core/CoverFetcher.h
     src/core/IniFile.cpp
@@ -126,6 +128,8 @@ set(VANTA_SOURCES
     src/ui/ModManagerDialog.h
     src/ui/ThunderstoreDialog.cpp
     src/ui/ThunderstoreDialog.h
+    src/ui/LogsDialog.cpp
+    src/ui/LogsDialog.h
     src/ui/LibraryView.cpp
     src/ui/LibraryView.h
     src/ui/MainWindow.cpp

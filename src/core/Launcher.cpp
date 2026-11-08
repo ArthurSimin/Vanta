@@ -1,5 +1,7 @@
 #include "Launcher.h"
 
+#include "LaunchLogs.h"
+
 #include <QDir>
 #include <QFileInfo>
 #include <QProcessEnvironment>
@@ -67,7 +69,8 @@ bool GameLauncher::launch(const Game &game, const LaunchPlan &plan, QString *err
             return;
         it->started = true;
         it->clock.start();
-        emit gameStarted(gameId, QDateTime::currentDateTime());
+        it->startedAt = QDateTime::currentDateTime();
+        emit gameStarted(gameId, it->startedAt);
     });
 
     connect(process, &QProcess::readyReadStandardOutput, this, [this, gameId] {
@@ -222,6 +225,7 @@ void GameLauncher::completeInstance(const QString &gameId, int exitCode, QProces
     const bool crashed = !stopped && (exitStatus == QProcess::CrashExit || exitCode != 0);
     const QString diagnostic = outputLog(*it);
     const QString gameName = it->gameName;
+    const QString logPath = persistLog(gameId, *it, exitCode, crashed, stopped, diagnostic);
     if (it->process) {
         it->process->disconnect(this);
         it->process->deleteLater();
@@ -231,10 +235,37 @@ void GameLauncher::completeInstance(const QString &gameId, int exitCode, QProces
 
     if (crashed) {
         const QString message = QStringLiteral("%1 exited unexpectedly with code %2.").arg(gameName).arg(exitCode);
-        emit gameFinished(gameId, elapsedMs / 1000, exitCode, true, false, message + QStringLiteral("\n\n") + diagnostic);
+        emit gameFinished(gameId, elapsedMs / 1000, exitCode, true, false,
+                          message + QStringLiteral("\n\n") + diagnostic, logPath);
     } else {
-        emit gameFinished(gameId, elapsedMs / 1000, exitCode, false, stopped, diagnostic);
+        emit gameFinished(gameId, elapsedMs / 1000, exitCode, false, stopped, diagnostic, logPath);
     }
+}
+
+QString GameLauncher::persistLog(const QString &gameId, const Instance &instance, int exitCode,
+                                 bool crashed, bool stopped, const QString &output) const
+{
+    // The plan summary names the exact command and environment overrides, so
+    // the log explains what Vanta ran before the process output begins.
+    QString body = instance.plan.summary();
+    body += QStringLiteral("\n\nOutput:\n");
+    body += output.trimmed().isEmpty() ? QStringLiteral("(the process printed nothing)")
+                                      : output.trimmed();
+
+    QString error;
+    const QDateTime startedAt = instance.startedAt.isValid() ? instance.startedAt
+                                                             : QDateTime::currentDateTime();
+    const QString path = LaunchLogs::write(gameId, instance.gameName, runnerName(instance.plan.runner),
+                                           startedAt, QDateTime::currentDateTime(), exitCode,
+                                           crashed, stopped, body, &error);
+    if (path.isEmpty()) {
+        // A log that cannot be written must never block the game from closing;
+        // the diagnostics are still delivered to the caller below.
+        qWarning("%s", qUtf8Printable(error));
+    } else {
+        LaunchLogs::prune(gameId);
+    }
+    return path;
 }
 
 void GameLauncher::emitFailure(const QString &gameId, const QString &message)
@@ -243,14 +274,16 @@ void GameLauncher::emitFailure(const QString &gameId, const QString &message)
     if (it == m_instances.end() || it->failureEmitted)
         return;
     it->failureEmitted = true;
-    const QString diagnostic = outputLog(*it) + QLatin1Char('\n') + it->plan.summary();
+    const QString output = outputLog(*it);
+    const QString diagnostic = output + QLatin1Char('\n') + it->plan.summary();
+    const QString logPath = persistLog(gameId, *it, -1, false, false, output);
     if (it->process) {
         it->process->disconnect(this);
         it->process->deleteLater();
         it->process = nullptr;
     }
     m_instances.erase(it);
-    emit launchFailed(gameId, message, diagnostic);
+    emit launchFailed(gameId, message, diagnostic, logPath);
 }
 
 bool GameLauncher::isRunning(const QString &gameId) const

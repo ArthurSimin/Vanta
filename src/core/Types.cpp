@@ -121,6 +121,30 @@ QString installFilterName(InstallFilter filter)
     return QStringLiteral("All");
 }
 
+QString wineLogLevelName(WineLogLevel level)
+{
+    switch (level) {
+    case WineLogLevel::Off: return QStringLiteral("Off");
+    case WineLogLevel::Errors: return QStringLiteral("Errors only");
+    case WineLogLevel::Warnings: return QStringLiteral("Warnings and errors");
+    case WineLogLevel::Trace: return QStringLiteral("Everything (verbose)");
+    }
+    return QStringLiteral("Errors only");
+}
+
+QString wineDebugValue(WineLogLevel level)
+{
+    switch (level) {
+    case WineLogLevel::Off: return QStringLiteral("-all");
+    // Starting from -all and re-enabling err/warn keeps the real failures
+    // visible without the fixme chatter that floods a terminal for every game.
+    case WineLogLevel::Errors: return QStringLiteral("-all,err+all");
+    case WineLogLevel::Warnings: return QStringLiteral("-all,err+all,warn+all");
+    case WineLogLevel::Trace: return QStringLiteral("+all");
+    }
+    return QStringLiteral("-all,err+all");
+}
+
 RunnerType runnerFromName(const QString &name)
 {
     if (name.compare(QStringLiteral("Wine"), Qt::CaseInsensitive) == 0) return RunnerType::Wine;
@@ -184,6 +208,14 @@ OnlineFixPrompt onlineFixPromptFromName(const QString &name)
     if (name.compare(QStringLiteral("Always apply without asking"), Qt::CaseInsensitive) == 0) return OnlineFixPrompt::AlwaysApply;
     if (name.compare(QStringLiteral("Never apply"), Qt::CaseInsensitive) == 0) return OnlineFixPrompt::NeverApply;
     return OnlineFixPrompt::Ask;
+}
+
+WineLogLevel wineLogLevelFromName(const QString &name)
+{
+    if (name.compare(QStringLiteral("Off"), Qt::CaseInsensitive) == 0) return WineLogLevel::Off;
+    if (name.compare(QStringLiteral("Warnings and errors"), Qt::CaseInsensitive) == 0) return WineLogLevel::Warnings;
+    if (name.compare(QStringLiteral("Everything (verbose)"), Qt::CaseInsensitive) == 0) return WineLogLevel::Trace;
+    return WineLogLevel::Errors;
 }
 
 bool runnerIsWineLike(RunnerType type)

@@ -176,6 +176,7 @@ QJsonObject AppSettings::toJson() const
     object.insert(QStringLiteral("windowMaximized"), windowMaximized);
     object.insert(QStringLiteral("steamGridDbApiKey"), steamGridDbApiKey);
     object.insert(QStringLiteral("fetchCoversAutomatically"), fetchCoversAutomatically);
+    object.insert(QStringLiteral("wineLogLevel"), wineLogLevelName(wineLogLevel));
     return object;
 }
 
@@ -210,6 +211,7 @@ AppSettings AppSettings::fromJson(const QJsonObject &object)
     settings.windowMaximized = object.value(QStringLiteral("windowMaximized")).toBool(false);
     settings.steamGridDbApiKey = object.value(QStringLiteral("steamGridDbApiKey")).toString();
     settings.fetchCoversAutomatically = object.value(QStringLiteral("fetchCoversAutomatically")).toBool(true);
+    settings.wineLogLevel = wineLogLevelFromName(object.value(QStringLiteral("wineLogLevel")).toString());
     return settings;
 }
 

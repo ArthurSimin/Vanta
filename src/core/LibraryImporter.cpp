@@ -106,16 +106,17 @@ RunnerType lutrisRunnerFor(const QString &dbRunner, const QString &version, bool
 // Best effort: point the imported game at a detected build whose name matches
 // the recorded version so the launch reuses it. An unmatched version leaves the
 // path blank and the launch plan resolves a runner at start time, which is
-// safer than guessing a path that may not be the build Lutris used.
-QString matchRunnerPath(const QString &version, RunnerType runner)
+// safer than guessing a path that may not be the build Lutris used. The
+// detected entries are passed in because rescanning the runner directories for
+// every game would be wasteful.
+QString matchRunnerPath(const QString &version, RunnerType runner,
+                        const QList<RunnerEntry> &wineEntries,
+                        const QList<RunnerEntry> &protonEntries)
 {
     const QString needle = version.trimmed();
     if (needle.isEmpty() || !runnerIsWineLike(runner))
         return {};
-    const AppSettings settings;
-    const QList<RunnerEntry> entries = runner == RunnerType::Proton
-        ? RunnerDetector::protonEntries(settings)
-        : RunnerDetector::wineEntries(settings);
+    const QList<RunnerEntry> &entries = runner == RunnerType::Proton ? protonEntries : wineEntries;
     for (const RunnerEntry &entry : entries) {
         if (entry.name.compare(needle, Qt::CaseInsensitive) == 0)
             return entry.path;
@@ -256,6 +257,14 @@ QList<ImportedGameCandidate> LibraryImporter::scanLutris()
 {
     QList<ImportedGameCandidate> results;
     const QString home = homePath();
+
+    // Detected once for the whole scan. A version is matched against these for
+    // every game, so rescanning the runner directories per game would be
+    // wasteful. AppSettings defaults are used because the importer has no
+    // settings of its own; this matches the builds Vanta detects out of the box.
+    const AppSettings detectionSettings;
+    const QList<RunnerEntry> detectedWine = RunnerDetector::wineEntries(detectionSettings);
+    const QList<RunnerEntry> detectedProton = RunnerDetector::protonEntries(detectionSettings);
     const QStringList lutrisDirs = {
         home + QStringLiteral("/.local/share/lutris"),
         home + QStringLiteral("/.var/app/net.lutris.Lutris/data/lutris")
@@ -367,7 +376,7 @@ QList<ImportedGameCandidate> LibraryImporter::scanLutris()
                 || row.platform.compare(QStringLiteral("Windows"), Qt::CaseInsensitive) == 0;
             game.platform = isWindows ? Platform::Windows : Platform::Linux;
             game.runner = lutrisRunnerFor(row.runner, wineVersion, isWindows);
-            game.runnerPath = matchRunnerPath(wineVersion, game.runner);
+            game.runnerPath = matchRunnerPath(wineVersion, game.runner, detectedWine, detectedProton);
 
             if (!row.slug.isEmpty()) {
                 const QStringList coverCandidates = {

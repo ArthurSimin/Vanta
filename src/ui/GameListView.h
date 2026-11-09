@@ -16,6 +16,7 @@ public:
 
     void setGames(const QList<Game> &games);
     void setSelectedGame(const QString &gameId);
+    void setRunningGames(const QStringList &gameIds);
     void refreshTheme();
     QString selectedGameId() const;
 
@@ -29,9 +30,11 @@ protected:
 
 private:
     QString idForRow(int row) const;
+    QString displayName(const Game &game, bool running) const;
     QString compatibilityText(const Game &game) const;
 
     ThemeManager *m_theme = nullptr;
     bool m_populating = false;
     QList<Game> m_games;
+    QStringList m_runningIds;
 };

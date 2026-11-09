@@ -69,6 +69,14 @@ QString GameListView::selectedGameId() const
     return idForRow(rows.first().row());
 }
 
+QString GameListView::displayName(const Game &game, bool running) const
+{
+    QString name = game.favorite ? QStringLiteral("★  %1").arg(game.name) : game.name;
+    if (running)
+        name.prepend(QStringLiteral("●  "));
+    return name;
+}
+
 QString GameListView::compatibilityText(const Game &game) const
 {
     if ((game.compatibility == ScanState::ComponentsDetected || scanNeedsAttention(game.compatibility))
@@ -88,9 +96,14 @@ void GameListView::setGames(const QList<Game> &games)
     const ThemeColors &colors = m_theme ? m_theme->colors() : ThemeColors();
     for (int row = 0; row < games.size(); ++row) {
         const Game &game = games.at(row);
-        auto *nameItem = new QTableWidgetItem(game.name);
+        // The grid card shows a pulsing Running chip, so the same game must not
+        // look idle here. A dot keeps the sort order and the column widths as
+        // they were; the tooltip spells the state out.
+        const bool running = m_runningIds.contains(game.id);
+        auto *nameItem = new QTableWidgetItem(displayName(game, running));
         nameItem->setData(Qt::UserRole, game.id);
-        nameItem->setToolTip(game.name);
+        nameItem->setToolTip(running ? QStringLiteral("%1\nThis game is running.").arg(game.name)
+                                     : game.name);
         const QSize iconSize(40, 54);
         const qreal dpr = devicePixelRatioF();
         const QSize pixels(qRound(iconSize.width() * dpr), qRound(iconSize.height() * dpr));
@@ -113,11 +126,8 @@ void GameListView::setGames(const QList<Game> &games)
         setItem(row, 3, compatItem);
         setItem(row, 4, playedItem);
         setItem(row, 5, playtimeItem);
-        if (game.favorite) {
-            nameItem->setIcon(Icons::coverIcon(game.coverPath, pixels, initialsForGame(game.name),
-                                               colors.accentSoft, colors.accent));
-            nameItem->setText(QStringLiteral("★  %1").arg(game.name));
-        }
+        if (running)
+            nameItem->setForeground(colors.success);
         if (!game.executableExists())
             compatItem->setToolTip(QStringLiteral("The configured executable is missing."));
         else if (game.showsOnlineFix() && game.compatibility != ScanState::NoKnownComponents
@@ -137,6 +147,36 @@ void GameListView::setGames(const QList<Game> &games)
         }
     }
     m_populating = false;
+}
+
+void GameListView::setRunningGames(const QStringList &gameIds)
+{
+    if (m_runningIds == gameIds)
+        return;
+    m_runningIds = gameIds;
+    // Rebuilding the table would reset the scroll position, so the marker is
+    // applied to the rows that are already there.
+    const ThemeColors &colors = m_theme ? m_theme->colors() : ThemeColors();
+    for (int row = 0; row < rowCount(); ++row) {
+        QTableWidgetItem *nameItem = item(row, 0);
+        if (!nameItem)
+            continue;
+        const QString id = idForRow(row);
+        const bool running = m_runningIds.contains(id);
+        const Game *game = nullptr;
+        for (const Game &candidate : m_games) {
+            if (candidate.id == id) {
+                game = &candidate;
+                break;
+            }
+        }
+        if (!game)
+            continue;
+        nameItem->setText(displayName(*game, running));
+        nameItem->setToolTip(running ? QStringLiteral("%1\nThis game is running.").arg(game->name)
+                                     : game->name);
+        nameItem->setForeground(QBrush(running ? colors.success : colors.text));
+    }
 }
 
 void GameListView::setSelectedGame(const QString &gameId)

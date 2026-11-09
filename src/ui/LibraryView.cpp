@@ -147,6 +147,7 @@ void LibraryView::setSelectedGame(const QString &gameId)
 void LibraryView::setRunningGames(const QStringList &gameIds)
 {
     m_grid->setRunningGames(gameIds);
+    m_list->setRunningGames(gameIds);
 }
 
 void LibraryView::showEmptyState(const QString &title, const QString &message, bool offerAdd)

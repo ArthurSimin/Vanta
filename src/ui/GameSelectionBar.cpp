@@ -24,6 +24,16 @@ QString playtimeText(const Game &game)
     return QStringLiteral("%1 played").arg(formatPlaytime(game.playtimeSeconds));
 }
 
+// A Custom runner may be a complete command line with no game executable at
+// all, so an empty executable field only means a launch will fail for the other
+// runners. A path that is set but gone is always a problem.
+bool executableMissing(const Game &game)
+{
+    if (!game.executable.trimmed().isEmpty())
+        return !game.executableExists();
+    return game.runner != RunnerType::Custom;
+}
+
 QString lastPlayedText(const Game &game)
 {
     if (!game.lastPlayed.isValid())
@@ -257,7 +267,7 @@ void GameSelectionBar::updateContent()
     if (!playtime.isEmpty())
         parts.append(playtime);
     parts.append(QStringLiteral("%1 · %2").arg(runnerName(m_game.runner), platformName(m_game.platform)));
-    if (!m_game.executableExists())
+    if (executableMissing(m_game))
         parts.append(QStringLiteral("Executable missing"));
     m_meta->setText(parts.join(QStringLiteral("   ·   ")));
 
@@ -287,7 +297,14 @@ void GameSelectionBar::updatePrimaryButton()
         m_menuButton->setEnabled(false);
         return;
     }
-    m_launchButton->setEnabled(true);
+    // Launch plan building fails on a missing executable, so offering an enabled
+    // Launch button only produces a dialog. The meta line already says the file
+    // is gone; the button should agree with it. Stopping a running game stays
+    // available because the process exists whether or not the file does now.
+    const bool canLaunch = m_running || !executableMissing(m_game);
+    m_launchButton->setEnabled(canLaunch);
+    m_launchButton->setToolTip(canLaunch ? QString()
+        : QStringLiteral("The configured executable is missing. Set the game's executable first."));
     m_menuButton->setEnabled(true);
     m_launchButton->setProperty("primary", !m_running);
     m_launchButton->setProperty("danger", m_running);

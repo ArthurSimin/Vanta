@@ -13,6 +13,13 @@
 namespace {
 constexpr qint64 kMaximumReadBytes = 512LL * 1024LL;
 constexpr int kMaximumHeaderBytes = 1024;
+// The live file grows while a game runs, so it is bounded on disk as well as in
+// memory. Once it passes the threshold the header and the most recent output are
+// kept and the middle is dropped, which also covers a single oversized chunk.
+constexpr qint64 kMaximumLiveBytes = 1024LL * 1024LL;
+constexpr qint64 kLiveTrimThreshold = 2 * kMaximumLiveBytes;
+constexpr char kLiveHeaderEnd[] = "----------------\n";
+constexpr char kLiveTrimMarker[] = "... earlier output was trimmed to keep the live log small ...\n\n";
 
 QString sanitizeComponent(const QString &value)
 {
@@ -80,6 +87,42 @@ QString writeBody(const QString &path, const QString &text, QString *error)
         return {};
     }
     return path;
+}
+
+// Rewrites an oversized live log as the header plus its most recent output so a
+// chatty runner cannot fill the disk. The header is kept so the viewer still
+// knows the game, runner and start time after the middle is dropped.
+bool trimLiveLog(const QString &path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly))
+        return false;
+    const qint64 size = file.size();
+    if (size <= kMaximumLiveBytes) {
+        file.close();
+        return true;
+    }
+
+    QByteArray header = file.read(kMaximumHeaderBytes);
+    const int headerEnd = header.indexOf(kLiveHeaderEnd);
+    if (headerEnd >= 0)
+        header = header.left(headerEnd + int(sizeof(kLiveHeaderEnd)) - 1);
+    else
+        header.clear();
+
+    const QByteArray marker(kLiveTrimMarker);
+    const qint64 tailBudget = qMax<qint64>(0, kMaximumLiveBytes - header.size() - marker.size());
+    file.seek(size - tailBudget);
+    const QByteArray tail = file.readAll();
+    file.close();
+
+    QSaveFile out(path);
+    if (!out.open(QIODevice::WriteOnly))
+        return false;
+    out.write(header);
+    out.write(marker);
+    out.write(tail);
+    return out.commit();
 }
 }
 
@@ -150,8 +193,15 @@ bool LaunchLogs::appendLive(const QString &path, const QString &text)
     QFile file(path);
     if (!file.open(QIODevice::Append))
         return false;
-    file.write(text.toUtf8());
+    const QByteArray bytes = text.toUtf8();
+    const bool written = file.write(bytes) == bytes.size();
     file.flush();
+    const qint64 size = file.size();
+    file.close();
+    if (!written)
+        return false;
+    if (size > kLiveTrimThreshold)
+        trimLiveLog(path);
     return true;
 }
 

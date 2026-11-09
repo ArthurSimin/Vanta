@@ -44,7 +44,8 @@ QString write(const QString &gameId, const QString &gameName, const QString &run
 // Starts a log while the game is still running so the viewer is not empty
 // during a launch. `commandSummary` is written once under the header; output is
 // appended with appendLive() as the process prints it. finishLive() rewrites the
-// same file with the finished header and the complete diagnostics.
+// same file with the finished header and the complete diagnostics. appendLive()
+// keeps the file bounded on disk, retaining the header and recent output.
 QString beginLive(const QString &gameId, const QString &gameName, const QString &runner,
                   const QDateTime &startedAt, const QString &commandSummary, QString *error = nullptr);
 bool appendLive(const QString &path, const QString &text);

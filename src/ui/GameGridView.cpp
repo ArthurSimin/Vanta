@@ -53,7 +53,10 @@ void GameGridView::setGames(const QList<Game> &games)
         card->setSelectedState(game.id == m_selectedId);
         card->setRunning(m_runningIds.contains(game.id));
         connect(card, &GameCard::clicked, this, [this, card] {
-            m_selectedId = card->game().id;
+            // Going through setSelectedGame is what clears the border on the
+            // previously selected card. Assigning m_selectedId directly made the
+            // later round-trip early-return, leaving two cards looking selected.
+            setSelectedGame(card->game().id);
             emit gameSelected(card->game().id);
         });
         connect(card, &GameCard::activated, this, &GameGridView::gameActivated);

@@ -115,6 +115,16 @@ A settled screenshot cannot tell you whether the slide happened.
 - **Packaging needs an install tree, not the build tree.** Run
   `DESTDIR=... cmake --install` first; `packaging/build-packages.sh` reads that
   tree and copies it verbatim into each format.
+- **Stopping a native game means signalling its process group.** Many Linux
+  games are wrapper scripts; `QProcess::terminate()`/`kill()` reaches only the
+  direct child and leaves the real game running after Vanta quits. `Launcher`
+  gives every game `setpgid(0, 0)` through `setChildProcessModifier` (guarded at
+  Qt 6.2) and stops it through `signalProcessGroup()`. Do not go back to a bare
+  `process->kill()`.
+- **A stopped game still has an exit code.** After `SIGKILL` the code is
+  non-zero (Qt reports it with `CrashExit`), but the *stopped* flag is what
+  decides the log's result line. Recording `-1` instead made every quit read
+  "the process never started", which was wrong and confusing.
 
 ## Editing discipline
 

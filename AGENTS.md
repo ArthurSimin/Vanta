@@ -124,6 +124,7 @@ src/
     LaunchLogs.*        Per-launch log store under the XDG data directory
     IniFile.*           INI parsing that preserves formatting
     CoverFetcher.*      SteamGridDB search, artwork listing, downloads
+    UpdateChecker.*     GitHub latest-release lookup, version comparison
     ThemeManager.*      ThemeColors, palettes and the QSS
     Types.*             Enums and their display names
 
@@ -139,6 +140,7 @@ src/
     RunnerInstallDialog.* Runner download/uninstall with version picker
     SettingsDialog.*    Preferences and runner/import entry points
     Sidebar.*           Source grouping and filter list
+    UpdateBanner.*      Newer-release strip above the library
     AddEditDialog.*     Add/edit form, executable-only path entry
     GameDetailsDialog.* Read-only detail sheet
     OnlineFixDialog.*   Detection report and confirmed actions
@@ -213,6 +215,29 @@ default `Errors only` is `-all,err+all`: Wine's `err` channel stays visible whil
 `fixme` chatter — hundreds of lines per launch — is suppressed. Do not restore
 the old unconditional `WINEDEBUG=-all`, because it leaves the viewer empty.
 
+### Update notifications
+
+`UpdateChecker` reads one public endpoint,
+`https://api.github.com/repos/ArthurSimin/Vanta/releases/latest`. It keeps no
+state, writes no file and never fetches a package. `UpdateBanner` only offers
+**Open release page**, which hands the URL to the desktop browser.
+
+Rules that follow from the distribution model:
+
+- **Never download or install an update.** Vanta is installed as a package, so
+  replacing its own files would fight the package manager and could leave a
+  half-upgraded install. The check exists to tell the user a newer version is
+  out, nothing more.
+- Version comparison is numeric per segment (`1.0.10` is newer than `1.0.9`).
+  A letter suffix marks a pre-release and ranks below the plain release; a
+  numeric packaging suffix (`1.0.3-1`) ranks equal. Do not reduce it to a string
+  comparison.
+- A build without a numeric version (a working-tree development build) skips the
+  check. A failed check is a status line, and only when the user asked for it —
+  never a dialog on startup.
+- The startup check is a single delayed request. Do not add polling, periodic
+  re-checks or a background timer.
+
 ## Packaging
 
 `packaging/build-packages.sh` turns a `DESTDIR` install tree into a `.deb`, an
@@ -221,7 +246,7 @@ installed, and fails when none can be built.
 
 ```bash
 DESTDIR="$PWD/stage" cmake --install build --prefix /usr
-./packaging/build-packages.sh --root stage --version 1.0.2 --out dist
+./packaging/build-packages.sh --root stage --version 1.0.3 --out dist
 ```
 
 Notes that are easy to get wrong:
@@ -278,6 +303,10 @@ These are non-negotiable. A change that violates them is rejected.
   comments, ordering and line endings intact.
 - Never state or imply that a detected fix works, is applied successfully, or
   will make a game playable. Report what was *detected* and what was *changed*.
+- A game whose mode is `Disabled` shows **no** OnlineFix marker anywhere in the
+  library. `Game::showsOnlineFix()` is the only gate; every badge, chip and
+  label must call it instead of testing `fixKind` directly. Detection stays
+  visible in the details sheet, which says the mode is off.
 - Do not add DRM circumvention, licence bypasses, or key generation. Vanta
   launches games the user already has; OnlineFix support exists because the
   launcher-side configuration is legitimate to reproduce.

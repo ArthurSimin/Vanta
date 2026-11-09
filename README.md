@@ -77,6 +77,12 @@ adds entries on its own.
 - **Launch logs.** Every launch stores the runner output, and a terminal-styled
   viewer opens the newest one so a game that closed on its own can still be
   diagnosed. See [Launch logs](#launch-logs).
+- **Release notifications.** Vanta asks GitHub for the newest release once at
+  start, and again whenever you choose **Main menu → Check for updates…**. When
+  a newer version exists, a banner above the library names it and offers
+  **Open release page**. Vanta never downloads or installs an update itself:
+  packages belong to your distribution, so the check only tells you that a new
+  version is there. See [Update notifications](#update-notifications).
 
 ## Requirements
 
@@ -230,7 +236,10 @@ Selecting a game fills the detail strip along the bottom with its cover, name, l
 played date and total playtime, plus a **Launch** button. The arrow beside it opens
 the same menu as a right-click. When a fix signature is present the **OnlineFix**
 chip next to the name is on by default, so the launch applies the configuration the
-fix expects; click it to launch without the fix for one run. Nothing is applied
+fix expects; click it to launch without the fix for one run. Setting the game's
+OnlineFix mode to **Disabled** hides the chip, the card badge and every other
+OnlineFix marker, because a launch would ignore the fix; the game details sheet
+still reports what was detected and says that the mode is off. Nothing is applied
 silently — every file Vanta touches is backed up first, and detection is still not
 proof that a fix works.
 
@@ -347,6 +356,26 @@ scrolled to the newest line, because that is where a failure usually appears.
 A log records what Vanta ran and what the process printed. It cannot prove why a
 game failed, and Vanta makes no such claim.
 
+### Update notifications
+
+Vanta asks `https://api.github.com/repos/ArthurSimin/Vanta/releases/latest` for
+the newest published release once, a couple of seconds after start, and again
+when you pick **Main menu → Check for updates…**.
+
+When the release is newer than the running build, a banner appears above the
+library with its version and an **Open release page** button. The button opens
+the release in your browser; there is no download and no self-update, because
+Vanta is installed by your distribution's package manager and replacing its own
+files would fight it. Dismissing the banner keeps it away for the session;
+checking manually brings it back.
+
+Version comparison is numeric per segment, so `1.0.10` is newer than `1.0.9`. A
+suffix made of letters marks a pre-release (`1.0.3-beta` is older than `1.0.3`),
+while a packaging suffix does not (`1.0.3-1` equals `1.0.3`). A build without a
+numeric version — a development build from the working tree — skips the check
+entirely. A failed check is reported in the status bar only when you asked for
+it.
+
 ## Files
 
 | Purpose | Path |
@@ -365,18 +394,21 @@ overwriting your data.
 
 ## Privacy
 
-Vanta makes network requests in exactly three situations, all of which you start:
+Vanta makes network requests in exactly four situations:
 
-1. Downloading a runner (GitHub release metadata and the release asset).
-2. Downloading cover art from [SteamGridDB](https://www.steamgriddb.com/), which
+1. Checking for a newer release when Vanta starts and when you choose
+   **Check for updates…**. The request reads the public GitHub releases API,
+   sends no information about you or your library, and writes nothing.
+2. Downloading a runner (GitHub release metadata and the release asset).
+3. Downloading cover art from [SteamGridDB](https://www.steamgriddb.com/), which
    sends only the game name you asked it to look up. Turn off "Fetch missing
    cover art automatically" in Settings → Covers to keep lookups entirely manual.
-3. Browsing or installing from [Thunderstore](https://thunderstore.io/), which
+4. Browsing or installing from [Thunderstore](https://thunderstore.io/), which
    sends the community slug, the package or search text you entered, and the
    package downloads themselves. Opening the mod manager alone makes no request.
 
-Nothing else leaves the machine. There is no telemetry, no analytics, no update
-check and no account.
+Nothing else leaves the machine. There is no telemetry, no analytics and no
+account.
 
 Everything else is local. The scanner only reads file names, sizes, timestamps
 and, for Windows executables, the PE header architecture.
@@ -401,6 +433,9 @@ and, for Windows executables, the PE header architecture.
   whether a Thunderstore package is compatible with the installed BepInEx build.
 - Thunderstore support covers BepInEx communities. Games that use a different
   loader (MelonLoader, and packs that only ship `r2modman`) are not supported.
+- The update check only reports a newer release. Vanta does not download or
+  install it, and cannot tell whether your distribution has packaged that
+  version yet.
 
 ## Credits
 

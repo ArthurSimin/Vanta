@@ -452,8 +452,17 @@ void ModManagerDialog::addLocalMod()
     QStringList written;
     QString backupRoot;
     if (!ModInstaller::execute(plan, target, overwrite, &written, &backupRoot, &error)) {
-        QMessageBox::critical(this, QStringLiteral("Mod not installed"), error);
+        QString message = error;
+        if (!written.isEmpty()) {
+            message += QStringLiteral(" %1 file(s) were written before the failure.").arg(written.size());
+        }
+        QMessageBox::critical(this,
+                              written.isEmpty() ? QStringLiteral("Mod not installed")
+                                                : QStringLiteral("Mod installation incomplete"),
+                              message);
         refresh();
+        if (!written.isEmpty())
+            emit modsChanged();
         return;
     }
 

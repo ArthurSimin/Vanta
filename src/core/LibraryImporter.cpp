@@ -215,13 +215,18 @@ QList<ImportedGameCandidate> LibraryImporter::scanLutris()
         // Query pga.db if sqlite3 CLI is available
         const QString sqlite3 = QStandardPaths::findExecutable(QStringLiteral("sqlite3"));
         if (!sqlite3.isEmpty() && QFile::exists(dbPath)) {
+            // A game title may contain a pipe, so the columns are separated with
+            // a control character instead of the default "|".
+            const QString separator = QString(QChar(0x1f));
             QProcess process;
-            process.start(sqlite3, {dbPath, QStringLiteral("SELECT name, slug, runner, platform, directory, configpath FROM games WHERE installed = 1;")});
+            process.start(sqlite3, {QStringLiteral("-separator"), separator, dbPath,
+                                    QStringLiteral("SELECT name, slug, runner, platform, directory, "
+                                                   "configpath FROM games WHERE installed = 1;")});
             if (process.waitForFinished(5000)) {
                 const QString output = QString::fromUtf8(process.readAllStandardOutput());
                 const QStringList lines = output.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
                 for (const QString &line : lines) {
-                    const QStringList parts = line.split(QLatin1Char('|'));
+                    const QStringList parts = line.split(separator);
                     if (parts.size() >= 6) {
                         LutrisDbRow row;
                         row.name = parts.at(0).trimmed();

@@ -434,6 +434,12 @@ void Thunderstore::download(const ThunderstoreVersion &version, const QString &c
         fail(context, QStringLiteral("The package has no download address."));
         return;
     }
+    // The address comes from a remote API, so it is restricted to https before a
+    // GET is issued with the user's machine as the source.
+    if (url.scheme() != QStringLiteral("https")) {
+        fail(context, QStringLiteral("The package download address is not an https URL."));
+        return;
+    }
     get(url, context);
 }
 

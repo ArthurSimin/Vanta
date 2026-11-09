@@ -233,9 +233,10 @@ bool scanNeedsAttention(ScanState state)
 
 bool scanIsDetected(ScanState state)
 {
+    // A failed scan is not a detection. Counting it as one would list an
+    // unreadable folder under "Detected" and in the detected total.
     return state == ScanState::ComponentsDetected
         || state == ScanState::IncompleteInstallation
         || state == ScanState::IncompatibleArchitecture
-        || state == ScanState::MissingRequiredFiles
-        || state == ScanState::ScanError;
+        || state == ScanState::MissingRequiredFiles;
 }

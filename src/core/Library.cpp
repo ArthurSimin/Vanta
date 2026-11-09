@@ -54,18 +54,36 @@ bool GameLibrary::addGame(const Game &game)
 
 int GameLibrary::addGames(const QList<Game> &newGames)
 {
-    int added = 0;
+    QList<Game> appended;
     for (const Game &game : newGames) {
         if (game.id.isEmpty() || hasGame(game.id))
             continue;
-        m_games.append(game);
-        ++added;
+        // hasGame() only sees the library, so a duplicate id inside the incoming
+        // batch would otherwise be added twice.
+        bool alreadyStaged = false;
+        for (const Game &staged : appended) {
+            if (staged.id == game.id) {
+                alreadyStaged = true;
+                break;
+            }
+        }
+        if (alreadyStaged)
+            continue;
+        appended.append(game);
     }
-    if (added > 0) {
-        saveLibrary();
-        emit gamesChanged();
+    if (appended.isEmpty())
+        return 0;
+
+    m_games.append(appended);
+    if (!saveLibrary()) {
+        // Without the rollback the caller would report success and the entries
+        // would vanish at the next start, because nothing on disk changed.
+        for (int index = 0; index < appended.size(); ++index)
+            m_games.removeLast();
+        return 0;
     }
-    return added;
+    emit gamesChanged();
+    return appended.size();
 }
 
 bool GameLibrary::updateGame(const Game &game)

@@ -1412,8 +1412,13 @@ OnlineFixInfo MainWindow::onlineFixInfoFor(const Game &game) const
         info.fixPath = game.fixPath;
         info.photonLauncherDir = game.photonLauncherDir;
     }
-    if (!info.realAppId.isEmpty() && game.realAppId.isEmpty())
+    // The scan result wins, but a stored app id is still usable when the scan
+    // did not read one; this previously ran only when the stored value was
+    // empty, which is the one case where it does nothing.
+    if (info.realAppId.isEmpty() && !game.realAppId.isEmpty())
         info.realAppId = game.realAppId;
+    if (info.fakeAppId.isEmpty() && !game.fakeAppId.isEmpty())
+        info.fakeAppId = game.fakeAppId;
     return info;
 }
 

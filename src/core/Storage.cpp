@@ -76,8 +76,15 @@ void Storage::quarantineCorruptFile(const QString &path)
 {
     if (!QFileInfo::exists(path))
         return;
-    const QString suffix = QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss"));
-    const QString target = path + QStringLiteral(".corrupt-") + suffix;
+    // A second corrupt file in the same second must not overwrite the first
+    // quarantine, which is the only surviving copy of the original data.
+    const QString base = path + QStringLiteral(".corrupt-")
+        + QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss"));
+    QString target = base;
+    for (int attempt = 1; QFileInfo::exists(target) && attempt < 1000; ++attempt)
+        target = QStringLiteral("%1-%2").arg(base).arg(attempt);
+    if (QFileInfo::exists(target))
+        return;
     QFile::rename(path, target);
 }
 
@@ -142,15 +149,25 @@ QList<Game> Storage::loadLibrary(QStringList *warnings)
         return games;
     }
     const QJsonArray array = gamesValue.toArray();
+    bool generatedIds = false;
     for (const QJsonValue &value : array) {
         if (!value.isObject())
             continue;
         Game game = Game::fromJson(value.toObject());
         if (game.name.trimmed().isEmpty() && game.executable.isEmpty())
             continue;
-        if (game.id.isEmpty())
+        if (game.id.isEmpty()) {
             game.id = Game::create().id;
+            // The id is the key for covers, logs and scan cache, so an entry
+            // without one must not be given a fresh id on every start.
+            generatedIds = true;
+        }
         games.append(game);
+    }
+    if (generatedIds) {
+        // Best effort: a read-only library is still usable for this session, and
+        // the caller hears about the failure on the next real save.
+        saveLibrary(games, nullptr);
     }
     return games;
 }

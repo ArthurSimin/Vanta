@@ -66,6 +66,12 @@ public:
     void listCoverArt(const QString &gameId, const QString &gameName);
     void downloadCoverArt(const QString &gameId, const CoverArt &art);
     void downloadThumbnail(const QString &gridId, const QString &thumbUrl);
+
+    // Continues the automatic fetch queue after an interactive artwork picker
+    // closed without a choice. The picker suspends the queue while it is open,
+    // and without this the remaining covers were never fetched that session.
+    void resumeQueue();
+
     void cancel();
 
 signals:

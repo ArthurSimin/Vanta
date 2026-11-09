@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QSaveFile>
 #include <QRegularExpression>
+#include <QStringDecoder>
 
 QString IniFile::detectNewline(const QByteArray &data)
 {
@@ -33,7 +34,14 @@ bool IniFile::load(const QString &path, QString *error)
     m_finalNewline = data.endsWith('\n');
     m_utf8Bom = data.startsWith("\xEF\xBB\xBF");
     const QByteArray content = m_utf8Bom ? data.mid(3) : data;
-    QString text = QString::fromUtf8(content);
+    // A Legacy INI from a Windows game is often CP1252, not UTF-8. Detecting
+    // that at load time is the only way to write the file back without
+    // replacing every accented character with U+FFFD.
+    QStringDecoder decoder(QStringDecoder::Utf8);
+    QString text = decoder(content);
+    m_latin1 = decoder.hasError();
+    if (m_latin1)
+        text = QString::fromLatin1(content);
     if (text.endsWith(QLatin1Char('\n')))
         text.chop(1);
     if (text.endsWith(QLatin1Char('\r')))
@@ -234,7 +242,23 @@ bool IniFile::saveAs(const QString &path, QString *error)
     QByteArray data;
     if (m_utf8Bom)
         data.append("\xEF\xBB\xBF");
-    data.append(m_lines.join(m_newline).toUtf8());
+    const QString text = m_lines.join(m_newline);
+    if (m_latin1) {
+        // The original bytes were not UTF-8, so they round-trip byte for byte
+        // through Latin-1. A character the encoding cannot represent can only
+        // come from something new, and writing UTF-8 into a CP1252 file would
+        // corrupt the rest, so refuse instead.
+        if (text.contains(QRegularExpression(QStringLiteral("[^\\x00-\\xFF]")))) {
+            if (error)
+                *error = QStringLiteral("%1 is not UTF-8 and cannot represent the new text, so it was left "
+                                        "unchanged.").arg(path);
+            file.cancelWriting();
+            return false;
+        }
+        data.append(text.toLatin1());
+    } else {
+        data.append(text.toUtf8());
+    }
     if (m_finalNewline && !m_lines.isEmpty())
         data.append(m_newline.toUtf8());
     if (file.write(data) != data.size()) {

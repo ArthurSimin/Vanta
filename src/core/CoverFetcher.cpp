@@ -1,7 +1,6 @@
 #include "CoverFetcher.h"
 
 #include <QDir>
-#include <QFile>
 #include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -10,6 +9,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QRegularExpression>
+#include <QSaveFile>
 #include <QStandardPaths>
 #include <QTimer>
 #include <QUrl>
@@ -358,6 +358,13 @@ void CoverFetcher::downloadCoverArt(const QString &gameId, const CoverArt &art)
     downloadImage(gameId, art.fullUrl);
 }
 
+void CoverFetcher::resumeQueue()
+{
+    if (m_reply)
+        return;
+    queueNextFetch();
+}
+
 void CoverFetcher::queueNextFetch()
 {
     m_pendingGameId.clear();
@@ -378,9 +385,9 @@ void CoverFetcher::queueNextFetch()
 void CoverFetcher::emitFailed(const QString &gameId, const QString &message)
 {
     emit failed(gameId, message);
-    if (m_mode == Mode::SaveFirst) {
-        queueNextFetch();
-    }
+    // Both modes continue the queue: an artwork listing that failed before the
+    // picker opened would otherwise strand every cover still waiting.
+    queueNextFetch();
 }
 
 void CoverFetcher::emitFinished(const QString &gameId, const QString &coverPath)
@@ -553,13 +560,18 @@ void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl)
         }
 
         const QString path = suggestedCoverPath(gameId, detectImageExtension(payload));
-        QFile file(path);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        // The cover is written with QSaveFile so an interrupted download cannot
+        // leave a truncated image that the grid then paints as a broken card.
+        QSaveFile file(path);
+        if (!file.open(QIODevice::WriteOnly)) {
             emitFailed(gameId, QStringLiteral("The cover image could not be saved to %1.").arg(path));
             return;
         }
-        file.write(payload);
-        file.close();
+        if (file.write(payload) != payload.size() || !file.commit()) {
+            file.cancelWriting();
+            emitFailed(gameId, QStringLiteral("The cover image could not be saved to %1.").arg(path));
+            return;
+        }
         if (QFileInfo(path).size() <= 0) {
             QFile::remove(path);
             emitFailed(gameId, QStringLiteral("The downloaded cover image was empty."));

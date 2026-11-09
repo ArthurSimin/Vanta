@@ -204,6 +204,16 @@ void LibraryImportDialog::importSelected()
     }
 
     const int imported = m_library->addGames(addedGames);
+    if (imported < addedGames.size()) {
+        // The porting plan is complete before the write, so a shortfall means
+        // the library could not be saved. Saying "ported" for entries that will
+        // disappear on the next start would be a lie.
+        QMessageBox::warning(
+            this, QStringLiteral("Could not save the library"),
+            QStringLiteral("%1 of %2 games could not be saved. The library file may be unwritable.")
+                .arg(QString::number(addedGames.size() - imported), QString::number(addedGames.size())));
+        return;
+    }
     emit gamesImported(imported);
     emit gamesImportedList(addedGames);
 

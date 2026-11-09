@@ -39,5 +39,9 @@ private:
     QString m_newline = QStringLiteral("\n");
     bool m_finalNewline = true;
     bool m_utf8Bom = false;
+    // A legacy INI (typically Latin-1/CP1252) is decoded and written back in its
+    // own single-byte encoding. Re-encoding it as UTF-8 would replace every
+    // non-ASCII character with U+FFFD, and the file is not ours to change.
+    bool m_latin1 = false;
     bool m_changed = false;
 };

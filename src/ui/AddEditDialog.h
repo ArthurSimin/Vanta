@@ -34,8 +34,10 @@ private:
     void buildEnvironmentTab();
     void loadFromGame();
     void updateRunnerUi();
+    void populateBuildCombo(RunnerType runner);
+    void onBuildChanged();
+    void applyBuildSelectionUi();
     void refreshDetection(bool applyDetectedValues);
-    void detectRunner();
     void browseExecutable();
     void browseWorkingDirectory();
     void browseCover();
@@ -70,9 +72,10 @@ private:
 
     QComboBox *m_runnerCombo = nullptr;
     QComboBox *m_platformCombo = nullptr;
+    QComboBox *m_runnerBuildCombo = nullptr;
+    QLabel *m_runnerBuildLabel = nullptr;
     QLineEdit *m_runnerPathEdit = nullptr;
     QPushButton *m_runnerBrowseButton = nullptr;
-    QPushButton *m_runnerDetectButton = nullptr;
     QLineEdit *m_prefixEdit = nullptr;
     QPushButton *m_prefixBrowseButton = nullptr;
     QCheckBox *m_wineD3DCheck = nullptr;

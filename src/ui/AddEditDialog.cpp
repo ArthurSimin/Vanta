@@ -8,7 +8,6 @@
 #include "OnlineFix.h"
 #include "ThemeManager.h"
 
-#include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDateTime>
@@ -20,7 +19,6 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QMenu>
 #include <QPlainTextEdit>
 #include <QProcess>
 #include <QPushButton>
@@ -28,10 +26,12 @@
 #include <QScrollArea>
 #include <QStandardPaths>
 #include <QTabWidget>
-#include <QToolTip>
 #include <QVBoxLayout>
 
 namespace {
+// Sentinel data value for the "custom path" entry in the runner build chooser.
+const char *const kCustomBuild = "__vanta_custom_runner__";
+
 QScrollArea *makeScrollArea(QWidget *content, QWidget *parent)
 {
     auto *area = new QScrollArea(parent);
@@ -308,6 +308,15 @@ void AddEditDialog::buildRunnerTab()
     m_platformCombo->addItem(platformName(Platform::Windows), static_cast<int>(Platform::Windows));
     form->addRow(QStringLiteral("Platform"), m_platformCombo);
 
+    m_runnerBuildCombo = new QComboBox(content);
+    m_runnerBuildCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_runnerBuildCombo->setToolTip(QStringLiteral(
+        "Pick one of the Wine or Proton builds Vanta found on this system, or choose a custom path."));
+    form->addRow(QStringLiteral("Build"), m_runnerBuildCombo);
+    m_runnerBuildLabel = qobject_cast<QLabel *>(form->labelForField(m_runnerBuildCombo));
+    connect(m_runnerBuildCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            [this] { onBuildChanged(); });
+
     auto *runnerRow = new QWidget(content);
     auto *runnerLayout = new QHBoxLayout(runnerRow);
     runnerLayout->setContentsMargins(0, 0, 0, 0);
@@ -316,15 +325,10 @@ void AddEditDialog::buildRunnerTab()
     m_runnerBrowseButton = new QPushButton(QStringLiteral("Browse…"), runnerRow);
     m_runnerBrowseButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makeFlat(m_runnerBrowseButton);
-    m_runnerDetectButton = new QPushButton(QStringLiteral("Detect"), runnerRow);
-    m_runnerDetectButton->setCursor(Qt::PointingHandCursor);
-    UiHelp::makeFlat(m_runnerDetectButton);
     runnerLayout->addWidget(m_runnerPathEdit, 1);
-    runnerLayout->addWidget(m_runnerDetectButton);
     runnerLayout->addWidget(m_runnerBrowseButton);
     form->addRow(QStringLiteral("Runner path"), runnerRow);
     connect(m_runnerBrowseButton, &QPushButton::clicked, this, &AddEditDialog::browseRunnerPath);
-    connect(m_runnerDetectButton, &QPushButton::clicked, this, &AddEditDialog::detectRunner);
 
     QPushButton *prefixButton = nullptr;
     form->addRow(QStringLiteral("Prefix folder"),
@@ -480,19 +484,28 @@ void AddEditDialog::updateRunnerUi()
     const bool wineLike = runnerIsWineLike(runner);
     const bool proton = runner == RunnerType::Proton;
     const bool native = runner == RunnerType::Native;
-    const bool flatpak = runner == RunnerType::Flatpak;
 
     m_runnerPathEdit->setEnabled(!native);
-    m_runnerBrowseButton->setVisible(!native && !flatpak);
-    m_runnerDetectButton->setVisible(runner == RunnerType::Wine || proton);
     m_prefixEdit->setEnabled(wineLike);
     m_prefixBrowseButton->setVisible(wineLike);
     m_wineD3DCheck->setEnabled(proton);
     m_nativeWaylandCheck->setEnabled(proton);
     m_steamOverlayCheck->setEnabled(proton);
     m_steamRuntimeCheck->setEnabled(proton);
-    m_bepInExCheck->setEnabled(wineLike);
     m_overridesEdit->setEnabled(wineLike);
+
+    // The build chooser lists every Wine or Proton Vanta found so the user can
+    // pick the exact one for a game instead of typing a path. It is hidden for
+    // runners that do not use a Wine-like build.
+    m_runnerBuildCombo->setVisible(wineLike);
+    if (m_runnerBuildLabel)
+        m_runnerBuildLabel->setVisible(wineLike);
+    if (wineLike) {
+        populateBuildCombo(runner);
+        applyBuildSelectionUi();
+    } else {
+        m_runnerBrowseButton->setVisible(runner == RunnerType::Custom);
+    }
 
     switch (runner) {
     case RunnerType::Native:
@@ -517,6 +530,27 @@ void AddEditDialog::updateRunnerUi()
         m_runnerPathEdit->setPlaceholderText(QStringLiteral("Launcher executable and optional arguments, for example: mangohud"));
         m_runnerHelp->setText(QStringLiteral("The custom command is executed with the optional executable and game arguments appended."));
         break;
+    }
+
+    // The BepInEx line means something different per runner, and Flatpak cannot
+    // inject the preloader at all, so the option says so instead of presenting a
+    // Windows-only override for a game that will never use it.
+    if (native) {
+        m_bepInExCheck->setEnabled(true);
+        m_bepInExCheck->setText(QStringLiteral("BepInEx compatibility (doorstop launcher when detected)"));
+        m_bepInExCheck->setToolTip(QStringLiteral(
+            "A native Linux game loads BepInEx through the run_bepinex.sh doorstop launcher. "
+            "Vanta uses that script when it is present next to the game."));
+    } else if (wineLike) {
+        m_bepInExCheck->setEnabled(true);
+        m_bepInExCheck->setText(QStringLiteral("BepInEx compatibility (winhttp=n,b when detected)"));
+        m_bepInExCheck->setToolTip(QStringLiteral(
+            "Adds the winhttp=n,b DLL override for the launch when BepInEx files are detected."));
+    } else {
+        m_bepInExCheck->setEnabled(false);
+        m_bepInExCheck->setText(QStringLiteral("BepInEx compatibility (not available for this runner)"));
+        m_bepInExCheck->setToolTip(QStringLiteral(
+            "BepInEx can only be loaded for Native, Wine and Proton launches."));
     }
 }
 
@@ -566,30 +600,68 @@ void AddEditDialog::refreshDetection(bool applyDetectedValues)
     }
 }
 
-void AddEditDialog::detectRunner()
+void AddEditDialog::populateBuildCombo(RunnerType runner)
 {
-    const auto runner = static_cast<RunnerType>(m_runnerCombo->currentData().toInt());
-    QList<RunnerEntry> entries;
-    if (runner == RunnerType::Wine)
-        entries = RunnerDetector::wineEntries(m_settings);
-    else if (runner == RunnerType::Proton)
-        entries = RunnerDetector::protonEntries(m_settings);
-    if (entries.isEmpty()) {
-        QToolTip::showText(m_runnerDetectButton->mapToGlobal(QPoint(0, m_runnerDetectButton->height())),
-                           QStringLiteral("No matching runners were found on this system."), m_runnerDetectButton);
-        return;
-    }
+    const QString previous = m_runnerBuildCombo->currentData().toString();
+    const QString currentPath = m_runnerPathEdit->text().trimmed();
 
-    QMenu menu(this);
+    const QList<RunnerEntry> entries = runner == RunnerType::Proton
+        ? RunnerDetector::protonEntries(m_settings)
+        : RunnerDetector::wineEntries(m_settings);
+
+    m_runnerBuildCombo->blockSignals(true);
+    m_runnerBuildCombo->clear();
+    // A blank path is meaningful for Wine: it asks the launch plan to resolve
+    // the system wine at start time. Giving it a named entry keeps the combo
+    // from showing "Custom path..." for a perfectly normal configuration.
+    if (runner == RunnerType::Wine)
+        m_runnerBuildCombo->addItem(QStringLiteral("System Wine (chosen at launch)"), QString());
     for (const RunnerEntry &entry : entries) {
-        QAction *action = menu.addAction(entry.name);
-        action->setToolTip(entry.path);
-        action->setData(entry.path);
+        QString label = entry.name;
+        if (runner == RunnerType::Proton) {
+            // Proton builds, especially the community ones, are told apart by
+            // their version string rather than by the folder name.
+            const QString version = RunnerDetector::protonVersion(entry.path);
+            if (!version.isEmpty() && !label.contains(version, Qt::CaseInsensitive))
+                label += QStringLiteral(" · %1").arg(version);
+        }
+        m_runnerBuildCombo->addItem(label, entry.path);
     }
-    QAction *chosen = menu.exec(m_runnerDetectButton->mapToGlobal(QPoint(0, m_runnerDetectButton->height())));
-    if (!chosen)
+    m_runnerBuildCombo->addItem(QStringLiteral("Custom path…"), QLatin1String(kCustomBuild));
+    if (entries.isEmpty())
+        m_runnerBuildCombo->setItemText(m_runnerBuildCombo->count() - 1,
+                                        QStringLiteral("Custom path… (no builds were detected)"));
+
+    int index = m_runnerBuildCombo->findData(currentPath);
+    if (index < 0 && previous != QLatin1String(kCustomBuild))
+        index = m_runnerBuildCombo->findData(previous);
+    if (index < 0)
+        index = m_runnerBuildCombo->count() - 1;
+    m_runnerBuildCombo->setCurrentIndex(index);
+    m_runnerBuildCombo->blockSignals(false);
+}
+
+void AddEditDialog::onBuildChanged()
+{
+    const QString data = m_runnerBuildCombo->currentData().toString();
+    if (data == QLatin1String(kCustomBuild)) {
+        // The path field becomes editable again so a build outside the searched
+        // folders can still be entered.
+        m_runnerPathEdit->setEnabled(true);
+        m_runnerBrowseButton->setVisible(true);
+        m_runnerPathEdit->setFocus(Qt::OtherFocusReason);
         return;
-    m_runnerPathEdit->setText(chosen->data().toString());
+    }
+    m_runnerPathEdit->setText(data);
+    m_runnerPathEdit->setEnabled(false);
+    m_runnerBrowseButton->setVisible(false);
+}
+
+void AddEditDialog::applyBuildSelectionUi()
+{
+    const bool custom = m_runnerBuildCombo->currentData().toString() == QLatin1String(kCustomBuild);
+    m_runnerPathEdit->setEnabled(custom);
+    m_runnerBrowseButton->setVisible(custom);
 }
 
 void AddEditDialog::browseExecutable()

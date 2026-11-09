@@ -1030,6 +1030,13 @@ void RunnerInstaller::cancelOperation()
 {
     if (!busy())
         return;
+    // Killing the elevation wrapper does not stop apt/dpkg/pacman and can leave
+    // the package database mid-transaction. The only safe cancellation is to
+    // let the package manager finish and report its real result.
+    if (m_operation == Operation::InstallingPackage || m_operation == Operation::UninstallingPackage) {
+        emit progress(QStringLiteral("The package manager is still running. Wait for it to finish before closing this dialog."));
+        return;
+    }
     m_cancelRequested = true;
     if (m_reply) {
         QNetworkReply *reply = m_reply.data();

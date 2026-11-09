@@ -8,6 +8,7 @@
 #include "ScanController.h"
 #include "Launcher.h"
 #include "ThemeManager.h"
+#include "UpdateChecker.h"
 
 #include <QMainWindow>
 #include <QPointer>
@@ -28,6 +29,7 @@ class LaunchProgressDialog;
 class SteamPrecondition;
 class CoverFetcher;
 class GameSelectionBar;
+class UpdateBanner;
 
 class MainWindow : public QMainWindow
 {
@@ -82,6 +84,9 @@ private:
     void openLibraryImportDialog();
     void handleGamesImported(const QList<Game> &imported);
     void fetchMissingCovers();
+    void checkForUpdates(bool manual);
+    void handleUpdateAvailable(const UpdateRelease &release, const QString &currentVersion);
+    void openUpdatePage(const QString &url);
     void showContextMenu(const QString &gameId, const QPoint &globalPosition);
     void showTutorial(int startIndex = 0);
     void showTutorialSteps();
@@ -137,6 +142,12 @@ private:
     QLabel *m_statusLabel = nullptr;
     QLabel *m_runningLabel = nullptr;
     TutorialOverlay *m_tutorial = nullptr;
+    UpdateBanner *m_updateBanner = nullptr;
+    UpdateChecker m_updateChecker;
+    // Set once the user dismisses the banner, so a periodic check cannot bring
+    // the same notification back in the same session.
+    bool m_updateDismissed = false;
+    bool m_updateCheckManual = false;
 
     QMenu *m_filterMenu = nullptr;
     QMenu *m_viewMenu = nullptr;

@@ -22,6 +22,7 @@
 #include "GameSelectionBar.h"
 #include "LibraryImportDialog.h"
 #include "TutorialOverlay.h"
+#include "UpdateBanner.h"
 #include "Version.h"
 
 #include <QAction>
@@ -113,8 +114,12 @@ MainWindow::MainWindow(QWidget *parent)
 
                 const int result = picker.exec();
                 disconnect(thumbConnection);
-                if (result != QDialog::Accepted)
+                if (result != QDialog::Accepted) {
+                    // The picker suspends the automatic queue while it is open;
+                    // covers waiting behind it have to resume either way.
+                    m_coverFetcher->resumeQueue();
                     return;
+                }
                 const CoverArt chosen = picker.selectedArt();
                 if (chosen.fullUrl.isEmpty())
                     return;
@@ -135,6 +140,10 @@ MainWindow::MainWindow(QWidget *parent)
             showTutorial(0);
         scheduleAutoScan();
     });
+
+    // Check once per run, a moment after start-up so the window is painted and
+    // the status line is not fighting the first paint.
+    QTimer::singleShot(2500, this, [this] { checkForUpdates(false); });
 }
 
 MainWindow::~MainWindow()
@@ -173,6 +182,11 @@ void MainWindow::buildUi()
     contentLayout->setSpacing(0);
     buildHeader();
     contentLayout->addWidget(m_header);
+
+    m_updateBanner = new UpdateBanner(&m_theme, contentArea);
+    m_updateBanner->setVisible(false);
+    contentLayout->addWidget(m_updateBanner);
+
     buildContent();
     contentLayout->addWidget(m_libraryView, 1);
 
@@ -462,6 +476,26 @@ void MainWindow::connectSignals()
         updateRunningState();
     });
     connect(&m_launcher, &GameLauncher::gameFinished, this, &MainWindow::handleGameFinished);
+
+    connect(&m_updateChecker, &UpdateChecker::updateAvailable, this, &MainWindow::handleUpdateAvailable);
+    connect(&m_updateChecker, &UpdateChecker::upToDate, this, [this](const QString &) {
+        if (m_updateCheckManual)
+            setStatusMessage(QStringLiteral("Vanta is up to date."));
+    });
+    connect(&m_updateChecker, &UpdateChecker::checkSkipped, this, [this](const QString &) {
+        // No request was made, so saying "up to date" would be a claim Vanta
+        // cannot support. A development build has no release to compare against.
+        if (m_updateCheckManual)
+            setStatusMessage(QStringLiteral("This build has no release version, so updates cannot be checked."));
+    });
+    connect(&m_updateChecker, &UpdateChecker::checkFailed, this, [this](const QString &message) {
+        // A failed check is not something the user has to fix, so it stays a
+        // status line instead of a dialog, and only when the check was asked for.
+        if (m_updateCheckManual)
+            setStatusMessage(QStringLiteral("The update check failed. %1").arg(message), 9000);
+    });
+    connect(m_updateBanner, &UpdateBanner::openReleaseRequested, this, &MainWindow::openUpdatePage);
+    connect(m_updateBanner, &UpdateBanner::dismissed, this, [this] { m_updateDismissed = true; });
 }
 
 void MainWindow::restoreState()
@@ -680,6 +714,8 @@ void MainWindow::refreshIcons()
     auto *tutorialAction = m_mainMenu->addAction(QStringLiteral("Show tutorial"));
     connect(tutorialAction, &QAction::triggered, this, [this] { showTutorial(0); });
     m_mainMenu->addSeparator();
+    auto *updateAction = m_mainMenu->addAction(QStringLiteral("Check for updates…"));
+    connect(updateAction, &QAction::triggered, this, [this] { checkForUpdates(true); });
     auto *aboutAction = m_mainMenu->addAction(QStringLiteral("About Vanta"));
     connect(aboutAction, &QAction::triggered, this, &MainWindow::openAboutDialog);
     auto *quitAction = m_mainMenu->addAction(QStringLiteral("Quit"));
@@ -1196,6 +1232,38 @@ void MainWindow::openAboutDialog()
 {
     AboutDialog dialog(&m_theme, this);
     dialog.exec();
+}
+
+void MainWindow::checkForUpdates(bool manual)
+{
+    // A check is a network round trip, so the manual path reports its progress
+    // and the automatic one stays silent unless there is something to say.
+    m_updateCheckManual = manual;
+    if (manual) {
+        setStatusMessage(QStringLiteral("Checking for updates…"), 4000);
+        m_updateDismissed = false;
+        if (m_updateBanner)
+            m_updateBanner->hideBanner();
+    }
+    m_updateChecker.checkForUpdates(QStringLiteral(VANTA_VERSION));
+}
+
+void MainWindow::handleUpdateAvailable(const UpdateRelease &release, const QString &currentVersion)
+{
+    if (m_updateDismissed || !m_updateBanner)
+        return;
+    m_updateBanner->showRelease(release, currentVersion);
+    setStatusMessage(QStringLiteral("Vanta %1 is available.")
+                         .arg(UpdateChecker::normaliseVersion(release.tagName)),
+                     9000);
+}
+
+void MainWindow::openUpdatePage(const QString &url)
+{
+    if (url.isEmpty())
+        return;
+    if (!QDesktopServices::openUrl(QUrl(url)))
+        warn(QStringLiteral("The release page could not be opened in a browser."));
 }
 
 void MainWindow::openRunnerInstallDialog()

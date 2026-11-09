@@ -724,6 +724,18 @@ QFrame#compatibilityPanel, QFrame#diagnosticsPanel, QFrame#infoPanel {
     border: 1px solid %BORDER%;
     border-radius: 13px;
 }
+QFrame#updateBanner {
+    background: %ACCENTSOFT%;
+    border: 1px solid %ACCENT%;
+    border-radius: 13px;
+    margin: 0px 22px 10px 22px;
+}
+QLabel#updateBannerHeadline {
+    color: %TEXT%;
+}
+QToolButton#updateBannerDismiss:hover {
+    background: %HOVER%;
+}
 QFrame#emptyState, QFrame#filterPopup {
     background: %SURFACE%;
     border: 1px solid %BORDER%;

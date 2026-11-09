@@ -102,6 +102,8 @@ set(VANTA_SOURCES
     src/core/ThemeManager.h
     src/core/Types.cpp
     src/core/Types.h
+    src/core/UpdateChecker.cpp
+    src/core/UpdateChecker.h
     src/Version.h
 
     src/ui/AboutDialog.cpp
@@ -150,6 +152,8 @@ set(VANTA_SOURCES
     src/ui/SteamPromptDialog.h
     src/ui/TutorialOverlay.cpp
     src/ui/TutorialOverlay.h
+    src/ui/UpdateBanner.cpp
+    src/ui/UpdateBanner.h
 
     resources.qrc
 )

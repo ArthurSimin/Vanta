@@ -53,6 +53,7 @@ struct ScanResult
     QString prefixStatus;
     bool bepinexDetected = false;
     bool truncated = false;
+    bool executablesTruncated = false;
     QString suggestedExecutable;
     QString error;
     qint64 directoryModified = 0;

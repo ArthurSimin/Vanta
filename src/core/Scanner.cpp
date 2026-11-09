@@ -249,6 +249,7 @@ QJsonObject ScanResult::toJson() const
     object.insert(QStringLiteral("prefixStatus"), prefixStatus);
     object.insert(QStringLiteral("bepinexDetected"), bepinexDetected);
     object.insert(QStringLiteral("truncated"), truncated);
+    object.insert(QStringLiteral("executablesTruncated"), executablesTruncated);
     object.insert(QStringLiteral("suggestedExecutable"), suggestedExecutable);
     object.insert(QStringLiteral("error"), error);
     object.insert(QStringLiteral("directoryModified"), static_cast<double>(directoryModified));
@@ -297,6 +298,7 @@ ScanResult ScanResult::fromJson(const QJsonObject &object)
     result.prefixStatus = object.value(QStringLiteral("prefixStatus")).toString();
     result.bepinexDetected = object.value(QStringLiteral("bepinexDetected")).toBool(false);
     result.truncated = object.value(QStringLiteral("truncated")).toBool(false);
+    result.executablesTruncated = object.value(QStringLiteral("executablesTruncated")).toBool(false);
     result.suggestedExecutable = object.value(QStringLiteral("suggestedExecutable")).toString();
     result.error = object.value(QStringLiteral("error")).toString();
     result.directoryModified = static_cast<qint64>(object.value(QStringLiteral("directoryModified")).toDouble());
@@ -663,8 +665,15 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
                 : (isElf ? QStringLiteral("Linux ELF") : QStringLiteral("Script"));
             candidate.depth = depth;
             candidate.score = score;
-            if (result.executables.size() < 400)
+            // The cap only matters for pathological folders, but it must not be
+            // silent: a user wondering why the right binary is missing from the
+            // list has no other hint.
+            if (result.executables.size() < 400) {
                 result.executables.append(candidate);
+            } else if (!result.executablesTruncated) {
+                result.executablesTruncated = true;
+                result.warnings.append(QStringLiteral("More than 400 executables were found. Only the %1 best matches are listed; set the executable explicitly if the right one is missing.").arg(400));
+            }
         }
     }
 

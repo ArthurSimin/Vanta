@@ -781,6 +781,31 @@ void RunnerInstaller::beginExtraction()
         failOperation(QStringLiteral("The tar command was not found; the downloaded archive cannot be extracted."));
         return;
     }
+
+    // The archive is network-sourced, so its member names are checked before
+    // anything is written. GNU tar already refuses ".." and strips a leading
+    // slash, but validating first means the failure is Vanta's own message
+    // rather than a page of tar output.
+    QProcess listing;
+    listing.start(tar, {QStringLiteral("-tf"), m_temporaryFile});
+    if (!listing.waitForFinished(30000) || listing.exitStatus() != QProcess::NormalExit
+        || listing.exitCode() != 0) {
+        failOperation(QStringLiteral("The downloaded archive could not be read."));
+        return;
+    }
+    const QStringList members = QString::fromLocal8Bit(listing.readAllStandardOutput())
+                                    .split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+    for (const QString &rawMember : members) {
+        const QString member = rawMember.trimmed();
+        const QStringList parts = member.split(QLatin1Char('/'), Qt::SkipEmptyParts);
+        if (member.startsWith(QLatin1Char('/')) || member.startsWith(QLatin1Char('\\'))
+            || parts.contains(QStringLiteral(".."))) {
+            failOperation(QStringLiteral("The downloaded archive contains a path outside its own folder: %1")
+                              .arg(member));
+            return;
+        }
+    }
+
     beginOperation(Operation::Extracting,
                    QStringLiteral("Extracting %1…").arg(m_releaseTag.isEmpty() ? m_downloadName : m_releaseTag));
     m_processOutput.clear();

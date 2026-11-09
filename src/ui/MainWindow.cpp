@@ -379,6 +379,10 @@ void MainWindow::connectSignals()
         m_compatibilityFilter = CompatibilityFilter::All;
         m_installFilter = InstallFilter::All;
         m_favoritesOnly = false;
+        m_hideNeedsAttention = false;
+        m_hiddenRunners.clear();
+        buildFilterMenu();
+        persistFilterList();
         selectFilter(QStringLiteral("library.games"));
     });
 

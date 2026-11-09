@@ -34,6 +34,10 @@ signals:
     void gameFinished(const QString &gameId, qint64 elapsedSeconds, int exitCode,
                       bool crashed, bool stopped, const QString &diagnostic,
                       const QString &logPath);
+    // Emitted the moment the game process exits, before the prefix teardown
+    // finishes. The UI clears its running state from this so a game that exits
+    // on its own stops showing Stop without waiting on wineserver.
+    void gameExited(const QString &gameId);
     void launchFailed(const QString &gameId, const QString &message, const QString &diagnostic,
                       const QString &logPath);
     void gameStopping(const QString &gameId);
@@ -47,9 +51,11 @@ private:
         bool stopped = false;
         bool stopInProgress = false;
         bool started = false;
+        bool running = false;
         bool failureEmitted = false;
         QByteArray output;
         QByteArray errorOutput;
+        QString liveLogPath;
         LaunchPlan plan;
         QString gameName;
         QString executableBaseName;

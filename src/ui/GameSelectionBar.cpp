@@ -242,6 +242,9 @@ void GameSelectionBar::setRunning(bool running)
     if (m_running == running)
         return;
     m_running = running;
+    // The meta line changes between "Running now" and the stored playtime, so it
+    // has to be rebuilt too and not only the primary button.
+    updateContent();
     updatePrimaryButton();
 }
 
@@ -262,7 +265,10 @@ void GameSelectionBar::updateContent()
                                                   : QStringLiteral("OnlineFix off"));
 
     QStringList parts;
-    parts.append(lastPlayedText(m_game));
+    // While the game is open the stored last-played time is stale, and on a
+    // first run it is not set at all. Reporting the live state is honest and
+    // stops a running game from claiming it was never played.
+    parts.append(m_running ? QStringLiteral("Running now") : lastPlayedText(m_game));
     const QString playtime = playtimeText(m_game);
     if (!playtime.isEmpty())
         parts.append(playtime);

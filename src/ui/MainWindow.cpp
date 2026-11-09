@@ -447,6 +447,13 @@ void MainWindow::connectSignals()
         updateRunningState();
         setStatusMessage(QStringLiteral("Game started."));
     });
+    // The process exited but the prefix may still be shutting down. Clearing the
+    // running state here is what makes a game the user closed themselves stop
+    // showing Stop immediately.
+    connect(&m_launcher, &GameLauncher::gameExited, this, [this](const QString &gameId) {
+        Q_UNUSED(gameId);
+        updateRunningState();
+    });
     connect(&m_launcher, &GameLauncher::launchFailed, this,
             [this](const QString &gameId, const QString &message, const QString &diagnostic,
                    const QString &logPath) {

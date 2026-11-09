@@ -35,6 +35,52 @@ QString labelFor(bool crashed, bool stopped, int exitCode)
         return QStringLiteral("exited with a non-zero code");
     return QStringLiteral("closed normally");
 }
+
+QString buildHeader(const QString &gameId, const QString &gameName, const QString &runner,
+                    const QDateTime &startedAt, const QDateTime &finishedAt, int exitCode,
+                    bool crashed, bool stopped, bool running)
+{
+    QString header = QStringLiteral("Vanta launch log\n");
+    header += QStringLiteral("Game: %1\n").arg(gameName);
+    header += QStringLiteral("Game id: %1\n").arg(gameId);
+    header += QStringLiteral("Runner: %1\n").arg(runner.isEmpty() ? QStringLiteral("Unknown") : runner);
+    header += QStringLiteral("Started: %1\n").arg(startedAt.toString(Qt::ISODate));
+    if (running)
+        header += QStringLiteral("Finished: (still running)\n");
+    else
+        header += QStringLiteral("Finished: %1\n").arg(finishedAt.toString(Qt::ISODate));
+    if (running)
+        header += QStringLiteral("Exit code: unknown (the game is still running)\n");
+    else if (exitCode < 0)
+        header += QStringLiteral("Exit code: none (the process never started)\n");
+    else
+        header += QStringLiteral("Exit code: %1\n").arg(exitCode);
+    header += QStringLiteral("Result: %1\n").arg(running ? QStringLiteral("running")
+                                                        : labelFor(crashed, stopped, exitCode));
+    header += QStringLiteral("----------------\n");
+    return header;
+}
+
+QString writeBody(const QString &path, const QString &text, QString *error)
+{
+    QSaveFile file(path);
+    if (!file.open(QIODevice::WriteOnly)) {
+        if (error)
+            *error = QStringLiteral("Could not create the log file %1: %2")
+                         .arg(QDir::toNativeSeparators(path), file.errorString());
+        return {};
+    }
+    file.write(text.toUtf8());
+    if (!text.endsWith(QLatin1Char('\n')))
+        file.write("\n");
+    if (!file.commit()) {
+        if (error)
+            *error = QStringLiteral("Could not finish writing the log file %1: %2")
+                         .arg(QDir::toNativeSeparators(path), file.errorString());
+        return {};
+    }
+    return path;
+}
 }
 
 QString LaunchLogEntry::fileName() const
@@ -60,42 +106,69 @@ QString LaunchLogs::write(const QString &gameId, const QString &gameName, const 
                           const QDateTime &startedAt, const QDateTime &finishedAt, int exitCode,
                           bool crashed, bool stopped, const QString &diagnostics, QString *error)
 {
-    auto fail = [error](const QString &message) {
-        if (error)
-            *error = message;
-        return QString();
-    };
     if (error)
         error->clear();
 
     const QString path = pathFor(gameId, finishedAt);
-    if (!QDir().mkpath(QFileInfo(path).absolutePath()))
-        return fail(QStringLiteral("Could not create the log folder %1.")
-                        .arg(QDir::toNativeSeparators(QFileInfo(path).absolutePath())));
+    if (!QDir().mkpath(QFileInfo(path).absolutePath())) {
+        if (error)
+            *error = QStringLiteral("Could not create the log folder %1.")
+                         .arg(QDir::toNativeSeparators(QFileInfo(path).absolutePath()));
+        return {};
+    }
 
-    QString header = QStringLiteral("Vanta launch log\n");
-    header += QStringLiteral("Game: %1\n").arg(gameName);
-    header += QStringLiteral("Game id: %1\n").arg(gameId);
-    header += QStringLiteral("Runner: %1\n").arg(runner.isEmpty() ? QStringLiteral("Unknown") : runner);
-    header += QStringLiteral("Started: %1\n").arg(startedAt.toString(Qt::ISODate));
-    header += QStringLiteral("Finished: %1\n").arg(finishedAt.toString(Qt::ISODate));
-    header += exitCode < 0 ? QStringLiteral("Exit code: none (the process never started)\n")
-                           : QStringLiteral("Exit code: %1\n").arg(exitCode);
-    header += QStringLiteral("Result: %1\n").arg(labelFor(crashed, stopped, exitCode));
-    header += QStringLiteral("----------------\n");
+    const QString header = buildHeader(gameId, gameName, runner, startedAt, finishedAt, exitCode,
+                                       crashed, stopped, false);
+    return writeBody(path, header + diagnostics, error);
+}
 
-    QSaveFile file(path);
-    if (!file.open(QIODevice::WriteOnly))
-        return fail(QStringLiteral("Could not create the log file %1: %2")
-                        .arg(QDir::toNativeSeparators(path), file.errorString()));
-    file.write(header.toUtf8());
-    file.write(diagnostics.toUtf8());
-    if (!diagnostics.endsWith(QLatin1Char('\n')))
-        file.write("\n");
-    if (!file.commit())
-        return fail(QStringLiteral("Could not finish writing the log file %1: %2")
-                        .arg(QDir::toNativeSeparators(path), file.errorString()));
-    return path;
+QString LaunchLogs::beginLive(const QString &gameId, const QString &gameName, const QString &runner,
+                              const QDateTime &startedAt, const QString &commandSummary, QString *error)
+{
+    if (error)
+        error->clear();
+
+    const QString path = pathFor(gameId, startedAt);
+    if (!QDir().mkpath(QFileInfo(path).absolutePath())) {
+        if (error)
+            *error = QStringLiteral("Could not create the log folder %1.")
+                         .arg(QDir::toNativeSeparators(QFileInfo(path).absolutePath()));
+        return {};
+    }
+
+    const QString header = buildHeader(gameId, gameName, runner, startedAt, QDateTime(), -1, false,
+                                       false, true);
+    QString body = QDir::toNativeSeparators(commandSummary);
+    body += QStringLiteral("\n\nOutput:\n");
+    return writeBody(path, header + body, error);
+}
+
+bool LaunchLogs::appendLive(const QString &path, const QString &text)
+{
+    if (path.isEmpty() || text.isEmpty())
+        return false;
+    QFile file(path);
+    if (!file.open(QIODevice::Append))
+        return false;
+    file.write(text.toUtf8());
+    file.flush();
+    return true;
+}
+
+QString LaunchLogs::finishLive(const QString &path, const QString &gameId, const QString &gameName,
+                               const QString &runner, const QDateTime &startedAt,
+                               const QDateTime &finishedAt, int exitCode, bool crashed, bool stopped,
+                               const QString &diagnostics, QString *error)
+{
+    if (error)
+        error->clear();
+    if (path.isEmpty())
+        return write(gameId, gameName, runner, startedAt, finishedAt, exitCode, crashed, stopped,
+                     diagnostics, error);
+
+    const QString header = buildHeader(gameId, gameName, runner, startedAt, finishedAt, exitCode,
+                                       crashed, stopped, false);
+    return writeBody(path, header + diagnostics, error);
 }
 
 QList<LaunchLogEntry> LaunchLogs::list(const QString &gameId, int limit)
@@ -143,6 +216,7 @@ QList<LaunchLogEntry> LaunchLogs::list(const QString &gameId, int limit)
                 entry.crashed = value == QStringLiteral("exited unexpectedly");
         }
         entry.stopped = head.contains(QStringLiteral("Result: stopped by the user"));
+        entry.running = head.contains(QStringLiteral("Result: running"));
         if (!entry.finishedAt.isValid())
             entry.finishedAt = info.lastModified();
         entries.append(entry);

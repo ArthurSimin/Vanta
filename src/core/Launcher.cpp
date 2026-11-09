@@ -26,9 +26,15 @@ GameLauncher::~GameLauncher()
 
 bool GameLauncher::launch(const Game &game, const LaunchPlan &plan, QString *error)
 {
-    if (m_instances.contains(game.id)) {
+    const auto existing = m_instances.constFind(game.id);
+    if (existing != m_instances.constEnd()) {
+        // The process can be gone while the prefix is still being torn down. The
+        // game is not running then, but a relaunch has to wait for the previous
+        // instance to finish, so the caller gets a reason it can act on.
         if (error)
-            *error = QStringLiteral("This game is already running.");
+            *error = existing->started && !existing->running
+                ? QStringLiteral("The previous session is still shutting down. Try again in a moment.")
+                : QStringLiteral("This game is already running.");
         return false;
     }
     if (!plan.isValid()) {
@@ -395,6 +401,12 @@ bool GameLauncher::isStopping(const QString &gameId) const
     return it != m_instances.constEnd() && it->stopInProgress;
 }
 
+bool GameLauncher::isShuttingDown(const QString &gameId) const
+{
+    const auto it = m_instances.constFind(gameId);
+    return it != m_instances.constEnd() && it->started && !it->running;
+}
+
 QStringList GameLauncher::runningGameIds() const
 {
     QStringList result;
@@ -467,6 +479,11 @@ void GameLauncher::shutdown(bool reportStopped)
         }
 
         if (!reportStopped || !it->started) {
+            // A live log still marked "running" would claim a session that is
+            // already over, so it is finalized on this path too. The destructor
+            // takes it, and no receiver should run that late.
+            if (!it->liveLogPath.isEmpty())
+                persistLog(id, *it, exitCode, false, wasRunning, diagnostic);
             m_instances.erase(it);
             continue;
         }

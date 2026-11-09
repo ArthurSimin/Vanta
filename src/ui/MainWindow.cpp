@@ -1584,6 +1584,10 @@ void MainWindow::requestLaunch(const QString &gameId, bool applyOnlineFix)
         setStatusMessage(QStringLiteral("This game is already running."));
         return;
     }
+    if (m_launcher.isShuttingDown(gameId)) {
+        setStatusMessage(QStringLiteral("The previous session is still shutting down. Try again in a moment."));
+        return;
+    }
     bool found = false;
     const Game game = m_library.gameById(gameId, &found);
     if (!found)

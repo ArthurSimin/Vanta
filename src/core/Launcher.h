@@ -22,6 +22,9 @@ public:
     void stopGame(const QString &gameId);
     bool isRunning(const QString &gameId) const;
     bool isStopping(const QString &gameId) const;
+    // True between process exit and the end of prefix teardown: the game is no
+    // longer running, but a relaunch must wait for the previous session.
+    bool isShuttingDown(const QString &gameId) const;
     QStringList runningGameIds() const;
     QString diagnosticLog(const QString &gameId) const;
     // Stops every running game. `reportStopped` forwards each session to

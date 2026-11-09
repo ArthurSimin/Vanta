@@ -118,7 +118,9 @@ QString matchRunnerPath(const QString &version, RunnerType runner,
         return {};
     const QList<RunnerEntry> &entries = runner == RunnerType::Proton ? protonEntries : wineEntries;
     for (const RunnerEntry &entry : entries) {
-        if (entry.name.compare(needle, Qt::CaseInsensitive) == 0)
+        // A recorded version names the build alone, so it is matched against the
+        // unsuffixed build name rather than the "build (source)" display label.
+        if (entry.buildName.compare(needle, Qt::CaseInsensitive) == 0)
             return entry.path;
     }
     return {};
@@ -412,6 +414,13 @@ QList<ImportedGameCandidate> LibraryImporter::scanHeroic()
         home + QStringLiteral("/.var/app/com.heroicgameslauncher.hgl/config/heroic")
     };
 
+    // Detected once so a per-game Proton selection can be pointed at a real
+    // build rather than relying on a "proton" that may not be on PATH. The
+    // importer has no settings of its own, so the defaults are used, which
+    // matches the builds Vanta detects out of the box.
+    const AppSettings detectionSettings;
+    const QList<RunnerEntry> detectedProton = RunnerDetector::protonEntries(detectionSettings);
+
     for (const QString &root : heroicRoots) {
         if (!QDir(root).exists())
             continue;
@@ -443,6 +452,8 @@ QList<ImportedGameCandidate> LibraryImporter::scanHeroic()
 
                 // Check per-game config
                 QString prefix;
+                QString heroicVersionName;
+                QString heroicVersionBin;
                 RunnerType heroicRunner = RunnerType::Wine;
                 const QString gameConfigPath = QDir(root).filePath(
                     QStringLiteral("GamesConfig/%1.json").arg(it.key()));
@@ -455,9 +466,10 @@ QList<ImportedGameCandidate> LibraryImporter::scanHeroic()
                         // Heroic records the chosen build; a Proton name or
                         // type means the truer runner is Proton, not Wine.
                         const QJsonObject wineVersion = cfg.value(QStringLiteral("wineVersion")).toObject();
-                        const QString versionName = wineVersion.value(QStringLiteral("name")).toString();
+                        heroicVersionName = wineVersion.value(QStringLiteral("name")).toString();
+                        heroicVersionBin = wineVersion.value(QStringLiteral("bin")).toString();
                         const QString versionType = wineVersion.value(QStringLiteral("type")).toString();
-                        if (versionName.contains(QStringLiteral("proton"), Qt::CaseInsensitive)
+                        if (heroicVersionName.contains(QStringLiteral("proton"), Qt::CaseInsensitive)
                             || versionType.contains(QStringLiteral("proton"), Qt::CaseInsensitive))
                             heroicRunner = RunnerType::Proton;
                     }
@@ -472,6 +484,14 @@ QList<ImportedGameCandidate> LibraryImporter::scanHeroic()
                 game.winePrefix = prefix;
                 game.platform = Platform::Windows;
                 game.runner = heroicRunner;
+                if (heroicRunner == RunnerType::Proton) {
+                    // Prefer a build Vanta detected; fall back to the path Heroic
+                    // recorded so a launch does not need "proton" on PATH.
+                    game.runnerPath = matchRunnerPath(heroicVersionName, RunnerType::Proton, {},
+                                                      detectedProton);
+                    if (game.runnerPath.isEmpty())
+                        game.runnerPath = heroicVersionBin.trimmed();
+                }
 
                 const QStringList coverCandidates = {
                     QDir(root).filePath(QStringLiteral("icons/%1.jpg").arg(title)),

@@ -8,7 +8,12 @@
 struct RunnerEntry
 {
     RunnerType type = RunnerType::Native;
+    // Display label, which carries the source, for example
+    // "proton-cachyos (Steam)".
     QString name;
+    // The build name alone, for example "proton-cachyos". A recorded version
+    // from another launcher names the build, not the display label.
+    QString buildName;
     QString path;
     bool custom = false;
 };

@@ -230,6 +230,7 @@ QList<RunnerEntry> RunnerDetector::wineEntries(const AppSettings &settings)
             RunnerEntry entry;
             entry.type = RunnerType::Wine;
             entry.name = QStringLiteral("Custom Wine");
+            entry.buildName = QStringLiteral("Custom Wine");
             entry.path = custom;
             entry.custom = true;
             appendUnique(entries, seen, entry);
@@ -243,6 +244,7 @@ QList<RunnerEntry> RunnerDetector::wineEntries(const AppSettings &settings)
         RunnerEntry entry;
         entry.type = RunnerType::Wine;
         entry.name = QStringLiteral("System Wine");
+        entry.buildName = QStringLiteral("System Wine");
         entry.path = systemWine;
         appendUnique(entries, seen, entry);
     }
@@ -260,6 +262,7 @@ QList<RunnerEntry> RunnerDetector::wineEntries(const AppSettings &settings)
             RunnerEntry entry;
             entry.type = RunnerType::Wine;
             entry.name = appLabel(child.fileName(), source.label);
+            entry.buildName = child.fileName();
             entry.path = wine;
             entry.custom = settings.customWinePath == wine || settings.customWinePath == child.absoluteFilePath();
             appendUnique(entries, seen, entry);
@@ -287,6 +290,7 @@ QList<RunnerEntry> RunnerDetector::protonEntries(const AppSettings &settings)
             entry.type = RunnerType::Proton;
             entry.path = proton;
             entry.name = appLabel(protonNameFor(proton), source.label);
+            entry.buildName = protonNameFor(proton);
             entry.custom = settings.customProtonPaths.contains(child.absoluteFilePath())
                 || settings.customProtonPaths.contains(proton);
             appendUnique(entries, seen, entry);
@@ -301,6 +305,7 @@ QList<RunnerEntry> RunnerDetector::protonEntries(const AppSettings &settings)
         entry.type = RunnerType::Proton;
         entry.path = proton;
         entry.name = appLabel(protonNameFor(proton), QStringLiteral("Custom"));
+        entry.buildName = protonNameFor(proton);
         entry.custom = true;
         appendUnique(entries, seen, entry);
     }

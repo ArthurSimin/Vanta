@@ -59,6 +59,49 @@ QString resolveCommand(const QString &configured, const QString &fallbackName, b
     }
     return info.absoluteFilePath();
 }
+
+// A Wine build folder is accepted in the editor and in Settings, so a path that
+// points at the unpacked build has to resolve to its wine binary instead of
+// being rejected as "a directory, not an executable".
+QString wineExecutableInBuildFolder(const QString &path)
+{
+    const QFileInfo info(path);
+    if (info.isFile())
+        return info.fileName() == QStringLiteral("wine") || info.fileName() == QStringLiteral("wine64")
+            ? info.absoluteFilePath() : QString();
+    if (!info.isDir())
+        return QString();
+    for (const QString &relative : {QStringLiteral("bin/wine"), QStringLiteral("bin/wine64"),
+                                    QStringLiteral("wine"), QStringLiteral("wine64")}) {
+        const QString candidate = QDir(path).filePath(relative);
+        if (QFileInfo(candidate).isFile())
+            return QFileInfo(candidate).absoluteFilePath();
+    }
+    return {};
+}
+
+QString resolveWineCommand(const QString &configured, QString *error)
+{
+    if (configured.trimmed().isEmpty())
+        return resolveCommand(configured, QStringLiteral("wine"), false, error);
+
+    const QFileInfo info(configured);
+    if (info.isDir()) {
+        const QString wine = wineExecutableInBuildFolder(configured);
+        if (wine.isEmpty()) {
+            if (error)
+                *error = QStringLiteral("No wine binary was found in the Wine build folder: %1").arg(configured);
+            return {};
+        }
+        if (!QFileInfo(wine).isExecutable()) {
+            if (error)
+                *error = QStringLiteral("The Wine binary is not executable: %1").arg(wine);
+            return {};
+        }
+        return wine;
+    }
+    return resolveCommand(configured, QStringLiteral("wine"), false, error);
+}
 }
 
 bool LaunchPlanBuilder::isControlledEnvironmentKey(const QString &key)
@@ -121,10 +164,14 @@ QString LaunchPlanBuilder::wineServerFor(const Game &game, const QString &proton
         return {};
     }
     QString wine;
-    if (!game.runnerPath.isEmpty()) {
-        const QFileInfo info(game.runnerPath);
-        if (info.isFile())
-            wine = info.absolutePath();
+    if (!game.runnerPath.trimmed().isEmpty()) {
+        // A build folder is valid input, and its wineserver lives next to the
+        // wine binary, not at the folder root.
+        const QString resolvedWine = wineExecutableInBuildFolder(game.runnerPath);
+        if (!resolvedWine.isEmpty())
+            wine = QFileInfo(resolvedWine).absolutePath();
+        else if (QFileInfo(game.runnerPath).isFile())
+            wine = QFileInfo(game.runnerPath).absolutePath();
     }
     if (wine.isEmpty()) {
         const QString found = QStandardPaths::findExecutable(QStringLiteral("wine"));
@@ -135,6 +182,10 @@ QString LaunchPlanBuilder::wineServerFor(const Game &game, const QString &proton
         const QFileInfo sibling(QDir(wine).filePath(QStringLiteral("wineserver")));
         if (sibling.exists())
             return sibling.absoluteFilePath();
+        // A distro layout keeps wineserver a level above bin/.
+        const QFileInfo upper(QDir(wine).filePath(QStringLiteral("../wineserver")));
+        if (upper.exists())
+            return upper.absoluteFilePath();
     }
     return QStandardPaths::findExecutable(QStringLiteral("wineserver"));
 }
@@ -217,7 +268,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
         QString runnerError;
         const QString configuredWine = game.runnerPath.trimmed().isEmpty()
             ? settings.customWinePath : game.runnerPath;
-        const QString wine = resolveCommand(configuredWine, QStringLiteral("wine"), false, &runnerError);
+        const QString wine = resolveWineCommand(configuredWine, &runnerError);
         if (wine.isEmpty()) {
             if (error)
                 *error = runnerError.isEmpty() ? QStringLiteral("Wine was not found.") : runnerError;
@@ -336,8 +387,18 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
         }
         command << resolved;
         command << custom.mid(1);
-        if (executableInfo.exists())
+        if (!game.executable.trimmed().isEmpty()) {
+            // Dropping a configured-but-missing exe used to launch the runner
+            // with no game argument, which looks like a successful launch of
+            // nothing. A custom runner may omit the game only when no game
+            // executable is configured at all.
+            if (!executableInfo.exists() || !executableInfo.isFile()) {
+                if (error)
+                    *error = QStringLiteral("The game executable is missing: %1").arg(game.executable);
+                return {};
+            }
             command << executable;
+        }
         command << postArgs;
     }
 

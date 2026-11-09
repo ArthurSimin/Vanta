@@ -36,6 +36,8 @@ struct PackageManagerSpec
     QString executableName;
     QStringList distributions;
     int priority = 0;
+    // Empty when the same executable both installs and removes packages.
+    QString uninstallExecutableName;
 };
 
 QString packageManagerDisplay(const QString &id)
@@ -82,21 +84,23 @@ QList<PackageManagerSpec> packageManagerSpecs()
     return {
         {QStringLiteral("apt-get"), packageManagerDisplay(QStringLiteral("apt-get")), QStringLiteral("apt-get"),
          {QStringLiteral("debian"), QStringLiteral("ubuntu"), QStringLiteral("linuxmint"), QStringLiteral("pop"),
-          QStringLiteral("elementary"), QStringLiteral("kali"), QStringLiteral("raspbian"), QStringLiteral("neon")}, 10},
+          QStringLiteral("elementary"), QStringLiteral("kali"), QStringLiteral("raspbian"), QStringLiteral("neon")}, 10,
+         QString()},
         {QStringLiteral("dnf"), packageManagerDisplay(QStringLiteral("dnf")), QStringLiteral("dnf"),
          {QStringLiteral("fedora"), QStringLiteral("rhel"), QStringLiteral("centos"), QStringLiteral("rocky"),
-          QStringLiteral("almalinux"), QStringLiteral("nobara"), QStringLiteral("bazzite")}, 9},
+          QStringLiteral("almalinux"), QStringLiteral("nobara"), QStringLiteral("bazzite")}, 9, QString()},
         {QStringLiteral("pacman"), packageManagerDisplay(QStringLiteral("pacman")), QStringLiteral("pacman"),
          {QStringLiteral("arch"), QStringLiteral("manjaro"), QStringLiteral("endeavouros"),
-          QStringLiteral("garuda"), QStringLiteral("cachyos")}, 8},
+          QStringLiteral("garuda"), QStringLiteral("cachyos")}, 8, QString()},
         {QStringLiteral("zypper"), packageManagerDisplay(QStringLiteral("zypper")), QStringLiteral("zypper"),
-         {QStringLiteral("opensuse"), QStringLiteral("suse"), QStringLiteral("sles"), QStringLiteral("sled")}, 7},
+         {QStringLiteral("opensuse"), QStringLiteral("suse"), QStringLiteral("sles"), QStringLiteral("sled")}, 7,
+         QString()},
         {QStringLiteral("apk"), packageManagerDisplay(QStringLiteral("apk")), QStringLiteral("apk"),
-         {QStringLiteral("alpine"), QStringLiteral("postmarketos")}, 6},
+         {QStringLiteral("alpine"), QStringLiteral("postmarketos")}, 6, QString()},
         {QStringLiteral("eopkg"), packageManagerDisplay(QStringLiteral("eopkg")), QStringLiteral("eopkg"),
-         {QStringLiteral("solus")}, 5},
+         {QStringLiteral("solus")}, 5, QString()},
         {QStringLiteral("xbps-install"), packageManagerDisplay(QStringLiteral("xbps-install")), QStringLiteral("xbps-install"),
-         {QStringLiteral("void")}, 4}
+         {QStringLiteral("void")}, 4, QStringLiteral("xbps-remove")}
     };
 }
 
@@ -157,7 +161,7 @@ QStringList elevatedUninstallCommand(const PackageManagerInfo &manager)
     const QString tool = elevationTool();
     if (!tool.isEmpty())
         command.append(tool);
-    command.append(manager.executable);
+    command.append(manager.removalExecutable());
     command.append(RunnerInstaller::uninstallArguments(manager));
     return command;
 }
@@ -298,6 +302,15 @@ PackageManagerInfo RunnerInstaller::detectPackageManager()
             detected.executable = executable;
             detected.packageName = QStringLiteral("wine");
             detected.available = true;
+            if (!spec.uninstallExecutableName.isEmpty()) {
+                detected.uninstallToolName = spec.uninstallExecutableName;
+                const QString remover =
+                    QStandardPaths::findExecutable(spec.uninstallExecutableName);
+                if (remover.isEmpty())
+                    detected.removalUnsupported = true;
+                else
+                    detected.uninstallExecutable = remover;
+            }
             return detected;
         }
         if (!fallback)
@@ -312,6 +325,15 @@ PackageManagerInfo RunnerInstaller::detectPackageManager()
             detected.executable = executable;
             detected.packageName = QStringLiteral("wine");
             detected.available = true;
+            if (!fallback->uninstallExecutableName.isEmpty()) {
+                detected.uninstallToolName = fallback->uninstallExecutableName;
+                const QString remover =
+                    QStandardPaths::findExecutable(fallback->uninstallExecutableName);
+                if (remover.isEmpty())
+                    detected.removalUnsupported = true;
+                else
+                    detected.uninstallExecutable = remover;
+            }
         }
     }
     return detected;
@@ -363,8 +385,11 @@ QString RunnerInstaller::uninstallCommandLine(const PackageManagerInfo &manager)
 {
     if (!manager.available)
         return QStringLiteral("No supported package manager was detected.");
+    if (manager.removalUnsupported)
+        return QStringLiteral("This system removes packages with %1, which was not found.")
+            .arg(manager.uninstallToolName);
     if (!isRoot() && elevationTool().isEmpty()) {
-        QStringList command = {QStringLiteral("sudo"), manager.executable};
+        QStringList command = {QStringLiteral("sudo"), manager.removalExecutable()};
         command.append(uninstallArguments(manager));
         return commandLine(command);
     }
@@ -500,6 +525,11 @@ void RunnerInstaller::uninstallSystemWine()
     const PackageManagerInfo manager = detectPackageManager();
     if (!manager.available) {
         emit failed(QStringLiteral("No supported package manager was detected on this system."));
+        return;
+    }
+    if (manager.removalUnsupported) {
+        emit failed(QStringLiteral("Wine can be removed with %1, but that command was not found on this system.")
+                        .arg(manager.uninstallToolName));
         return;
     }
     if (!isRoot() && elevationTool().isEmpty()) {

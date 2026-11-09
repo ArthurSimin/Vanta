@@ -17,8 +17,24 @@ struct PackageManagerInfo
     QString id;
     QString displayName;
     QString executable;
+    // Removal is not always the install tool: Void installs with xbps-install
+    // and removes with xbps-remove. Empty means "same as executable".
+    QString uninstallExecutable;
+    // The name of that removal tool, kept so a missing one can be named.
+    QString uninstallToolName;
+    // True when the distribution needs a separate removal tool that is missing.
+    // Reporting a missing remover is better than running the installer again in
+    // the hope that it removes something.
+    bool removalUnsupported = false;
     QString packageName = QStringLiteral("wine");
     bool available = false;
+
+    QString removalExecutable() const
+    {
+        if (removalUnsupported)
+            return {};
+        return uninstallExecutable.isEmpty() ? executable : uninstallExecutable;
+    }
 };
 
 class RunnerInstaller : public QObject

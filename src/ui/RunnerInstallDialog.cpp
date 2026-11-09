@@ -197,12 +197,25 @@ void RunnerInstallDialog::updateButtons()
     const bool systemWine = RunnerInstaller::isSystemWineInstalled();
     const PackageManagerInfo manager = RunnerInstaller::detectPackageManager();
     if (systemWine) {
-        m_packageStatus->setProperty("class", QString());
-        m_packageStatus->setText(QStringLiteral("System Wine is installed (%1).")
-                                     .arg(manager.available ? manager.displayName : QStringLiteral("detected on PATH")));
-        m_commandLabel->setText(manager.available ? RunnerInstaller::uninstallCommandLine(manager) : QString());
+        const bool canRemove = manager.available && !manager.removalUnsupported;
+        m_packageStatus->setProperty("class", canRemove ? QString() : QStringLiteral("warning"));
+        if (!manager.available) {
+            m_packageStatus->setText(
+                QStringLiteral("System Wine is installed, but no supported package manager was detected."));
+        } else if (manager.removalUnsupported) {
+            m_packageStatus->setText(
+                QStringLiteral("System Wine is installed. Removing it needs %1, which was not found.")
+                    .arg(manager.uninstallToolName));
+        } else {
+            m_packageStatus->setText(QStringLiteral("System Wine is installed (%1).").arg(manager.displayName));
+        }
+        m_commandLabel->setText(canRemove ? RunnerInstaller::uninstallCommandLine(manager) : QString());
         m_installWineButton->setText(QStringLiteral("Uninstall Wine with the package manager"));
         m_installWineButton->setProperty("installed", true);
+        // setBusy() re-enables from this property, so it has to track whether
+        // removal is actually possible rather than just whether a manager exists.
+        m_installWineButton->setProperty("packageAvailable", canRemove);
+        m_installWineButton->setEnabled(canRemove && !m_busy);
         UiHelp::makeDanger(m_installWineButton);
     } else {
         if (manager.available) {
@@ -216,13 +229,14 @@ void RunnerInstallDialog::updateButtons()
         }
         m_installWineButton->setText(QStringLiteral("Install Wine with the package manager"));
         m_installWineButton->setProperty("installed", false);
+        m_installWineButton->setProperty("packageAvailable", manager.available);
         m_installWineButton->setProperty("class", QVariant());
         m_installWineButton->style()->unpolish(m_installWineButton);
         m_installWineButton->style()->polish(m_installWineButton);
+        m_installWineButton->setEnabled(manager.available && !m_busy);
     }
     m_packageStatus->style()->unpolish(m_packageStatus);
     m_packageStatus->style()->polish(m_packageStatus);
-    m_installWineButton->setEnabled(manager.available && !m_busy);
 
     const bool portableWine = RunnerInstaller::isPortableWineInstalled();
     if (portableWine) {

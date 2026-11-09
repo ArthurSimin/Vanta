@@ -167,6 +167,11 @@ void GameSelectionBar::setGame(const Game &game)
 {
     const bool sameGame = m_game.id == game.id;
     m_game = game;
+    // The height depends on what the strip shows: a game with a fix toggle is
+    // taller than one without, so a measurement taken for the previous game
+    // would clip the new one mid-reveal.
+    if (m_reveal && m_reveal->state() != QAbstractAnimation::Running)
+        m_fullHeight = 0;
     if (game.id.isEmpty())
         m_running = false;
     if (!sameGame)
@@ -189,7 +194,13 @@ void GameSelectionBar::animateReveal(bool visible)
 
     const bool animations = !m_theme || m_theme->animationsEnabled();
     if (!animations) {
+        // The fade is driven by the animation's callbacks, which never run when
+        // animations are off. Without setting the opacity here the strip would
+        // take up its full height but paint nothing, leaving a blank band above
+        // the status bar with an invisible Launch button on it.
         m_reveal->stop();
+        if (m_opacity)
+            m_opacity->setOpacity(visible ? 1.0 : 0.0);
         setMaximumHeight(visible ? QWIDGETSIZE_MAX : 0);
         setVisible(visible);
         return;
@@ -295,4 +306,10 @@ void GameSelectionBar::refreshTheme()
 {
     updateContent();
     updatePrimaryButton();
+    // A theme change can alter the fonts and therefore the strip height. The
+    // measurement below is only taken during an animation, so it has to be
+    // invalidated while the strip is settled or the reveal would clamp to a
+    // stale height and snap at the end.
+    if (!m_reveal || m_reveal->state() != QAbstractAnimation::Running)
+        m_fullHeight = 0;
 }

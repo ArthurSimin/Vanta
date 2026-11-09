@@ -37,6 +37,7 @@ private:
     void clearAll();
     void openLogFolder();
     QString currentPath() const;
+    QString logDirectory() const;
 
     QString m_gameId;
     QString m_gameName;

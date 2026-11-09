@@ -177,7 +177,14 @@ void LogsDialog::updateSummary()
     const bool hasLogs = m_logCombo->count() > 0;
     m_logCombo->setEnabled(hasLogs);
     m_clearButton->setEnabled(hasLogs);
-    m_folderButton->setEnabled(!LaunchLogs::rootDirectory().isEmpty());
+    // rootDirectory() is always a non-empty path; only the per-game folder tells
+    // whether there is anything to open. Without the existence check the button
+    // looked live for a game that never launched and then did nothing.
+    const QString folder = logDirectory();
+    m_folderButton->setEnabled(QFileInfo::exists(folder));
+    m_folderButton->setToolTip(QFileInfo::exists(folder)
+        ? QStringLiteral("Open the folder that holds this game's logs.")
+        : QStringLiteral("No log folder exists yet. Start the game once and it will be created."));
 
     if (!hasLogs) {
         m_summaryLabel->setText(
@@ -224,6 +231,11 @@ void LogsDialog::updateSummary()
     });
 }
 
+QString LogsDialog::logDirectory() const
+{
+    return QDir(LaunchLogs::rootDirectory()).filePath(m_gameId);
+}
+
 void LogsDialog::openLogFolder()
 {
     const QString path = currentPath();
@@ -231,7 +243,13 @@ void LogsDialog::openLogFolder()
         UiHelp::openContainingDirectory(path);
         return;
     }
-    const QString directory = QDir(LaunchLogs::rootDirectory()).filePath(m_gameId);
+    const QString directory = logDirectory();
+    if (!QFileInfo::exists(directory)) {
+        m_summaryLabel->setText(
+            QStringLiteral("No log folder exists for %1 yet. Start the game once and the runner output "
+                           "will be stored there.").arg(m_gameName));
+        return;
+    }
     UiHelp::openContainingDirectory(directory);
 }
 

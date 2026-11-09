@@ -274,6 +274,8 @@ RunnerInstaller::~RunnerInstaller()
     }
     if (m_file.isOpen())
         m_file.close();
+    if (!m_stagingRoot.isEmpty())
+        QDir(m_stagingRoot).removeRecursively();
     if (!m_temporaryFile.isEmpty())
         QFile::remove(m_temporaryFile);
 }
@@ -810,6 +812,18 @@ void RunnerInstaller::beginExtraction()
                    QStringLiteral("Extracting %1…").arg(m_releaseTag.isEmpty() ? m_downloadName : m_releaseTag));
     m_processOutput.clear();
 
+    // Extract beside the final tree and move it into place only after tar
+    // succeeds. A failed or cancelled extraction would otherwise leave the
+    // top-level runner folder behind, and that half-unpacked tree is exactly
+    // what the detector lists as an installed runner.
+    m_stagingRoot = QDir(m_extractionRoot).filePath(QStringLiteral(".extracting"));
+    QDir(m_stagingRoot).removeRecursively();
+    if (!QDir().mkpath(m_stagingRoot)) {
+        failOperation(QStringLiteral("Could not create the extraction folder: %1")
+                          .arg(QDir::toNativeSeparators(m_stagingRoot)));
+        return;
+    }
+
     auto *process = new QProcess(this);
     m_process = process;
     process->setProcessChannelMode(QProcess::MergedChannels);
@@ -829,7 +843,7 @@ void RunnerInstaller::beginExtraction()
         failOperation(QStringLiteral("The tar command could not be started."));
         process->deleteLater();
     });
-    process->start(tar, {QStringLiteral("-xf"), m_temporaryFile, QStringLiteral("-C"), m_extractionRoot,
+    process->start(tar, {QStringLiteral("-xf"), m_temporaryFile, QStringLiteral("-C"), m_stagingRoot,
                          QStringLiteral("--no-same-owner")});
 }
 
@@ -850,7 +864,60 @@ void RunnerInstaller::handleExtractionFinished(int exitCode, QProcess::ExitStatu
         QFile::remove(m_temporaryFile);
         m_temporaryFile.clear();
     }
+    if (firstExistingRunnerInRoot(m_stagingRoot, m_requestedType).isEmpty()) {
+        failOperation(m_requestedType == RunnerType::Proton
+            ? QStringLiteral("The downloaded archive does not contain a Proton launcher.")
+            : QStringLiteral("The downloaded archive does not contain a Wine executable."));
+        return;
+    }
+    QString moveError;
+    if (!commitExtraction(&moveError)) {
+        failOperation(moveError);
+        return;
+    }
     validateManagedRunner();
+}
+
+bool RunnerInstaller::commitExtraction(QString *error)
+{
+    QDir staging(m_stagingRoot);
+    const QFileInfoList entries =
+        staging.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
+    if (entries.isEmpty()) {
+        if (error)
+            *error = QStringLiteral("The downloaded archive did not contain any files.");
+        return false;
+    }
+
+    QDir root(m_extractionRoot);
+    for (const QFileInfo &entry : entries) {
+        const QString target = root.filePath(entry.fileName());
+        if (QFileInfo::exists(target)) {
+            // A reinstall of the same release replaces the old tree as a unit,
+            // which also removes files the new archive no longer contains.
+            const QFileInfo targetInfo(target);
+            const bool removed = targetInfo.isDir() ? QDir(target).removeRecursively()
+                                                    : QFile::remove(target);
+            if (!removed) {
+                if (error) {
+                    *error = QStringLiteral("Could not replace the existing runner at %1.")
+                                 .arg(QDir::toNativeSeparators(target));
+                }
+                return false;
+            }
+        }
+        if (!QDir().rename(entry.absoluteFilePath(), target)) {
+            if (error) {
+                *error = QStringLiteral("Could not move the extracted runner into %1.")
+                             .arg(QDir::toNativeSeparators(m_extractionRoot));
+            }
+            return false;
+        }
+    }
+
+    staging.removeRecursively();
+    m_stagingRoot.clear();
+    return true;
 }
 
 void RunnerInstaller::validateManagedRunner()
@@ -931,6 +998,10 @@ void RunnerInstaller::resetOperation(bool removeTemporaryFile)
     if (removeTemporaryFile && !m_temporaryFile.isEmpty())
         QFile::remove(m_temporaryFile);
     m_temporaryFile.clear();
+    if (!m_stagingRoot.isEmpty()) {
+        QDir(m_stagingRoot).removeRecursively();
+        m_stagingRoot.clear();
+    }
     m_downloadName.clear();
     m_downloadUrl.clear();
     m_expectedSize = -1;

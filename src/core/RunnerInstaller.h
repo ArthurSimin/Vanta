@@ -83,6 +83,7 @@ private:
     void handleDownloadFinished(QNetworkReply *reply);
     void beginExtraction();
     void handleExtractionFinished(int exitCode, QProcess::ExitStatus status);
+    bool commitExtraction(QString *error);
     void startPackageInstall();
     void handlePackageFinished(int exitCode, QProcess::ExitStatus status);
     void handlePackageUninstallFinished(int exitCode, QProcess::ExitStatus status);
@@ -104,6 +105,7 @@ private:
     QString m_downloadUrl;
     QString m_releaseTag;
     QString m_extractionRoot;
+    QString m_stagingRoot;
     QString m_processOutput;
     qint64 m_expectedSize = -1;
     bool m_cancelRequested = false;

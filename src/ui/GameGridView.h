@@ -40,6 +40,7 @@ protected:
 private:
     void relayout();
     void clearCards();
+    void moveFocus(const QString &gameId, int key);
 
     ThemeManager *m_theme = nullptr;
     QWidget *m_content = nullptr;

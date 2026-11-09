@@ -5,7 +5,9 @@
 
 #include <QContextMenuEvent>
 #include <QEnterEvent>
+#include <QFocusEvent>
 #include <QFontMetrics>
+#include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
@@ -20,7 +22,9 @@ GameCard::GameCard(ThemeManager *theme, QWidget *parent)
     , m_theme(theme)
 {
     setCursor(Qt::PointingHandCursor);
-    setFocusPolicy(Qt::NoFocus);
+    // The grid is the default view, so a card that cannot take focus leaves the
+    // whole library unreachable from the keyboard.
+    setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
     m_hoverAnimation = new QPropertyAnimation(this, "hoverProgress", this);
     m_hoverAnimation->setDuration(150);
@@ -160,6 +164,42 @@ void GameCard::leaveEvent(QEvent *event)
 {
     QAbstractButton::leaveEvent(event);
     animateHover(0.0);
+}
+
+void GameCard::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key()) {
+    case Qt::Key_Return:
+    case Qt::Key_Enter:
+    case Qt::Key_Space:
+        emit keyboardActivated(m_game.id);
+        event->accept();
+        return;
+    case Qt::Key_Left:
+    case Qt::Key_Right:
+    case Qt::Key_Up:
+    case Qt::Key_Down:
+    case Qt::Key_Home:
+    case Qt::Key_End:
+        emit focusMoveRequested(m_game.id, event->key());
+        event->accept();
+        return;
+    default:
+        break;
+    }
+    QAbstractButton::keyPressEvent(event);
+}
+
+void GameCard::focusInEvent(QFocusEvent *event)
+{
+    QAbstractButton::focusInEvent(event);
+    update();
+}
+
+void GameCard::focusOutEvent(QFocusEvent *event)
+{
+    QAbstractButton::focusOutEvent(event);
+    update();
 }
 
 void GameCard::mouseDoubleClickEvent(QMouseEvent *event)
@@ -374,5 +414,16 @@ void GameCard::paintEvent(QPaintEvent *event)
         painter.drawRoundedRect(backgroundRect.adjusted(3, 3, -3, -3), 13, 13);
         painter.setPen(QPen(colors.accent, 2));
         painter.drawRoundedRect(backgroundRect, 15, 15);
+    }
+
+    // Keyboard focus has to be visible somewhere other than the selection border,
+    // which also appears for a mouse click that never gave the card focus.
+    if (hasFocus()) {
+        QColor ring = colors.accent;
+        painter.save();
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(QPen(ring, 1.5, Qt::DashLine));
+        painter.drawRoundedRect(backgroundRect.adjusted(4, 4, -4, -4), 11, 11);
+        painter.restore();
     }
 }

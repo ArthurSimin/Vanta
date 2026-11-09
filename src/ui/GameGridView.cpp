@@ -3,6 +3,7 @@
 #include "ThemeManager.h"
 
 #include <QGridLayout>
+#include <QKeyEvent>
 #include <QLayoutItem>
 #include <QResizeEvent>
 #include <QScrollBar>
@@ -60,6 +61,8 @@ void GameGridView::setGames(const QList<Game> &games)
             emit gameSelected(card->game().id);
         });
         connect(card, &GameCard::activated, this, &GameGridView::gameActivated);
+        connect(card, &GameCard::keyboardActivated, this, &GameGridView::gameActivated);
+        connect(card, &GameCard::focusMoveRequested, this, &GameGridView::moveFocus);
         connect(card, &GameCard::contextMenuRequested, this, &GameGridView::contextMenuRequested);
         m_cards.insert(game.id, card);
         m_orderedCards.append(card);
@@ -76,6 +79,58 @@ void GameGridView::setSelectedGame(const QString &gameId)
     m_selectedId = gameId;
     for (auto it = m_cards.begin(); it != m_cards.end(); ++it)
         it.value()->setSelectedState(it.key() == gameId);
+}
+
+// Moves keyboard focus between cards and keeps the selection in step, so the
+// detail strip follows the highlight instead of pointing at another game.
+void GameGridView::moveFocus(const QString &gameId, int key)
+{
+    if (m_orderedCards.isEmpty())
+        return;
+    int index = -1;
+    for (int i = 0; i < m_orderedCards.size(); ++i) {
+        if (m_orderedCards.at(i)->game().id == gameId) {
+            index = i;
+            break;
+        }
+    }
+    if (index < 0)
+        return;
+
+    const int columns = qMax(1, m_columns);
+    int target = index;
+    switch (key) {
+    case Qt::Key_Left:
+        target = index - 1;
+        break;
+    case Qt::Key_Right:
+        target = index + 1;
+        break;
+    case Qt::Key_Up:
+        target = index - columns;
+        break;
+    case Qt::Key_Down:
+        target = index + columns;
+        break;
+    case Qt::Key_Home:
+        target = 0;
+        break;
+    case Qt::Key_End:
+        target = m_orderedCards.size() - 1;
+        break;
+    default:
+        return;
+    }
+    target = qBound(0, target, m_orderedCards.size() - 1);
+    GameCard *card = m_orderedCards.at(target);
+    if (!card)
+        return;
+    m_selectedId = card->game().id;
+    for (GameCard *other : m_orderedCards)
+        other->setSelectedState(other == card);
+    ensureWidgetVisible(card, 20, 20);
+    card->setFocus(Qt::ShortcutFocusReason);
+    emit gameSelected(m_selectedId);
 }
 
 void GameGridView::setRunningGames(const QStringList &gameIds)

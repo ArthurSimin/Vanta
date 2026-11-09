@@ -41,6 +41,12 @@ public:
 signals:
     void activated(const QString &gameId);
     void contextMenuRequested(const QString &gameId, const QPoint &globalPosition);
+    // Emitted for Enter/Space so the grid can treat a card as activated the
+    // same way a double click does.
+    void keyboardActivated(const QString &gameId);
+    // Arrow keys move focus between cards; the grid owns the layout and
+    // therefore the neighbour calculation.
+    void focusMoveRequested(const QString &gameId, int key);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -50,6 +56,9 @@ protected:
     void contextMenuEvent(QContextMenuEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
     void changeEvent(QEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void focusInEvent(QFocusEvent *event) override;
+    void focusOutEvent(QFocusEvent *event) override;
 
 private:
     void animateHover(qreal target);

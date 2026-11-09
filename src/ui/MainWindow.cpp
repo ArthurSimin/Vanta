@@ -1210,6 +1210,13 @@ void MainWindow::openSettingsDialog()
     settings.windowMaximized = isMaximized();
     if (!m_library.updateSettings(settings)) {
         warn(QStringLiteral("Settings could not be saved."));
+        // The dialog previewed the theme live, so the screen shows a choice that
+        // was not persisted. Re-apply the stored one instead of leaving a theme
+        // that vanishes at the next start.
+        const AppSettings &stored = m_library.settings();
+        m_theme.setChoice(stored.theme);
+        m_theme.setAnimationsEnabled(stored.animations);
+        m_theme.apply();
         return;
     }
     m_theme.setChoice(settings.theme);

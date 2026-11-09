@@ -196,15 +196,20 @@ OnlineFixInfo OnlineFixInfo::fromJson(const QJsonObject &object)
 
 QStringList OnlineFixDetector::signaturePatterns()
 {
+    // These are the file names an OnlineFix / SteamFix release actually ships.
+    // Broader patterns were tried and rejected: "win*.dll" matched wininet.dll
+    // and windowscodecs.dll, "steam*.dll" matched steam_api64.dll, and
+    // "eos*.dll" matched EOSSDK-Win64-Shipping.dll, so almost every Steam or
+    // Epic title was reported as carrying a fix and the launch prompt appeared
+    // before games that never had one.
     return {
         QStringLiteral("^(emp|custom)\\.dll$"),
-        QStringLiteral("^win.*\\.dll$"),
-        QStringLiteral("^(online|steam).*\\.(dll|ini|json)$"),
-        QStringLiteral("^eos.*\\.dll$"),
-        QStringLiteral("^epicfix.*\\.dll$"),
-        QStringLiteral("^(winmm|dlllist)\\.txt$"),
-        QStringLiteral("^launch_data\\.of.*$"),
-        QStringLiteral("^onlinefix\\.json$")
+        QStringLiteral("^epicfix\\.dll$"),
+        QStringLiteral("^onlinefix(32|64)?\\.(dll|ini|json)$"),
+        QStringLiteral("^steamfix(32|64)?\\.(dll|ini)$"),
+        QStringLiteral("^winmm\\.(dll|txt)$"),
+        QStringLiteral("^dlllist\\.txt$"),
+        QStringLiteral("^launch_data\\.of.*$")
     };
 }
 

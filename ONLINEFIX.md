@@ -37,14 +37,19 @@ patterns (case-insensitive, `OnlineFixDetector::signaturePatterns()`):
 
 ```
 ^(emp|custom)\.dll$
-^win.*\.dll$
-^(online|steam).*\.(dll|ini|json)$
-^eos.*\.dll$
-^epicfix.*\.dll$
-^(winmm|dlllist)\.txt$
+^epicfix\.dll$
+^onlinefix(32|64)?\.(dll|ini|json)$
+^steamfix(32|64)?\.(dll|ini)$
+^winmm\.(dll|txt)$
+^dlllist\.txt$
 ^launch_data\.of.*$
-^onlinefix\.json$
 ```
+
+The list is deliberately narrow. Broader patterns such as `win*.dll`,
+`steam*.dll` and `eos*.dll` also match ordinary runtime libraries
+(`wininet.dll`, `steam_api64.dll`, `EOSSDK-Win64-Shipping.dll`), which made
+nearly every Steam or Epic title look like it carried a fix. A false positive is
+worse than a miss here, because it turns a detection into a launch prompt.
 
 Every match is reported in the OnlineFix dialog with its size, timestamp and the
 rule that matched it. Detection never opens a DLL, never hashes a binary and

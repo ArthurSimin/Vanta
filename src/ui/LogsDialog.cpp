@@ -56,6 +56,7 @@ void LogsDialog::buildUi()
 
     m_refreshButton = new QPushButton(QStringLiteral("Refresh"), this);
     m_refreshButton->setCursor(Qt::PointingHandCursor);
+    m_refreshButton->setAutoDefault(false);
     connect(m_refreshButton, &QPushButton::clicked, this, &LogsDialog::reload);
     topRow->addWidget(m_refreshButton);
     bodyLayout()->addLayout(topRow);
@@ -95,11 +96,13 @@ void LogsDialog::buildUi()
     footer->setSpacing(8);
     m_folderButton = new QPushButton(QStringLiteral("Open folder"), this);
     m_folderButton->setCursor(Qt::PointingHandCursor);
+    m_folderButton->setAutoDefault(false);
     connect(m_folderButton, &QPushButton::clicked, this, &LogsDialog::openLogFolder);
     footer->addWidget(m_folderButton);
 
     m_clearButton = new QPushButton(QStringLiteral("Clear logs"), this);
     m_clearButton->setCursor(Qt::PointingHandCursor);
+    m_clearButton->setAutoDefault(false);
     connect(m_clearButton, &QPushButton::clicked, this, &LogsDialog::clearAll);
     footer->addWidget(m_clearButton);
     footer->addStretch(1);
@@ -107,6 +110,7 @@ void LogsDialog::buildUi()
     m_closeButton = new QPushButton(QStringLiteral("Close"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_closeButton);
+    m_closeButton->setDefault(true);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::accept);
     footer->addWidget(m_closeButton);
     bodyLayout()->addLayout(footer);

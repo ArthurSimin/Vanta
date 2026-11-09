@@ -68,6 +68,7 @@ void LaunchProgressDialog::buildUi()
     footer->addStretch(1);
     m_logsButton = new QPushButton(QStringLiteral("Open log"), this);
     m_logsButton->setCursor(Qt::PointingHandCursor);
+    m_logsButton->setAutoDefault(false);
     m_logsButton->setVisible(false);
     connect(m_logsButton, &QPushButton::clicked, this, [this] {
         if (!m_logPath.isEmpty())
@@ -76,6 +77,9 @@ void LaunchProgressDialog::buildUi()
     footer->addWidget(m_logsButton);
     m_cancelButton = new QPushButton(QStringLiteral("Cancel"), this);
     m_cancelButton->setCursor(Qt::PointingHandCursor);
+    // Enter must not abort a launch that is already under way. The default
+    // button moves to Close once the launch finishes.
+    m_cancelButton->setAutoDefault(false);
     connect(m_cancelButton, &QPushButton::clicked, this, [this] {
         m_cancelButton->setEnabled(false);
         setMessage(QStringLiteral("Cancelling…"));
@@ -84,6 +88,7 @@ void LaunchProgressDialog::buildUi()
     footer->addWidget(m_cancelButton);
     m_closeButton = new QPushButton(QStringLiteral("Close"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
+    m_closeButton->setAutoDefault(true);
     m_closeButton->setVisible(false);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::accept);
     footer->addWidget(m_closeButton);
@@ -125,6 +130,9 @@ void LaunchProgressDialog::showFailure(const QString &message)
     m_message->setText(message);
     m_cancelButton->setVisible(false);
     m_closeButton->setVisible(true);
+    // A hidden button cannot be the default, so the default has to move with
+    // the visible action or Enter does nothing here.
+    m_closeButton->setDefault(true);
     m_logsButton->setVisible(!m_logPath.isEmpty());
 }
 
@@ -144,6 +152,7 @@ void LaunchProgressDialog::showSuccess(const QString &message)
     m_message->setText(message);
     m_cancelButton->setVisible(false);
     m_closeButton->setVisible(true);
+    m_closeButton->setDefault(true);
 }
 
 void LaunchProgressDialog::finishAndClose()

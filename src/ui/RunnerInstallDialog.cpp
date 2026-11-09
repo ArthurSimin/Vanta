@@ -86,6 +86,8 @@ void RunnerInstallDialog::buildUi()
 
     m_installWineButton = new QPushButton(QStringLiteral("Install Wine with the package manager"), packagePanel);
     m_installWineButton->setCursor(Qt::PointingHandCursor);
+    // This one can start an elevated package install, so Enter must not reach it.
+    m_installWineButton->setAutoDefault(false);
     m_installWineButton->setProperty("packageAvailable", manager.available);
     m_installWineButton->setEnabled(manager.available);
     connect(m_installWineButton, &QPushButton::clicked, this, &RunnerInstallDialog::onInstallWineClicked);
@@ -110,10 +112,12 @@ void RunnerInstallDialog::buildUi()
     wineRow->addLayout(wineText, 1);
     m_wineButton = new QPushButton(QStringLiteral("Download Wine"), downloadPanel);
     m_wineButton->setCursor(Qt::PointingHandCursor);
+    m_wineButton->setAutoDefault(false);
     connect(m_wineButton, &QPushButton::clicked, this, &RunnerInstallDialog::onWineButtonClicked);
     wineRow->addWidget(m_wineButton, 0, Qt::AlignVCenter);
     m_downloadWineSecondary = new QPushButton(QStringLiteral("Download build…"), downloadPanel);
     m_downloadWineSecondary->setCursor(Qt::PointingHandCursor);
+    m_downloadWineSecondary->setAutoDefault(false);
     m_downloadWineSecondary->setVisible(false);
     UiHelp::makeFlat(m_downloadWineSecondary);
     connect(m_downloadWineSecondary, &QPushButton::clicked, m_installer, &RunnerInstaller::downloadPortableWine);
@@ -133,11 +137,13 @@ void RunnerInstallDialog::buildUi()
     protonRow->addLayout(protonText, 1);
     m_protonButton = new QPushButton(QStringLiteral("Download Proton"), downloadPanel);
     m_protonButton->setCursor(Qt::PointingHandCursor);
+    m_protonButton->setAutoDefault(false);
     UiHelp::makePrimary(m_protonButton);
     connect(m_protonButton, &QPushButton::clicked, this, &RunnerInstallDialog::onProtonButtonClicked);
     protonRow->addWidget(m_protonButton, 0, Qt::AlignVCenter);
     m_downloadProtonSecondary = new QPushButton(QStringLiteral("Download GE-Proton…"), downloadPanel);
     m_downloadProtonSecondary->setCursor(Qt::PointingHandCursor);
+    m_downloadProtonSecondary->setAutoDefault(false);
     m_downloadProtonSecondary->setVisible(false);
     UiHelp::makeFlat(m_downloadProtonSecondary);
     connect(m_downloadProtonSecondary, &QPushButton::clicked, m_installer, &RunnerInstaller::downloadProton);
@@ -181,11 +187,13 @@ void RunnerInstallDialog::buildUi()
     buttons->addStretch(1);
     m_cancelButton = new QPushButton(QStringLiteral("Cancel operation"), this);
     m_cancelButton->setCursor(Qt::PointingHandCursor);
+    m_cancelButton->setAutoDefault(false);
     m_cancelButton->setVisible(false);
     connect(m_cancelButton, &QPushButton::clicked, m_installer, &RunnerInstaller::cancel);
     buttons->addWidget(m_cancelButton);
     m_closeButton = new QPushButton(QStringLiteral("Close"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
+    m_closeButton->setDefault(true);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::accept);
     buttons->addWidget(m_closeButton);
     bodyLayout()->addLayout(buttons);
@@ -337,10 +345,13 @@ void RunnerInstallDialog::onProtonButtonClicked()
             btnBox->addStretch(1);
             auto *cancelBtn = new QPushButton(QStringLiteral("Cancel"), &pickDialog);
             cancelBtn->setCursor(Qt::PointingHandCursor);
+            // Enter stays on Cancel so a stray keypress cannot remove a runner.
+            cancelBtn->setDefault(true);
             connect(cancelBtn, &QPushButton::clicked, &pickDialog, &QDialog::reject);
             btnBox->addWidget(cancelBtn);
             auto *uninstBtn = new QPushButton(QStringLiteral("Uninstall"), &pickDialog);
             uninstBtn->setCursor(Qt::PointingHandCursor);
+            uninstBtn->setAutoDefault(false);
             uninstBtn->setProperty("class", QStringLiteral("danger"));
             connect(uninstBtn, &QPushButton::clicked, &pickDialog, &QDialog::accept);
             btnBox->addWidget(uninstBtn);

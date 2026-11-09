@@ -53,6 +53,11 @@ QWidget *pathRow(QLineEdit **edit, QPushButton **button, const QString &placehol
     line->setPlaceholderText(placeholder);
     auto *browse = new QPushButton(buttonText, row);
     browse->setCursor(Qt::PointingHandCursor);
+    // Enter in the field beside it belongs to the dialog's primary action, not
+    // to Browse. Without this Qt made the first created Browse button the
+    // implicit default, so pressing Enter while typing a name opened a file
+    // dialog.
+    browse->setAutoDefault(false);
     UiHelp::makeFlat(browse);
     browse->setMinimumWidth(82);
     layout->addWidget(line, 1);
@@ -104,11 +109,13 @@ AddEditDialog::AddEditDialog(const Game &game, bool adding, const AppSettings &s
     buttons->addStretch(1);
     auto *cancel = new QPushButton(QStringLiteral("Cancel"), this);
     cancel->setCursor(Qt::PointingHandCursor);
+    cancel->setAutoDefault(false);
     connect(cancel, &QPushButton::clicked, this, &QDialog::reject);
     buttons->addWidget(cancel);
     m_saveButton = new QPushButton(adding ? QStringLiteral("Add game") : QStringLiteral("Save changes"), this);
     m_saveButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_saveButton);
+    m_saveButton->setDefault(true);
     connect(m_saveButton, &QPushButton::clicked, this, &AddEditDialog::validateAndAccept);
     buttons->addWidget(m_saveButton);
     bodyLayout()->addLayout(buttons);
@@ -256,11 +263,13 @@ void AddEditDialog::buildGeneralTab()
     m_fetchCoverButton->setCursor(Qt::PointingHandCursor);
     m_fetchCoverButton->setToolTip(
         QStringLiteral("Search SteamGridDB and choose which artwork to use"));
+    m_fetchCoverButton->setAutoDefault(false);
     UiHelp::makeFlat(m_fetchCoverButton);
     m_fetchCoverButton->setMinimumWidth(122);
     coverLayout->addWidget(m_fetchCoverButton);
     auto *coverButton = new QPushButton(QStringLiteral("Browse…"), coverRow);
     coverButton->setCursor(Qt::PointingHandCursor);
+    coverButton->setAutoDefault(false);
     UiHelp::makeFlat(coverButton);
     coverButton->setMinimumWidth(82);
     coverLayout->addWidget(coverButton);

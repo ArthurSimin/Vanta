@@ -63,11 +63,14 @@ void LibraryImportDialog::buildUi()
 
     m_selectAllButton = new QPushButton(QStringLiteral("Select all new"), this);
     m_selectAllButton->setCursor(Qt::PointingHandCursor);
+    // Enter belongs to Port selected games, not to the first button in the row.
+    m_selectAllButton->setAutoDefault(false);
     connect(m_selectAllButton, &QPushButton::clicked, this, [this] { selectAll(true); });
     bottomRow->addWidget(m_selectAllButton);
 
     m_deselectAllButton = new QPushButton(QStringLiteral("Deselect all"), this);
     m_deselectAllButton->setCursor(Qt::PointingHandCursor);
+    m_deselectAllButton->setAutoDefault(false);
     connect(m_deselectAllButton, &QPushButton::clicked, this, [this] { selectAll(false); });
     bottomRow->addWidget(m_deselectAllButton);
 
@@ -75,12 +78,14 @@ void LibraryImportDialog::buildUi()
 
     m_closeButton = new QPushButton(QStringLiteral("Cancel"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
+    m_closeButton->setAutoDefault(false);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::reject);
     bottomRow->addWidget(m_closeButton);
 
     m_importButton = new QPushButton(QStringLiteral("Port selected games"), this);
     m_importButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_importButton);
+    m_importButton->setDefault(true);
     connect(m_importButton, &QPushButton::clicked, this, &LibraryImportDialog::importSelected);
     bottomRow->addWidget(m_importButton);
 

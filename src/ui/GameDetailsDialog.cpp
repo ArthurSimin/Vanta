@@ -142,34 +142,43 @@ void GameDetailsDialog::buildUi()
     actions->setSpacing(8);
     m_playButton = new QPushButton(QStringLiteral("Play"), content);
     m_playButton->setCursor(Qt::PointingHandCursor);
+    // A details sheet must not launch or stop a game on Enter. When Play is
+    // hidden for a running game Qt promoted Stop to the implicit default, so a
+    // stray Enter killed the session.
+    m_playButton->setAutoDefault(false);
     UiHelp::makePrimary(m_playButton);
     connect(m_playButton, &QPushButton::clicked, this, [this] { setAction(Action::Launch); });
     actions->addWidget(m_playButton);
 
     m_stopButton = new QPushButton(QStringLiteral("Stop"), content);
     m_stopButton->setCursor(Qt::PointingHandCursor);
+    m_stopButton->setAutoDefault(false);
     UiHelp::makeDanger(m_stopButton);
     connect(m_stopButton, &QPushButton::clicked, this, [this] { setAction(Action::Stop); });
     actions->addWidget(m_stopButton);
 
     m_editButton = new QPushButton(QStringLiteral("Edit"), content);
     m_editButton->setCursor(Qt::PointingHandCursor);
+    m_editButton->setAutoDefault(false);
     connect(m_editButton, &QPushButton::clicked, this, [this] { setAction(Action::Edit); });
     actions->addWidget(m_editButton);
 
     m_onlineFixButton = new QPushButton(QStringLiteral("OnlineFix…"), content);
     m_onlineFixButton->setCursor(Qt::PointingHandCursor);
+    m_onlineFixButton->setAutoDefault(false);
     connect(m_onlineFixButton, &QPushButton::clicked, this, [this] { setAction(Action::OnlineFix); });
     actions->addWidget(m_onlineFixButton);
 
     m_modsButton = new QPushButton(QStringLiteral("Mods…"), content);
     m_modsButton->setCursor(Qt::PointingHandCursor);
+    m_modsButton->setAutoDefault(false);
     m_modsButton->setVisible(m_game.platform == Platform::Windows || runnerIsWineLike(m_game.runner));
     connect(m_modsButton, &QPushButton::clicked, this, [this] { setAction(Action::Mods); });
     actions->addWidget(m_modsButton);
 
     m_scanButton = new QPushButton(QStringLiteral("Scan"), content);
     m_scanButton->setCursor(Qt::PointingHandCursor);
+    m_scanButton->setAutoDefault(false);
     connect(m_scanButton, &QPushButton::clicked, this, [this] { setAction(Action::Scan); });
     actions->addWidget(m_scanButton);
     actions->addStretch(1);
@@ -345,6 +354,7 @@ void GameDetailsDialog::buildUi()
 
     m_closeButton = new QPushButton(QStringLiteral("Close"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
+    m_closeButton->setDefault(true);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::reject);
     footer->addWidget(m_closeButton);
     bodyLayout()->addLayout(footer);

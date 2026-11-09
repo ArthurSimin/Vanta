@@ -147,6 +147,10 @@ void SettingsDialog::buildUi()
 
     m_replayButton = new QPushButton(QStringLiteral("Show the tutorial again"), appearance);
     m_replayButton->setCursor(Qt::PointingHandCursor);
+    // Without this Qt makes the first created button the dialog's implicit
+    // default, so Enter on the Appearance tab replayed the tutorial instead of
+    // saving. Save and Cancel are set below.
+    m_replayButton->setAutoDefault(false);
     connect(m_replayButton, &QPushButton::clicked, this, [this] {
         m_replayTutorial = true;
         m_settings.tutorialCompleted = false;
@@ -334,11 +338,13 @@ void SettingsDialog::buildUi()
     buttons->addStretch(1);
     m_cancelButton = new QPushButton(QStringLiteral("Cancel"), this);
     m_cancelButton->setCursor(Qt::PointingHandCursor);
+    m_cancelButton->setAutoDefault(false);
     connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
     buttons->addWidget(m_cancelButton);
     m_saveButton = new QPushButton(QStringLiteral("Save settings"), this);
     m_saveButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_saveButton);
+    m_saveButton->setDefault(true);
     connect(m_saveButton, &QPushButton::clicked, this, &SettingsDialog::saveAndAccept);
     buttons->addWidget(m_saveButton);
     bodyLayout()->addLayout(buttons);

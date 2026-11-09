@@ -151,6 +151,10 @@ void ThunderstoreDialog::buildUi()
 
     m_autoButton = new QPushButton(QStringLiteral("Detect"), this);
     m_autoButton->setCursor(Qt::PointingHandCursor);
+    // Enter in the community field is handled by returnPressed above. Leaving
+    // these two as auto-default buttons made Qt also press Detect, which then
+    // replaced the requested slug with the guessed one for the game name.
+    m_autoButton->setAutoDefault(false);
     connect(m_autoButton, &QPushButton::clicked, this, [this] {
         m_candidates = Thunderstore::communityCandidates(m_game.name);
         m_candidateIndex = 0;
@@ -165,6 +169,7 @@ void ThunderstoreDialog::buildUi()
 
     m_loadButton = new QPushButton(QStringLiteral("Load"), this);
     m_loadButton->setCursor(Qt::PointingHandCursor);
+    m_loadButton->setAutoDefault(false);
     connect(m_loadButton, &QPushButton::clicked, this, &ThunderstoreDialog::loadCommunity);
     communityRow->addWidget(m_loadButton);
     bodyLayout()->addLayout(communityRow);

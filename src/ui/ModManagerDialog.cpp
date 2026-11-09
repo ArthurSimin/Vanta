@@ -184,33 +184,41 @@ void ModManagerDialog::buildUi()
     m_addButton = new QPushButton(QStringLiteral("Add mod file…"), this);
     m_addButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_addButton);
+    m_addButton->setAutoDefault(false);
     connect(m_addButton, &QPushButton::clicked, this, &ModManagerDialog::addLocalMod);
     footer->addWidget(m_addButton);
 
     m_toggleButton = new QPushButton(QStringLiteral("Toggle"), this);
     m_toggleButton->setCursor(Qt::PointingHandCursor);
+    m_toggleButton->setAutoDefault(false);
     m_toggleButton->setEnabled(false);
     connect(m_toggleButton, &QPushButton::clicked, this, &ModManagerDialog::toggleSelected);
     footer->addWidget(m_toggleButton);
 
     m_thunderstoreButton = new QPushButton(QStringLiteral("Browse Thunderstore…"), this);
     m_thunderstoreButton->setCursor(Qt::PointingHandCursor);
+    m_thunderstoreButton->setAutoDefault(false);
     connect(m_thunderstoreButton, &QPushButton::clicked, this, &ModManagerDialog::openThunderstore);
     footer->addWidget(m_thunderstoreButton);
 
     m_openFolderButton = new QPushButton(QStringLiteral("Open folder"), this);
     m_openFolderButton->setCursor(Qt::PointingHandCursor);
+    m_openFolderButton->setAutoDefault(false);
     connect(m_openFolderButton, &QPushButton::clicked, this, &ModManagerDialog::openModFolder);
     footer->addWidget(m_openFolderButton);
 
     m_refreshButton = new QPushButton(QStringLiteral("Refresh"), this);
     m_refreshButton->setCursor(Qt::PointingHandCursor);
+    m_refreshButton->setAutoDefault(false);
     connect(m_refreshButton, &QPushButton::clicked, this, &ModManagerDialog::refresh);
     footer->addWidget(m_refreshButton);
     footer->addStretch(1);
 
     m_closeButton = new QPushButton(QStringLiteral("Close"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
+    // The mod list clears its selection after every refresh, so a stale Enter
+    // could only ever fall through to Add mod file. Enter closes the dialog.
+    m_closeButton->setDefault(true);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::accept);
     footer->addWidget(m_closeButton);
     bodyLayout()->addLayout(footer);

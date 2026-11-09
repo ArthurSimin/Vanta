@@ -81,6 +81,7 @@ void AboutDialog::buildUi()
 
     auto *repoButton = new QPushButton(QStringLiteral("Open the OnlineFix Linux repository"), creditsPanel);
     repoButton->setCursor(Qt::PointingHandCursor);
+    repoButton->setAutoDefault(false);
     connect(repoButton, &QPushButton::clicked, this, [] {
         QDesktopServices::openUrl(QUrl(QStringLiteral("https://github.com/ZzEdovec/onlinefix-linux")));
     });
@@ -123,6 +124,7 @@ void AboutDialog::buildUi()
     footer->addStretch(1);
     auto *close = new QPushButton(QStringLiteral("Close"), this);
     close->setCursor(Qt::PointingHandCursor);
+    close->setDefault(true);
     connect(close, &QPushButton::clicked, this, &QDialog::accept);
     footer->addWidget(close);
     bodyLayout()->addLayout(footer);

@@ -246,16 +246,19 @@ void OnlineFixDialog::buildManageUi()
     footer->setSpacing(8);
     m_openFolderButton = new QPushButton(QStringLiteral("Open fix folder"), this);
     m_openFolderButton->setCursor(Qt::PointingHandCursor);
+    m_openFolderButton->setAutoDefault(false);
     connect(m_openFolderButton, &QPushButton::clicked, this, &OnlineFixDialog::openFixFolder);
     footer->addWidget(m_openFolderButton);
     footer->addStretch(1);
     m_closeButton = new QPushButton(QStringLiteral("Cancel"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
+    m_closeButton->setAutoDefault(false);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::reject);
     footer->addWidget(m_closeButton);
     m_saveButton = new QPushButton(QStringLiteral("Save policy"), this);
     m_saveButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_saveButton);
+    m_saveButton->setDefault(true);
     connect(m_saveButton, &QPushButton::clicked, this, &OnlineFixDialog::saveAndAccept);
     footer->addWidget(m_saveButton);
     bodyLayout()->addLayout(footer);
@@ -316,11 +319,15 @@ void OnlineFixDialog::buildPromptUi()
     footer->setSpacing(8);
     m_cancelButton = new QPushButton(QStringLiteral("Cancel"), this);
     m_cancelButton->setCursor(Qt::PointingHandCursor);
+    // Enter belongs to the primary action. Cancel was the first button created
+    // here, so Qt made it the implicit default and Enter aborted the launch.
+    m_cancelButton->setAutoDefault(false);
     connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
     footer->addWidget(m_cancelButton);
     footer->addStretch(1);
     m_skipButton = new QPushButton(QStringLiteral("Launch without OnlineFix"), this);
     m_skipButton->setCursor(Qt::PointingHandCursor);
+    m_skipButton->setAutoDefault(false);
     connect(m_skipButton, &QPushButton::clicked, this, [this] {
         m_launchChoice = LaunchChoice::Skip;
         accept();
@@ -329,6 +336,7 @@ void OnlineFixDialog::buildPromptUi()
     m_applyButton = new QPushButton(QStringLiteral("Apply and launch"), this);
     m_applyButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_applyButton);
+    m_applyButton->setDefault(true);
     connect(m_applyButton, &QPushButton::clicked, this, [this] {
         m_launchChoice = LaunchChoice::Apply;
         accept();

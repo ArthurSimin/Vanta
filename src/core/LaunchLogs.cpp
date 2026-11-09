@@ -212,11 +212,12 @@ QList<LaunchLogEntry> LaunchLogs::list(const QString &gameId, int limit)
                 entry.finishedAt = QDateTime::fromString(value, Qt::ISODate);
             else if (key == QStringLiteral("Exit code"))
                 entry.exitCode = value.startsWith(QStringLiteral("none")) ? -1 : value.toInt();
-            else if (key == QStringLiteral("Result"))
+            else if (key == QStringLiteral("Result")) {
                 entry.crashed = value == QStringLiteral("exited unexpectedly");
+                entry.stopped = value == QStringLiteral("stopped by the user");
+                entry.running = value == QStringLiteral("running");
+            }
         }
-        entry.stopped = head.contains(QStringLiteral("Result: stopped by the user"));
-        entry.running = head.contains(QStringLiteral("Result: running"));
         if (!entry.finishedAt.isValid())
             entry.finishedAt = info.lastModified();
         entries.append(entry);

@@ -139,6 +139,11 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
         if (symlink)
             return fail(QStringLiteral("The archive contains a symbolic link, which Vanta refuses to create: %1")
                             .arg(name));
+        // Some writers store a folder without the trailing slash. Its mode
+        // still marks it as a directory, and treating it as a file would both
+        // fail the install and block later packages from creating the folder.
+        if ((unixMode & 0170000) == 0040000)
+            continue;
 
         if (static_cast<qint64>(uncompressedSize) > kMaximumEntryBytes)
             return fail(QStringLiteral("The archive entry %1 is larger than the 512 MiB limit.").arg(name));
@@ -181,6 +186,11 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
             return fail(QStringLiteral("The archive entry %1 uses an unsupported compression method (%2).")
                             .arg(name).arg(method));
         }
+        // A stored entry carries its real length as compressedSize. If the
+        // central directory claims another uncompressed length, the archive is
+        // inconsistent and the payload would be installed truncated or padded.
+        if (payload.size() != static_cast<int>(uncompressedSize))
+            return fail(QStringLiteral("The archive entry %1 has inconsistent stored sizes.").arg(name));
 
         ZipEntry entry;
         entry.name = name;
@@ -261,7 +271,10 @@ QString mapArchivePath(const QString &sourcePath, const QString &rootRelative,
         if (!rest.isEmpty())
             return rootRelative + QLatin1Char('/') + rest;
     }
-    if (lower == QStringLiteral("BepInEx") || lower.startsWith(QStringLiteral("bepinex/"))) {
+    // A bare BepInEx member is the folder itself, not a file to install.
+    if (lower == QStringLiteral("bepinex"))
+        return {};
+    if (lower.startsWith(QStringLiteral("bepinex/"))) {
         const QString rest = afterPrefix(sourcePath, QStringLiteral("BepInEx"));
         return mapArchivePath(rootRelative + QLatin1Char('/') + rest, rootRelative, pluginsRelative,
                               patchersRelative, packageFolder);
@@ -657,6 +670,13 @@ bool ModInstaller::planFromArchive(const QByteArray &archive, const QString &arc
         const QString destination = mapArchivePath(sourcePath, rootRelative, pluginsRelative,
                                                    patchersRelative, folderName);
         if (destination.isEmpty())
+            continue;
+        // A folder marker stored without its trailing slash maps to a path
+        // ending in one. It carries no data and is not a file the package wants
+        // to install, so it must not become a zero-byte file in its place.
+        if (entry.data.isEmpty()
+            && (destination.endsWith(QLatin1Char('/'))
+                || QFileInfo(QDir(target.gameRoot).filePath(destination)).isDir()))
             continue;
         if (destination.endsWith(QStringLiteral(".dll"), Qt::CaseInsensitive))
             hasDll = true;

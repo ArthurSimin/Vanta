@@ -230,6 +230,12 @@ AssetChoice chooseAsset(const QJsonArray &assets, RunnerType type)
         } else {
             if (!name.endsWith(QStringLiteral(".tar.xz"), Qt::CaseInsensitive))
                 continue;
+            // An x86_64 Wine cannot run natively on arm64. Skipping the asset
+            // makes the lookup report that no portable build exists instead of
+            // installing a runner that fails on every launch.
+            if (arm && !name.contains(QStringLiteral("aarch64"), Qt::CaseInsensitive)
+                && !name.contains(QStringLiteral("arm64"), Qt::CaseInsensitive))
+                continue;
             score = 10;
             if (!arm && name.contains(QStringLiteral("amd64"), Qt::CaseInsensitive))
                 score += 100;
@@ -241,8 +247,6 @@ AssetChoice chooseAsset(const QJsonArray &assets, RunnerType type)
                 score -= 30;
             if (name.contains(QStringLiteral("-x86.tar"), Qt::CaseInsensitive))
                 score -= 200;
-            if (arm)
-                score -= 150;
         }
         if (score > bestScore) {
             bestScore = score;

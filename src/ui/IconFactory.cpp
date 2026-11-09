@@ -361,6 +361,9 @@ QString brandResource(const QString &source)
     if (source == QStringLiteral("Epic Games Store")) return QStringLiteral(":/icons/brand/epic.svg");
     if (source == QStringLiteral("EA App")) return QStringLiteral(":/icons/brand/ea.svg");
     if (source == QStringLiteral("Ubisoft Connect")) return QStringLiteral(":/icons/brand/ubisoft.svg");
+    // Runner marks share the brand renderer with launcher sources, so a runner
+    // row can show the real Proton logo instead of a generic glyph.
+    if (source == QStringLiteral("Proton")) return QStringLiteral(":/icons/brand/proton.svg");
     return {};
 }
 

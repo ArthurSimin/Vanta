@@ -528,8 +528,15 @@ void Sidebar::rebuild()
         RowSpec row;
         row.id = QStringLiteral("runner.") + runnerName(runner);
         row.label = runnerName(runner);
-        row.icon = glyphIcons(glyph).first;
-        row.selectedIcon = glyphIcons(glyph).second;
+        if (runner == RunnerType::Proton) {
+            // Proton has an official mark, so the runner row uses it rather
+            // than the generic rounded-box glyph.
+            row.icon = Icons::sourceIcon(QStringLiteral("Proton"), muted, 18);
+            row.selectedIcon = Icons::sourceIcon(QStringLiteral("Proton"), accent, 18);
+        } else {
+            row.icon = glyphIcons(glyph).first;
+            row.selectedIcon = glyphIcons(glyph).second;
+        }
         row.count = count;
         sections[QStringLiteral("runners")].append(row);
     }

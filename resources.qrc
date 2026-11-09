@@ -12,5 +12,6 @@
     <file alias="epic.svg">resources/icons/brand/epic.svg</file>
     <file alias="ea.svg">resources/icons/brand/ea.svg</file>
     <file alias="ubisoft.svg">resources/icons/brand/ubisoft.svg</file>
+    <file alias="proton.svg">resources/icons/brand/proton.svg</file>
   </qresource>
 </RCC>

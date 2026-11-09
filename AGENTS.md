@@ -238,6 +238,47 @@ Rules that follow from the distribution model:
 - The startup check is a single delayed request. Do not add polling, periodic
   re-checks or a background timer.
 
+## Versioning
+
+Vanta versions are **`MAJOR.MINOR.PATCH`** — exactly three dot-separated
+numbers, never two and never four. `1.0.4` is a version; `1.0`, `1` and
+`1.0.4.1` are not. Each bump raises one segment by one and leaves the others
+alone. Pick the segment from what the release contains, not from how big the
+diff looks:
+
+- **PATCH** (`1.0.4`) — bug fixes only. A release that changes no behaviour the
+  user can ask for, only behaviour that was wrong, is a patch. This is the
+  common case.
+- **MINOR** (`1.1.0`) — a small, backward-compatible feature. Adding something
+  the user can see or do that nothing depended on before is a minor bump, even
+  if it also carries fixes. The 1.0.3 update notification is the reference
+  example: it added a banner and a menu action while every existing library,
+  setting and file stayed compatible.
+- **MAJOR** (`2.0.0`) — a big feature that can break compatibility: an on-disk
+  format change without a migration, or a feature that changes how existing
+  games, runners or settings behave. Vanta has not had one yet; do not reach
+  for a major bump for a feature that is merely large.
+
+A release that ships any user-visible feature is a **minor**, not a patch. The
+common mistake is landing features under `X.Y.Z+1`; if the release notes say
+"now" or "new", the segment to raise is `MINOR`.
+
+Where the version lives:
+
+- The CMake project version: `set(VANTA_VERSION ...)` in `CMakeLists.txt`, mirrored
+  in `src/Version.h` for a build that does not go through CMake. Keep the two in
+  step.
+- The tag is `v<MAJOR>.<MINOR>.<PATCH>` (for example `v1.0.4`). The release
+  workflow strips the leading `v` and passes the rest as `-DVANTA_VERSION`, so
+  the tag is the single source of truth for a released build.
+- A trailing `-N` on a package file name (`vanta-1.0.4-1.x86_64.rpm`) is the
+  packaging revision. It is **not** part of the version and never appears in the
+  tag or the About dialog.
+
+`UpdateChecker` compares versions per numeric segment, so the segment actually
+matters to users: a feature shipped as a patch tells the update check that only
+fixes changed.
+
 ## Packaging
 
 `packaging/build-packages.sh` turns a `DESTDIR` install tree into a `.deb`, an

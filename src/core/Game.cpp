@@ -100,9 +100,9 @@ QJsonObject Game::toJson() const
 Game Game::fromJson(const QJsonObject &object)
 {
     Game game;
+    // Keep a missing id empty: loadLibrary assigns one and saves it back, so
+    // the id that keys logs and the scan cache stays stable across restarts.
     game.id = object.value(QStringLiteral("id")).toString();
-    if (game.id.isEmpty())
-        game.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     game.name = object.value(QStringLiteral("name")).toString();
     game.source = object.value(QStringLiteral("source")).toString(QStringLiteral("Manual"));
     game.gameDirectory = object.value(QStringLiteral("gameDirectory")).toString();

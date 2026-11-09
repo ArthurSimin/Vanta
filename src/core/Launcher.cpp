@@ -5,8 +5,14 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QProcessEnvironment>
+#include <QRegularExpression>
 #include <QStandardPaths>
 #include <QTimer>
+
+#ifdef Q_OS_UNIX
+#include <csignal>
+#include <unistd.h>
+#endif
 
 GameLauncher::GameLauncher(QObject *parent)
     : QObject(parent)
@@ -15,7 +21,7 @@ GameLauncher::GameLauncher(QObject *parent)
 
 GameLauncher::~GameLauncher()
 {
-    shutdown();
+    shutdown(false);
 }
 
 bool GameLauncher::launch(const Game &game, const LaunchPlan &plan, QString *error)
@@ -54,6 +60,19 @@ bool GameLauncher::launch(const Game &game, const LaunchPlan &plan, QString *err
     process->setWorkingDirectory(plan.workingDirectory);
     process->setProcessEnvironment(plan.environment);
     process->setProcessChannelMode(QProcess::SeparateChannels);
+
+    // A native game is often a launcher script whose real process is a child.
+    // Killing only the direct child leaves the game running after Vanta quits,
+    // so the game gets its own process group and both stop paths can signal the
+    // whole group. Qt offers no way to set a process group portably before 6.2,
+    // so this is guarded and simply degrades to killing the direct child.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0)
+    process->setChildProcessModifier([] {
+#ifdef Q_OS_UNIX
+        ::setpgid(0, 0);
+#endif
+    });
+#endif
 
     Instance instance;
     instance.process = process;
@@ -124,10 +143,36 @@ void GameLauncher::runTerminationFallback(const QString &gameId)
     const QString baseName = it->executableBaseName;
     if (baseName.isEmpty())
         return;
+    if (baseName.contains(QLatin1Char('/')))
+        return;
+
+    // The fallback is a last resort when wineserver cannot be asked to quit, so
+    // it has to match the game executable exactly. An unanchored `pkill -f name`
+    // also kills the shell or editor that happens to mention the name.
     auto process = new QProcess(this);
     connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), process, &QObject::deleteLater);
     connect(process, &QProcess::errorOccurred, process, &QObject::deleteLater);
-    process->start(QStringLiteral("pkill"), {QStringLiteral("-f"), baseName});
+    process->start(QStringLiteral("pkill"),
+                   {QStringLiteral("-f"), QStringLiteral("(^|/)%1($| )").arg(QRegularExpression::escape(baseName))});
+}
+
+void GameLauncher::signalProcessGroup(const Instance &instance, int sig)
+{
+#ifdef Q_OS_UNIX
+    if (instance.process) {
+        // The child called setpgid(0, 0), so its pid is the group id. Signalling
+        // the group reaches the game behind a wrapper script; a negative pid is
+        // not valid for QProcess::kill, hence kill(2) directly.
+        const qint64 pid = instance.process->processId();
+        if (pid > 0) {
+            ::kill(-static_cast<pid_t>(pid), sig);
+            return;
+        }
+    }
+#endif
+    Q_UNUSED(sig);
+    if (instance.process)
+        instance.process->kill();
 }
 
 void GameLauncher::stopGame(const QString &gameId)
@@ -142,10 +187,17 @@ void GameLauncher::stopGame(const QString &gameId)
     emit gameStopping(gameId);
 
     if (!runnerIsWineLike(it->plan.runner)) {
-        it->process->terminate();
-        QTimer::singleShot(2500, it->process.data(), [process = it->process.data()] {
-            if (process && process->state() != QProcess::NotRunning)
-                process->kill();
+        // The game owns a process group now, so the whole group has to hear the
+        // request: terminating only the direct child leaves a wrapper script's
+        // game alive and unparented.
+        const Instance instance = *it;
+        signalProcessGroup(instance, SIGTERM);
+        QTimer::singleShot(2500, this, [this, gameId] {
+            auto pending = m_instances.find(gameId);
+            if (pending == m_instances.end() || !pending->process)
+                return;
+            if (pending->process->state() != QProcess::NotRunning)
+                signalProcessGroup(*pending, SIGKILL);
         });
         return;
     }
@@ -330,18 +382,55 @@ QString GameLauncher::outputLog(const Instance &instance) const
     return log.trimmed();
 }
 
-void GameLauncher::shutdown()
+void GameLauncher::shutdown(bool reportStopped)
 {
     const QStringList ids = m_instances.keys();
     for (const QString &id : ids) {
         auto it = m_instances.find(id);
-        if (it != m_instances.end() && it->process) {
+        if (it == m_instances.end())
+            continue;
+
+        collectOutput(id);
+        it->elapsedAtExitMs = it->clock.isValid() ? it->clock.elapsed() : 0;
+
+        // Quitting Vanta must not leave the game running. A Wine game outlives
+        // its launcher process, so killing the QProcess alone leaves it alive;
+        // the prefix has to be shut down through its own wineserver first.
+        if (runnerIsWineLike(it->plan.runner) && !it->plan.winePrefix.isEmpty()
+            && QFileInfo(it->plan.wineServer).isExecutable()) {
+            QProcess wineserver;
+            QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
+            environment.insert(QStringLiteral("WINEPREFIX"), it->plan.winePrefix);
+            wineserver.setProcessEnvironment(environment);
+            wineserver.start(it->plan.wineServer, {QStringLiteral("-k")});
+            wineserver.waitForFinished(3000);
+        }
+
+        QString diagnostic;
+        int exitCode = -1;
+        if (it->process) {
+            // The game runs in its own process group, so a plain QProcess::kill
+            // would leave the real process behind when the game is a wrapper.
+            signalProcessGroup(*it, SIGKILL);
             it->process->disconnect(this);
-            it->process->kill();
-            it->process->waitForFinished(500);
+            it->process->waitForFinished(1500);
+            exitCode = it->process->exitCode();
+            diagnostic = outputLog(*it);
             it->process->deleteLater();
             it->process = nullptr;
         }
+
+        if (!reportStopped || !it->started) {
+            m_instances.erase(it);
+            continue;
+        }
+
+        // The session is over, but the playtime it earned and the log it
+        // produced are still worth keeping, so a clean quit reports the stop the
+        // same way an explicit stop does.
+        const QString logPath = persistLog(id, *it, exitCode, false, true, diagnostic);
+        const qint64 elapsedMs = it->elapsedAtExitMs;
+        m_instances.erase(it);
+        emit gameFinished(id, elapsedMs / 1000, exitCode, false, true, diagnostic, logPath);
     }
-    m_instances.clear();
 }

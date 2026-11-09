@@ -24,7 +24,10 @@ public:
     bool isStopping(const QString &gameId) const;
     QStringList runningGameIds() const;
     QString diagnosticLog(const QString &gameId) const;
-    void shutdown();
+    // Stops every running game. `reportStopped` forwards each session to
+    // gameFinished so playtime and the launch log survive the quit; the
+    // destructor passes false because no receiver should run that late.
+    void shutdown(bool reportStopped = true);
 
 signals:
     void gameStarted(const QString &gameId, const QDateTime &startedAt);
@@ -53,6 +56,9 @@ private:
         QDateTime startedAt;
     };
 
+    // Signals the game process group so launcher-script children stop too. A
+    // group that cannot be resolved falls back to the QProcess itself.
+    static void signalProcessGroup(const Instance &instance, int sig);
     void collectOutput(const QString &gameId);
     void runTerminationFallback(const QString &gameId);
     void beginTeardown(const QString &gameId);

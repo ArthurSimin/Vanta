@@ -172,7 +172,7 @@ void GameDetailsDialog::buildUi()
     m_modsButton = new QPushButton(QStringLiteral("Mods…"), content);
     m_modsButton->setCursor(Qt::PointingHandCursor);
     m_modsButton->setAutoDefault(false);
-    m_modsButton->setVisible(m_game.platform == Platform::Windows || runnerIsWineLike(m_game.runner));
+    m_modsButton->setVisible(m_game.platform == Platform::Windows || runnerSupportsBepInEx(m_game.runner));
     connect(m_modsButton, &QPushButton::clicked, this, [this] { setAction(Action::Mods); });
     actions->addWidget(m_modsButton);
 

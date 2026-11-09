@@ -57,5 +57,9 @@ OnlineFixPrompt onlineFixPromptFromName(const QString &name);
 WineLogLevel wineLogLevelFromName(const QString &name);
 
 bool runnerIsWineLike(RunnerType type);
+// Native games load BepInEx through the doorstop launcher script, Wine and
+// Proton through the winhttp override. Flatpak and Custom launches cannot load
+// it, so the mods UI stays hidden for them.
+bool runnerSupportsBepInEx(RunnerType type);
 bool scanNeedsAttention(ScanState state);
 bool scanIsDetected(ScanState state);

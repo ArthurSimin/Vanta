@@ -223,6 +223,11 @@ bool runnerIsWineLike(RunnerType type)
     return type == RunnerType::Wine || type == RunnerType::Proton;
 }
 
+bool runnerSupportsBepInEx(RunnerType type)
+{
+    return type == RunnerType::Native || runnerIsWineLike(type);
+}
+
 bool scanNeedsAttention(ScanState state)
 {
     return state == ScanState::IncompleteInstallation

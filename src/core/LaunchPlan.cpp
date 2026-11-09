@@ -257,8 +257,41 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
                 *error = QStringLiteral("The game executable is not executable: %1").arg(executable);
             return {};
         }
-        command << executable;
-        command << postArgs;
+        // A Windows preloader never loads into a Linux process, so native
+        // BepInEx is injected through the doorstop launcher script the pack
+        // ships. Without it the game still starts, but the preloader does not.
+        QString nativeLauncher;
+        if (plan.bepinexApplied) {
+            for (const QString &base : {game.effectiveDirectory(), executableInfo.absolutePath()}) {
+                if (base.isEmpty())
+                    continue;
+                const QString script = QDir(base).filePath(QStringLiteral("run_bepinex.sh"));
+                if (QFileInfo(script).isFile()) {
+                    nativeLauncher = QFileInfo(script).absoluteFilePath();
+                    break;
+                }
+            }
+            if (nativeLauncher.isEmpty()) {
+                plan.diagnostics.append(QStringLiteral(
+                    "BepInEx compatibility is enabled and BepInEx was detected, but no run_bepinex.sh "
+                    "launcher was found, so the native game starts without the doorstop preloader."));
+            } else if (!QFileInfo(nativeLauncher).isExecutable()) {
+                if (error)
+                    *error = QStringLiteral("The BepInEx launcher script is not executable: %1")
+                                 .arg(nativeLauncher);
+                return {};
+            }
+        }
+        if (!nativeLauncher.isEmpty()) {
+            command << nativeLauncher << executable;
+            command << postArgs;
+            setEnvironment(QStringLiteral("DOORSTOP_ENABLE"), QStringLiteral("TRUE"));
+            plan.diagnostics.append(QStringLiteral(
+                "Native BepInEx: launching through run_bepinex.sh so the doorstop preloader loads."));
+        } else {
+            command << executable;
+            command << postArgs;
+        }
     } else if (game.runner == RunnerType::Wine) {
         if (!executableInfo.exists() || !executableInfo.isFile()) {
             if (error)
@@ -443,7 +476,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
         plan.diagnostics.append(QStringLiteral("OnlineFix launch configuration enabled for this launch only."));
         plan.diagnostics.append(QStringLiteral("WINEDLLOVERRIDES source: forced DXVK chain, stored overrides, detected modules."));
     }
-    if (plan.bepinexApplied)
+    if (plan.bepinexApplied && runnerIsWineLike(plan.runner))
         plan.diagnostics.append(QStringLiteral("The BepInEx compatibility override (winhttp=n,b) is included because the user enabled it and BepInEx files were detected."));
     if (!plan.composedOverrides.isEmpty())
         plan.diagnostics.append(QStringLiteral("Composed WINEDLLOVERRIDES: %1").arg(plan.composedOverrides));

@@ -1362,7 +1362,7 @@ void MainWindow::showContextMenu(const QString &gameId, const QPoint &globalPosi
     connect(scanAction, &QAction::triggered, this, [this, gameId] { scanGame(gameId, true); });
     auto *onlineFixAction = menu.addAction(QStringLiteral("OnlineFix…"));
     connect(onlineFixAction, &QAction::triggered, this, [this, gameId] { openOnlineFixDialog(gameId); });
-    if (game.platform == Platform::Windows || runnerIsWineLike(game.runner)) {
+    if (game.platform == Platform::Windows || runnerSupportsBepInEx(game.runner)) {
         auto *modsAction = menu.addAction(QStringLiteral("Mods…"));
         connect(modsAction, &QAction::triggered, this, [this, gameId] { openModManager(gameId); });
     }

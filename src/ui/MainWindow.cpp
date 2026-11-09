@@ -524,6 +524,12 @@ void MainWindow::restoreState()
         m_filterId = QStringLiteral("library.games");
     m_sidebar->setCurrentItem(m_filterId);
 
+    // The filter list is part of the saved state, so the menu has to reflect
+    // what was persisted rather than the defaults buildMenus() installed.
+    m_hideNeedsAttention = settings.hideNeedsAttention;
+    m_hiddenRunners = settings.hiddenRunners;
+    buildFilterMenu();
+
     if (!settings.windowGeometry.isEmpty())
         restoreGeometry(settings.windowGeometry);
     if (settings.windowMaximized)
@@ -782,19 +788,71 @@ void MainWindow::buildFilterMenu()
         applyFilter();
     });
 
+    // The hide list is the part that persists: the same games a player never
+    // wants to see stay hidden across restarts.
+    auto *hideMenu = m_filterMenu->addMenu(QStringLiteral("Hide"));
+
+    auto *hideAttention = hideMenu->addAction(QStringLiteral("Games that need attention"));
+    hideAttention->setCheckable(true);
+    hideAttention->setChecked(m_hideNeedsAttention);
+    connect(hideAttention, &QAction::triggered, this, [this](bool checked) {
+        m_hideNeedsAttention = checked;
+        buildFilterMenu();
+        persistFilterList();
+        applyFilter();
+    });
+
+    hideMenu->addSeparator();
+    const QList<RunnerType> runners = {
+        RunnerType::Native, RunnerType::Wine, RunnerType::Proton, RunnerType::Flatpak, RunnerType::Custom
+    };
+    for (RunnerType runner : runners) {
+        const QString name = runnerName(runner);
+        auto *action = hideMenu->addAction(QStringLiteral("%1 games").arg(name));
+        action->setCheckable(true);
+        action->setChecked(m_hiddenRunners.contains(name));
+        connect(action, &QAction::triggered, this, [this, name](bool checked) {
+            if (checked) {
+                if (!m_hiddenRunners.contains(name))
+                    m_hiddenRunners.append(name);
+            } else {
+                m_hiddenRunners.removeAll(name);
+            }
+            buildFilterMenu();
+            persistFilterList();
+            applyFilter();
+        });
+    }
+
     m_filterMenu->addSeparator();
     auto *clear = m_filterMenu->addAction(QStringLiteral("Clear filters"));
     connect(clear, &QAction::triggered, this, [this] {
         m_compatibilityFilter = CompatibilityFilter::All;
         m_installFilter = InstallFilter::All;
         m_favoritesOnly = false;
+        m_hideNeedsAttention = false;
+        m_hiddenRunners.clear();
         buildFilterMenu();
+        persistFilterList();
         applyFilter();
     });
     m_filterButton->setProperty("active", m_compatibilityFilter != CompatibilityFilter::All
-        || m_installFilter != InstallFilter::All || m_favoritesOnly);
+        || m_installFilter != InstallFilter::All || m_favoritesOnly
+        || m_hideNeedsAttention || !m_hiddenRunners.isEmpty());
     m_filterButton->style()->unpolish(m_filterButton);
     m_filterButton->style()->polish(m_filterButton);
+}
+
+void MainWindow::persistFilterList()
+{
+    AppSettings settings = m_library.settings();
+    if (settings.hideNeedsAttention == m_hideNeedsAttention
+        && settings.hiddenRunners == m_hiddenRunners) {
+        return;
+    }
+    settings.hideNeedsAttention = m_hideNeedsAttention;
+    settings.hiddenRunners = m_hiddenRunners;
+    m_library.updateSettings(settings);
 }
 
 void MainWindow::selectFilter(const QString &id)
@@ -834,6 +892,18 @@ bool MainWindow::matchesFilter(const Game &game) const
         return false;
     if (m_favoritesOnly && !game.favorite)
         return false;
+
+    // The persisted hide list trims clutter from the broad views, but a view
+    // that explicitly asks for a runner or for the attention state still shows
+    // it, otherwise its sidebar entry would always come up empty.
+    if (m_hideNeedsAttention && m_filterId != QStringLiteral("compat.attention")
+        && scanNeedsAttention(game.compatibility))
+        return false;
+    if (!m_hiddenRunners.isEmpty()) {
+        const QString name = runnerName(game.runner);
+        if (m_hiddenRunners.contains(name) && m_filterId != QStringLiteral("runner.") + name)
+            return false;
+    }
 
     switch (m_compatibilityFilter) {
     case CompatibilityFilter::All:

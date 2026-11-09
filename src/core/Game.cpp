@@ -177,6 +177,11 @@ QJsonObject AppSettings::toJson() const
     object.insert(QStringLiteral("steamGridDbApiKey"), steamGridDbApiKey);
     object.insert(QStringLiteral("fetchCoversAutomatically"), fetchCoversAutomatically);
     object.insert(QStringLiteral("wineLogLevel"), wineLogLevelName(wineLogLevel));
+    QJsonArray hiddenRunnersArray;
+    for (const QString &runner : hiddenRunners)
+        hiddenRunnersArray.append(runner);
+    object.insert(QStringLiteral("hideNeedsAttention"), hideNeedsAttention);
+    object.insert(QStringLiteral("hiddenRunners"), hiddenRunnersArray);
     return object;
 }
 
@@ -212,6 +217,13 @@ AppSettings AppSettings::fromJson(const QJsonObject &object)
     settings.steamGridDbApiKey = object.value(QStringLiteral("steamGridDbApiKey")).toString();
     settings.fetchCoversAutomatically = object.value(QStringLiteral("fetchCoversAutomatically")).toBool(true);
     settings.wineLogLevel = wineLogLevelFromName(object.value(QStringLiteral("wineLogLevel")).toString());
+    settings.hideNeedsAttention = object.value(QStringLiteral("hideNeedsAttention")).toBool(false);
+    const QJsonArray hiddenRunnersArray = object.value(QStringLiteral("hiddenRunners")).toArray();
+    for (const QJsonValue &value : hiddenRunnersArray) {
+        const QString runner = value.toString();
+        if (!runner.isEmpty() && !settings.hiddenRunners.contains(runner))
+            settings.hiddenRunners.append(runner);
+    }
     return settings;
 }
 

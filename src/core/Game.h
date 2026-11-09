@@ -96,6 +96,13 @@ struct AppSettings
     bool fetchCoversAutomatically = true;
     WineLogLevel wineLogLevel = WineLogLevel::Errors;
 
+    // Persisted filter list. `hideNeedsAttention` removes the games the scan
+    // flagged from every view, and `hiddenRunners` holds the display name of
+    // each runner to hide (for example "Native" for a Windows-only library).
+    // They are stored so a filter the user set up survives a restart.
+    bool hideNeedsAttention = false;
+    QStringList hiddenRunners;
+
     QJsonObject toJson() const;
     static AppSettings fromJson(const QJsonObject &object);
 };

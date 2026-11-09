@@ -26,9 +26,15 @@ GameLauncher::~GameLauncher()
 
 bool GameLauncher::launch(const Game &game, const LaunchPlan &plan, QString *error)
 {
-    if (m_instances.contains(game.id)) {
+    const auto existing = m_instances.constFind(game.id);
+    if (existing != m_instances.constEnd()) {
+        // The process can be gone while the prefix is still being torn down. The
+        // game is not running then, but a relaunch has to wait for the previous
+        // instance to finish, so the caller gets a reason it can act on.
         if (error)
-            *error = QStringLiteral("This game is already running.");
+            *error = existing->started && !existing->running
+                ? QStringLiteral("The previous session is still shutting down. Try again in a moment.")
+                : QStringLiteral("This game is already running.");
         return false;
     }
     if (!plan.isValid()) {
@@ -87,8 +93,18 @@ bool GameLauncher::launch(const Game &game, const LaunchPlan &plan, QString *err
         if (it == m_instances.end())
             return;
         it->started = true;
+        it->running = true;
         it->clock.start();
         it->startedAt = QDateTime::currentDateTime();
+        // The log is created now, and filled with what the process prints, so
+        // opening the viewer while the game is running shows evidence instead of
+        // an empty "no log yet". The final pass rewrites it with the finished
+        // header and the complete output.
+        QString logError;
+        it->liveLogPath = LaunchLogs::beginLive(gameId, it->gameName, runnerName(it->plan.runner),
+                                                it->startedAt, it->plan.summary(), &logError);
+        if (it->liveLogPath.isEmpty() && !logError.isEmpty())
+            qWarning("%s", qUtf8Printable(logError));
         emit gameStarted(gameId, it->startedAt);
     });
 
@@ -106,6 +122,11 @@ bool GameLauncher::launch(const Game &game, const LaunchPlan &plan, QString *err
             return;
         collectOutput(gameId);
         it->elapsedAtExitMs = it->clock.isValid() ? it->clock.elapsed() : 0;
+        // The process is gone, so the game is no longer running even if the
+        // prefix still has to be torn down. Reporting that now keeps the UI from
+        // showing Stop after a game the user closed themselves.
+        it->running = false;
+        emit gameExited(gameId);
         beginTeardown(gameId);
     });
 
@@ -126,13 +147,21 @@ void GameLauncher::collectOutput(const QString &gameId)
     auto it = m_instances.find(gameId);
     if (it == m_instances.end() || !it->process)
         return;
-    it->output += it->process->readAllStandardOutput();
-    it->errorOutput += it->process->readAllStandardError();
+    const QByteArray out = it->process->readAllStandardOutput();
+    const QByteArray err = it->process->readAllStandardError();
+    it->output += out;
+    it->errorOutput += err;
     constexpr int maxLogSize = 65536;
     if (it->output.size() > maxLogSize)
         it->output = it->output.right(maxLogSize);
     if (it->errorOutput.size() > maxLogSize)
         it->errorOutput = it->errorOutput.right(maxLogSize);
+    if (!it->liveLogPath.isEmpty()) {
+        if (!out.isEmpty())
+            LaunchLogs::appendLive(it->liveLogPath, QString::fromLocal8Bit(out));
+        if (!err.isEmpty())
+            LaunchLogs::appendLive(it->liveLogPath, QString::fromLocal8Bit(err));
+    }
 }
 
 void GameLauncher::runTerminationFallback(const QString &gameId)
@@ -263,6 +292,20 @@ void GameLauncher::beginTeardown(const QString &gameId)
         waiter->deleteLater();
         completeInstance(gameId, exitCode, exitStatus);
     });
+
+    // A prefix can keep a background process alive indefinitely, which used to
+    // leave the launch un-finalized forever. The running state already cleared
+    // when the process exited, so this only bounds how long the playtime and the
+    // final log wait on the prefix; the waiter is killed once the bound passes.
+    auto *guard = new QTimer(waiter);
+    guard->setSingleShot(true);
+    connect(guard, &QTimer::timeout, this, [this, gameId, waiter, exitCode, exitStatus] {
+        if (waiter->state() != QProcess::NotRunning)
+            waiter->kill();
+        completeInstance(gameId, exitCode, exitStatus);
+    });
+    guard->start(20000);
+
     waiter->start(plan.wineServer, {QStringLiteral("-w")});
 }
 
@@ -307,9 +350,17 @@ QString GameLauncher::persistLog(const QString &gameId, const Instance &instance
     QString error;
     const QDateTime startedAt = instance.startedAt.isValid() ? instance.startedAt
                                                              : QDateTime::currentDateTime();
-    const QString path = LaunchLogs::write(gameId, instance.gameName, runnerName(instance.plan.runner),
-                                           startedAt, QDateTime::currentDateTime(), exitCode,
-                                           crashed, stopped, body, &error);
+    QString path;
+    if (!instance.liveLogPath.isEmpty()) {
+        path = LaunchLogs::finishLive(instance.liveLogPath, gameId, instance.gameName,
+                                      runnerName(instance.plan.runner), startedAt,
+                                      QDateTime::currentDateTime(), exitCode, crashed, stopped, body,
+                                      &error);
+    } else {
+        path = LaunchLogs::write(gameId, instance.gameName, runnerName(instance.plan.runner),
+                                 startedAt, QDateTime::currentDateTime(), exitCode,
+                                 crashed, stopped, body, &error);
+    }
     if (path.isEmpty()) {
         // A log that cannot be written must never block the game from closing;
         // the diagnostics are still delivered to the caller below.
@@ -341,7 +392,7 @@ void GameLauncher::emitFailure(const QString &gameId, const QString &message)
 bool GameLauncher::isRunning(const QString &gameId) const
 {
     const auto it = m_instances.constFind(gameId);
-    return it != m_instances.constEnd() && it->started;
+    return it != m_instances.constEnd() && it->running;
 }
 
 bool GameLauncher::isStopping(const QString &gameId) const
@@ -350,11 +401,17 @@ bool GameLauncher::isStopping(const QString &gameId) const
     return it != m_instances.constEnd() && it->stopInProgress;
 }
 
+bool GameLauncher::isShuttingDown(const QString &gameId) const
+{
+    const auto it = m_instances.constFind(gameId);
+    return it != m_instances.constEnd() && it->started && !it->running;
+}
+
 QStringList GameLauncher::runningGameIds() const
 {
     QStringList result;
     for (auto it = m_instances.constBegin(); it != m_instances.constEnd(); ++it) {
-        if (it->started)
+        if (it->running)
             result.append(it.key());
     }
     return result;
@@ -390,6 +447,7 @@ void GameLauncher::shutdown(bool reportStopped)
         if (it == m_instances.end())
             continue;
 
+        const bool wasRunning = it->running;
         collectOutput(id);
         it->elapsedAtExitMs = it->clock.isValid() ? it->clock.elapsed() : 0;
 
@@ -421,6 +479,11 @@ void GameLauncher::shutdown(bool reportStopped)
         }
 
         if (!reportStopped || !it->started) {
+            // A live log still marked "running" would claim a session that is
+            // already over, so it is finalized on this path too. The destructor
+            // takes it, and no receiver should run that late.
+            if (!it->liveLogPath.isEmpty())
+                persistLog(id, *it, exitCode, false, wasRunning, diagnostic);
             m_instances.erase(it);
             continue;
         }
@@ -428,9 +491,9 @@ void GameLauncher::shutdown(bool reportStopped)
         // The session is over, but the playtime it earned and the log it
         // produced are still worth keeping, so a clean quit reports the stop the
         // same way an explicit stop does.
-        const QString logPath = persistLog(id, *it, exitCode, false, true, diagnostic);
+        const QString logPath = persistLog(id, *it, exitCode, false, wasRunning, diagnostic);
         const qint64 elapsedMs = it->elapsedAtExitMs;
         m_instances.erase(it);
-        emit gameFinished(id, elapsedMs / 1000, exitCode, false, true, diagnostic, logPath);
+        emit gameFinished(id, elapsedMs / 1000, exitCode, false, wasRunning, diagnostic, logPath);
     }
 }

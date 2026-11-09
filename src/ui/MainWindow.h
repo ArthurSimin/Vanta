@@ -62,6 +62,7 @@ private:
     void refreshSelectionBar();
     void updateFilterLabel();
     void applyFilter();
+    void persistFilterList();
     QList<Game> filteredGames() const;
     bool matchesFilter(const Game &game) const;
     bool matchesSearch(const Game &game) const;
@@ -160,6 +161,10 @@ private:
     CompatibilityFilter m_compatibilityFilter = CompatibilityFilter::All;
     InstallFilter m_installFilter = InstallFilter::All;
     bool m_favoritesOnly = false;
+    // Persisted filter list; the members mirror AppSettings so the menu can be
+    // rebuilt without re-reading settings on every toggle.
+    bool m_hideNeedsAttention = false;
+    QStringList m_hiddenRunners;
     bool m_scannedOnce = false;
     QSet<QString> m_running;
     QString m_selectedGameId;

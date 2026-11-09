@@ -286,8 +286,9 @@ void ModManagerDialog::updateDetection()
 
     if (!detected) {
         m_emptyLabel->setText(
-            QStringLiteral("No BepInEx installation was detected. Windows games usually need the BepInEx pack "
-                           "before plugin DLLs can load. Use “Get BepInEx and mods…” or import a package that "
+            QStringLiteral("No BepInEx installation was detected. A Wine or Proton game usually needs the "
+                           "BepInEx pack before plugin DLLs can load, and a native game needs the doorstop "
+                           "launcher script. Use “Get BepInEx and mods…” or import a package that "
                            "contains BepInEx."));
     } else if (m_install.mods.isEmpty()) {
         m_emptyLabel->setText(

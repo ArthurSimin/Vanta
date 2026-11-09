@@ -142,7 +142,9 @@ void LogsDialog::reload()
             ? entry.finishedAt.toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
             : QStringLiteral("Unknown time");
         QString label = stamp;
-        if (entry.crashed)
+        if (entry.running)
+            label += QStringLiteral("  ·  running");
+        else if (entry.crashed)
             label += QStringLiteral("  ·  exited unexpectedly");
         else if (entry.stopped)
             label += QStringLiteral("  ·  stopped");
@@ -205,12 +207,16 @@ void LogsDialog::updateSummary()
         : QStringLiteral("Unknown time");
     if (!entry.runner.isEmpty())
         summary += QStringLiteral("  ·  %1").arg(entry.runner);
-    summary += entry.exitCode < 0 ? QStringLiteral("  ·  the process never started")
-                                  : QStringLiteral("  ·  exit code %1").arg(entry.exitCode);
-    if (entry.crashed)
-        summary += QStringLiteral("  ·  the game did not close normally");
-    else if (entry.stopped)
-        summary += QStringLiteral("  ·  stopped from Vanta");
+    if (entry.running) {
+        summary += QStringLiteral("  ·  still running");
+    } else {
+        summary += entry.exitCode < 0 ? QStringLiteral("  ·  the process never started")
+                                      : QStringLiteral("  ·  exit code %1").arg(entry.exitCode);
+        if (entry.crashed)
+            summary += QStringLiteral("  ·  the game did not close normally");
+        else if (entry.stopped)
+            summary += QStringLiteral("  ·  stopped from Vanta");
+    }
     if (entry.bytes > 0)
         summary += QStringLiteral("  ·  %1").arg(UiHelp::dataSize(entry.bytes));
     m_summaryLabel->setText(summary);

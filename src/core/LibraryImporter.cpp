@@ -1,5 +1,6 @@
 #include "LibraryImporter.h"
 #include "Library.h"
+#include "RunnerDetector.h"
 
 #include <QDir>
 #include <QFile>
@@ -30,16 +31,45 @@ QString canonicalOrClean(const QString &path)
     return QDir::cleanPath(path);
 }
 
-QString parseYamlValue(const QString &yamlContent, const QString &key)
+int leadingSpaces(const QString &line)
 {
+    int count = 0;
+    while (count < line.length() && line.at(count) == QLatin1Char(' '))
+        ++count;
+    return count;
+}
+
+// Value of a direct child `key` under a top-level `section`. Unlike the
+// single-key lookup above this honours indentation, so a key nested one level
+// deeper (Lutris writes wine.overrides.version as well as wine.version) is not
+// mistaken for the section's own key.
+QString parseYamlSectionValue(const QString &yamlContent, const QString &section, const QString &key)
+{
+    const QString sectionKey = section + QStringLiteral(":");
     const QString targetKey = key + QStringLiteral(":");
     const QStringList lines = yamlContent.split(QLatin1Char('\n'));
+    int sectionIndent = -1;
+    int childIndent = -1;
     for (int i = 0; i < lines.size(); ++i) {
-        QString line = lines.at(i).trimmed();
-        if (!line.startsWith(targetKey))
+        const QString &raw = lines.at(i);
+        const QString trimmed = raw.trimmed();
+        if (trimmed.isEmpty() || trimmed.startsWith(QLatin1Char('#')))
             continue;
-        QString value = line.mid(targetKey.length()).trimmed();
-        // Handle multiline folded strings in YAML (e.g. wrapped file paths)
+        const int indent = leadingSpaces(raw);
+        if (sectionIndent < 0) {
+            if (indent == 0 && trimmed == sectionKey)
+                sectionIndent = 0;
+            continue;
+        }
+        if (indent <= sectionIndent)
+            break;
+        if (childIndent < 0)
+            childIndent = indent;
+        if (indent != childIndent || !trimmed.startsWith(targetKey))
+            continue;
+
+        QString value = trimmed.mid(targetKey.length()).trimmed();
+        // Fold a wrapped plain scalar, the shape Lutris uses for long paths.
         while (i + 1 < lines.size()) {
             const QString &nextRaw = lines.at(i + 1);
             if (nextRaw.startsWith(QStringLiteral("  ")) && !nextRaw.trimmed().contains(QLatin1Char(':'))) {
@@ -54,6 +84,44 @@ QString parseYamlValue(const QString &yamlContent, const QString &key)
         else if (value.startsWith(QLatin1Char('"')) && value.endsWith(QLatin1Char('"')) && value.length() >= 2)
             value = value.mid(1, value.length() - 2);
         return value.trimmed();
+    }
+    return {};
+}
+
+// Lutris stores the runner as "wine" even when the build is Proton; the version
+// string under wine: is the part that tells the truth. A version naming Proton
+// selects Proton, one naming Wine selects Wine, and the pga.db runner is only
+// the fallback for a configuration with no version recorded.
+RunnerType lutrisRunnerFor(const QString &dbRunner, const QString &version, bool windowsExecutable)
+{
+    const QString runner = dbRunner.trimmed().toLower();
+    const QString build = version.trimmed().toLower();
+    if (runner == QStringLiteral("proton") || build.contains(QStringLiteral("proton")))
+        return RunnerType::Proton;
+    if (runner == QStringLiteral("wine") || build.contains(QStringLiteral("wine")) || windowsExecutable)
+        return RunnerType::Wine;
+    return RunnerType::Native;
+}
+
+// Best effort: point the imported game at a detected build whose name matches
+// the recorded version so the launch reuses it. An unmatched version leaves the
+// path blank and the launch plan resolves a runner at start time, which is
+// safer than guessing a path that may not be the build Lutris used. The
+// detected entries are passed in because rescanning the runner directories for
+// every game would be wasteful.
+QString matchRunnerPath(const QString &version, RunnerType runner,
+                        const QList<RunnerEntry> &wineEntries,
+                        const QList<RunnerEntry> &protonEntries)
+{
+    const QString needle = version.trimmed();
+    if (needle.isEmpty() || !runnerIsWineLike(runner))
+        return {};
+    const QList<RunnerEntry> &entries = runner == RunnerType::Proton ? protonEntries : wineEntries;
+    for (const RunnerEntry &entry : entries) {
+        // A recorded version names the build alone, so it is matched against the
+        // unsuffixed build name rather than the "build (source)" display label.
+        if (entry.buildName.compare(needle, Qt::CaseInsensitive) == 0)
+            return entry.path;
     }
     return {};
 }
@@ -191,6 +259,14 @@ QList<ImportedGameCandidate> LibraryImporter::scanLutris()
 {
     QList<ImportedGameCandidate> results;
     const QString home = homePath();
+
+    // Detected once for the whole scan. A version is matched against these for
+    // every game, so rescanning the runner directories per game would be
+    // wasteful. AppSettings defaults are used because the importer has no
+    // settings of its own; this matches the builds Vanta detects out of the box.
+    const AppSettings detectionSettings;
+    const QList<RunnerEntry> detectedWine = RunnerDetector::wineEntries(detectionSettings);
+    const QList<RunnerEntry> detectedProton = RunnerDetector::protonEntries(detectionSettings);
     const QStringList lutrisDirs = {
         home + QStringLiteral("/.local/share/lutris"),
         home + QStringLiteral("/.var/app/net.lutris.Lutris/data/lutris")
@@ -270,13 +346,15 @@ QList<ImportedGameCandidate> LibraryImporter::scanLutris()
             QString exe;
             QString prefix;
             QString args;
+            QString wineVersion;
             if (!yamlPath.isEmpty()) {
                 QFile yFile(yamlPath);
                 if (yFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
                     const QString content = QString::fromUtf8(yFile.readAll());
-                    exe = parseYamlValue(content, QStringLiteral("exe"));
-                    prefix = parseYamlValue(content, QStringLiteral("prefix"));
-                    args = parseYamlValue(content, QStringLiteral("args"));
+                    exe = parseYamlSectionValue(content, QStringLiteral("game"), QStringLiteral("exe"));
+                    prefix = parseYamlSectionValue(content, QStringLiteral("game"), QStringLiteral("prefix"));
+                    args = parseYamlSectionValue(content, QStringLiteral("game"), QStringLiteral("args"));
+                    wineVersion = parseYamlSectionValue(content, QStringLiteral("wine"), QStringLiteral("version"));
                 }
             }
 
@@ -299,12 +377,8 @@ QList<ImportedGameCandidate> LibraryImporter::scanLutris()
             const bool isWindows = exe.endsWith(QStringLiteral(".exe"), Qt::CaseInsensitive)
                 || row.platform.compare(QStringLiteral("Windows"), Qt::CaseInsensitive) == 0;
             game.platform = isWindows ? Platform::Windows : Platform::Linux;
-            if (row.runner.compare(QStringLiteral("proton"), Qt::CaseInsensitive) == 0)
-                game.runner = RunnerType::Proton;
-            else if (row.runner.compare(QStringLiteral("wine"), Qt::CaseInsensitive) == 0 || isWindows)
-                game.runner = RunnerType::Wine;
-            else
-                game.runner = RunnerType::Native;
+            game.runner = lutrisRunnerFor(row.runner, wineVersion, isWindows);
+            game.runnerPath = matchRunnerPath(wineVersion, game.runner, detectedWine, detectedProton);
 
             if (!row.slug.isEmpty()) {
                 const QStringList coverCandidates = {
@@ -340,6 +414,13 @@ QList<ImportedGameCandidate> LibraryImporter::scanHeroic()
         home + QStringLiteral("/.var/app/com.heroicgameslauncher.hgl/config/heroic")
     };
 
+    // Detected once so a per-game Proton selection can be pointed at a real
+    // build rather than relying on a "proton" that may not be on PATH. The
+    // importer has no settings of its own, so the defaults are used, which
+    // matches the builds Vanta detects out of the box.
+    const AppSettings detectionSettings;
+    const QList<RunnerEntry> detectedProton = RunnerDetector::protonEntries(detectionSettings);
+
     for (const QString &root : heroicRoots) {
         if (!QDir(root).exists())
             continue;
@@ -371,13 +452,26 @@ QList<ImportedGameCandidate> LibraryImporter::scanHeroic()
 
                 // Check per-game config
                 QString prefix;
+                QString heroicVersionName;
+                QString heroicVersionBin;
+                RunnerType heroicRunner = RunnerType::Wine;
                 const QString gameConfigPath = QDir(root).filePath(
                     QStringLiteral("GamesConfig/%1.json").arg(it.key()));
                 QFile cfgFile(gameConfigPath);
                 if (cfgFile.open(QIODevice::ReadOnly)) {
                     const QJsonDocument cfgDoc = QJsonDocument::fromJson(cfgFile.readAll());
                     if (cfgDoc.isObject()) {
-                        prefix = cfgDoc.object().value(QStringLiteral("winePrefix")).toString();
+                        const QJsonObject cfg = cfgDoc.object();
+                        prefix = cfg.value(QStringLiteral("winePrefix")).toString();
+                        // Heroic records the chosen build; a Proton name or
+                        // type means the truer runner is Proton, not Wine.
+                        const QJsonObject wineVersion = cfg.value(QStringLiteral("wineVersion")).toObject();
+                        heroicVersionName = wineVersion.value(QStringLiteral("name")).toString();
+                        heroicVersionBin = wineVersion.value(QStringLiteral("bin")).toString();
+                        const QString versionType = wineVersion.value(QStringLiteral("type")).toString();
+                        if (heroicVersionName.contains(QStringLiteral("proton"), Qt::CaseInsensitive)
+                            || versionType.contains(QStringLiteral("proton"), Qt::CaseInsensitive))
+                            heroicRunner = RunnerType::Proton;
                     }
                 }
 
@@ -389,7 +483,15 @@ QList<ImportedGameCandidate> LibraryImporter::scanHeroic()
                 game.workingDirectory = installPath;
                 game.winePrefix = prefix;
                 game.platform = Platform::Windows;
-                game.runner = RunnerType::Wine;
+                game.runner = heroicRunner;
+                if (heroicRunner == RunnerType::Proton) {
+                    // Prefer a build Vanta detected; fall back to the path Heroic
+                    // recorded so a launch does not need "proton" on PATH.
+                    game.runnerPath = matchRunnerPath(heroicVersionName, RunnerType::Proton, {},
+                                                      detectedProton);
+                    if (game.runnerPath.isEmpty())
+                        game.runnerPath = heroicVersionBin.trimmed();
+                }
 
                 const QStringList coverCandidates = {
                     QDir(root).filePath(QStringLiteral("icons/%1.jpg").arg(title)),

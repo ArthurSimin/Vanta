@@ -22,6 +22,9 @@ public:
     void stopGame(const QString &gameId);
     bool isRunning(const QString &gameId) const;
     bool isStopping(const QString &gameId) const;
+    // True between process exit and the end of prefix teardown: the game is no
+    // longer running, but a relaunch must wait for the previous session.
+    bool isShuttingDown(const QString &gameId) const;
     QStringList runningGameIds() const;
     QString diagnosticLog(const QString &gameId) const;
     // Stops every running game. `reportStopped` forwards each session to
@@ -34,6 +37,10 @@ signals:
     void gameFinished(const QString &gameId, qint64 elapsedSeconds, int exitCode,
                       bool crashed, bool stopped, const QString &diagnostic,
                       const QString &logPath);
+    // Emitted the moment the game process exits, before the prefix teardown
+    // finishes. The UI clears its running state from this so a game that exits
+    // on its own stops showing Stop without waiting on wineserver.
+    void gameExited(const QString &gameId);
     void launchFailed(const QString &gameId, const QString &message, const QString &diagnostic,
                       const QString &logPath);
     void gameStopping(const QString &gameId);
@@ -47,9 +54,11 @@ private:
         bool stopped = false;
         bool stopInProgress = false;
         bool started = false;
+        bool running = false;
         bool failureEmitted = false;
         QByteArray output;
         QByteArray errorOutput;
+        QString liveLogPath;
         LaunchPlan plan;
         QString gameName;
         QString executableBaseName;

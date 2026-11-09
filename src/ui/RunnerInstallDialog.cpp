@@ -451,8 +451,10 @@ void RunnerInstallDialog::refreshIcons()
 
     if (m_protonButton->property("installed").toBool())
         Icons::setButtonIcon(m_protonButton, Glyph::Trash, colors.danger, 16);
-    else
-        Icons::setButtonIcon(m_protonButton, Glyph::Proton, QColor(Qt::white), 16);
+    else {
+        m_protonButton->setIcon(Icons::sourceIcon(QStringLiteral("Proton"), colors.text, 16));
+        m_protonButton->setIconSize(QSize(16, 16));
+    }
 
     if (m_downloadWineSecondary)
         Icons::setButtonIcon(m_downloadWineSecondary, Glyph::Download, colors.text, 14);

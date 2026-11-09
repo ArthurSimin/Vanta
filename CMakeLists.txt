@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.21)
 
 # The version is the single source of truth for the binary, the packages and the
 # About dialog. Release builds pass -DVANTA_VERSION=<tag without v> so a tagged
-# build reports exactly what was released; otherwise default to 1.0.3.
-set(VANTA_VERSION "1.0.3" CACHE STRING "Version reported by the application")
+# build reports exactly what was released; otherwise default to 1.0.4.
+set(VANTA_VERSION "1.0.4" CACHE STRING "Version reported by the application")
 
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
@@ -21,7 +21,7 @@ endif()
 
 string(REGEX MATCH "^[0-9]+(\\.[0-9]+)*" VANTA_NUMERIC_VERSION "${VANTA_VERSION}")
 if(NOT VANTA_NUMERIC_VERSION)
-    set(VANTA_NUMERIC_VERSION "1.0.3")
+    set(VANTA_NUMERIC_VERSION "1.0.4")
 endif()
 
 project(Vanta

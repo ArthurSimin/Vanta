@@ -431,6 +431,11 @@ QPushButton[primary="true"]:hover {
 QPushButton[primary="true"]:pressed {
     background: %ACCENTPRESSED%;
 }
+QPushButton[primary="true"]:disabled, QPushButton[danger="true"]:disabled {
+    background: %SURFACE%;
+    color: %MUTED%;
+    border-color: %BORDER%;
+}
 QPushButton[danger="true"] {
     color: %DANGER%;
 }

@@ -179,7 +179,7 @@ void UpdateChecker::checkForUpdates(const QString &currentVersion)
 
     QNetworkRequest request{QUrl(releasesApiUrl())};
     request.setHeader(QNetworkRequest::UserAgentHeader,
-                      QStringLiteral("Vanta/%1").arg(VANTA_VERSION));
+                      QStringLiteral("Vanta/%1").arg(QStringLiteral(VANTA_VERSION)));
     request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                          QNetworkRequest::NoLessSafeRedirectPolicy);

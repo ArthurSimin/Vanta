@@ -313,7 +313,7 @@ void GameCard::paintEvent(QPaintEvent *event)
             drawBadge(painter, missingRect, text, QColor(QStringLiteral("#b91c1c")), Qt::white);
             leftX = missingRect.right() + 4;
         }
-        if (m_game.fixKind != FixKind::Unknown) {
+        if (m_game.showsOnlineFix()) {
             const QString text = QStringLiteral("OnlineFix");
             const QRect fixRect(leftX, bottomY, badgeMetrics.horizontalAdvance(text) + 14, 24);
             drawBadge(painter, fixRect, text, colors.accent, Qt::white);

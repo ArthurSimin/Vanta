@@ -72,7 +72,7 @@ QString GameListView::selectedGameId() const
 QString GameListView::compatibilityText(const Game &game) const
 {
     if ((game.compatibility == ScanState::ComponentsDetected || scanNeedsAttention(game.compatibility))
-        && game.fixKind != FixKind::Unknown) {
+        && game.showsOnlineFix()) {
         return QStringLiteral("OnlineFix detected");
     }
     return scanStateLabel(game.compatibility);
@@ -120,7 +120,7 @@ void GameListView::setGames(const QList<Game> &games)
         }
         if (!game.executableExists())
             compatItem->setToolTip(QStringLiteral("The configured executable is missing."));
-        else if (game.fixKind != FixKind::Unknown && game.compatibility != ScanState::NoKnownComponents
+        else if (game.showsOnlineFix() && game.compatibility != ScanState::NoKnownComponents
                  && game.compatibility != ScanState::NotScanned)
             compatItem->setToolTip(QStringLiteral("Filename signatures associated with OnlineFix were detected. Detection is not proof that a copy is functional."));
         compatItem->setForeground(scanNeedsAttention(game.compatibility)

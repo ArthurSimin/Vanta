@@ -213,9 +213,7 @@ void GameSelectionBar::animateReveal(bool visible)
 
 bool GameSelectionBar::onlineFixEnabled() const
 {
-    const bool hasFix = m_game.fixKind != FixKind::Unknown
-        || m_game.onlineFixMode == OnlineFixMode::Force;
-    return hasFix && m_fixToggle->isChecked();
+    return m_game.showsOnlineFix() && m_fixToggle->isChecked();
 }
 
 void GameSelectionBar::setRunning(bool running)
@@ -238,9 +236,7 @@ void GameSelectionBar::updateContent()
 
     m_name->setText(m_game.name);
 
-    const bool hasFix = m_game.fixKind != FixKind::Unknown
-        || m_game.onlineFixMode == OnlineFixMode::Force;
-    m_fixToggle->setVisible(hasFix);
+    m_fixToggle->setVisible(m_game.showsOnlineFix());
     m_fixToggle->setText(m_fixToggle->isChecked() ? QStringLiteral("OnlineFix")
                                                   : QStringLiteral("OnlineFix off"));
 

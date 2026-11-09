@@ -299,7 +299,13 @@ void GameDetailsDialog::buildUi()
         if (fileCount > 0)
             fixLayout->addWidget(UiHelp::helpLabel(QStringLiteral("%1 signature file(s) detected.").arg(fileCount),
                                                    fixPanel));
-        if (!m_hasScan || !m_scan.onlineFix.hasOnlineFixIni) {
+        if (m_game.onlineFixMode == OnlineFixMode::Disabled) {
+            // Detection is still worth reporting; what changes is that the
+            // launch path ignores it, and the panel has to say so.
+            fixLayout->addWidget(UiHelp::helpLabel(
+                QStringLiteral("OnlineFix is disabled for this game, so a launch does not apply this configuration."),
+                fixPanel));
+        } else if (!m_hasScan || !m_scan.onlineFix.hasOnlineFixIni) {
             fixLayout->addWidget(UiHelp::helpLabel(
                 QStringLiteral("Use the OnlineFix dialog to review detection, available launch overrides, and "
                                "per-game policy."),

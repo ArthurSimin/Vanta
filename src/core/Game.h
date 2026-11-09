@@ -47,6 +47,19 @@ struct Game
     QDateTime modifiedAt;
 
     bool executableExists() const;
+
+    // True when the library should present an OnlineFix marker for this game.
+    // A disabled mode hides every marker, because a badge the launch path
+    // ignores promises something the launcher will not do. Detection stays
+    // reportable through the scan result and the details sheet, which say what
+    // was found rather than what will be applied.
+    bool showsOnlineFix() const
+    {
+        if (onlineFixMode == OnlineFixMode::Disabled)
+            return false;
+        return fixKind != FixKind::Unknown || onlineFixMode == OnlineFixMode::Force;
+    }
+
     QString effectiveDirectory() const;
     QString effectiveWorkingDirectory() const;
     QJsonObject toJson() const;

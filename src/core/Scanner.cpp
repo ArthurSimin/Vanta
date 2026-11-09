@@ -754,7 +754,7 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
 QString GameScanner::compatibilityCacheLabel(const Game &game)
 {
     if (game.compatibility == ScanState::ComponentsDetected)
-        return game.fixKind != FixKind::Unknown ? QStringLiteral("OnlineFix detected") : scanStateLabel(game.compatibility);
+        return game.showsOnlineFix() ? QStringLiteral("OnlineFix detected") : scanStateLabel(game.compatibility);
     return scanStateLabel(game.compatibility);
 }
 

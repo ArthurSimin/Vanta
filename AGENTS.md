@@ -263,6 +263,13 @@ A release that ships any user-visible feature is a **minor**, not a patch. The
 common mistake is landing features under `X.Y.Z+1`; if the release notes say
 "now" or "new", the segment to raise is `MINOR`.
 
+Releases `1.0.0`–`1.0.4` were published before this rule existed, so some of them
+shipped features in the patch slot. They are kept as they are and the sequence
+continues from `1.0.4`: the next fix-only release is `1.0.5`, and the next
+release that adds a feature is `1.1.0`. Never renumber a published tag — its
+packages and the version its users report are already fixed, and the update
+check compares the numbers those users have.
+
 Where the version lives:
 
 - The CMake project version: `set(VANTA_VERSION ...)` in `CMakeLists.txt`, mirrored

@@ -460,6 +460,8 @@ Sources are a fixed set, not free text. To add one:
 - **Request a CodeRabbit review on every pull request.** Right after opening
   one, post the single comment `@coderabbitai review` (the same command used on
   the earlier PRs). This repository is below CodeRabbit's automatic-review star
-  threshold, so without the comment the PR gets no review at all. Do not treat a
-  PR as ready to merge until CodeRabbit has reviewed it and the CI build is
-  green.
+  threshold, so without the comment the PR gets no review at all. CodeRabbit is
+  incremental: if you push more commits after a review, post
+  `@coderabbitai review` again and wait for the fresh review. Do not treat a PR
+  as ready to merge until CodeRabbit has reviewed the final revision and the CI
+  build is green.

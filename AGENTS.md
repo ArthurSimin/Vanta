@@ -452,3 +452,9 @@ Sources are a fixed set, not free text. To add one:
 - Describe the user-visible effect in the body, not the mechanics of the diff.
 - Before committing: clean build, zero warnings, manual smoke test of the
   touched flow.
+- **Request a CodeRabbit review on every pull request.** Right after opening
+  one, post the single comment `@coderabbitai review` (the same command used on
+  the earlier PRs). This repository is below CodeRabbit's automatic-review star
+  threshold, so without the comment the PR gets no review at all. Do not treat a
+  PR as ready to merge until CodeRabbit has reviewed it and the CI build is
+  green.

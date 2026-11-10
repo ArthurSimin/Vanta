@@ -224,13 +224,13 @@
         </message>
         <message>
             <location filename="../src/core/Launcher.cpp" line="37" />
-            <location filename="../src/ui/MainWindow.cpp" line="1587" />
+            <location filename="../src/ui/MainWindow.cpp" line="1641" />
             <source>The previous session is still shutting down. Try again in a moment.</source>
             <translation>Предыдущий сеанс ещё завершается. Повторите попытку через момент.</translation>
         </message>
         <message>
             <location filename="../src/core/Launcher.cpp" line="38" />
-            <location filename="../src/ui/MainWindow.cpp" line="1583" />
+            <location filename="../src/ui/MainWindow.cpp" line="1637" />
             <source>This game is already running.</source>
             <translation>Эта игра уже запущена.</translation>
         </message>
@@ -1289,7 +1289,7 @@ Alternatively install the portable Wine build from this dialog.</source>
         </message>
         <message>
             <location filename="../src/core/Scanner.cpp" line="768" />
-            <location filename="../src/ui/GameListView.cpp" line="85" />
+            <location filename="../src/ui/GameListView.cpp" line="90" />
             <source>OnlineFix detected</source>
             <translation>Обнаружен OnlineFix</translation>
         </message>
@@ -1557,13 +1557,13 @@ Alternatively install the portable Wine build from this dialog.</source>
         </message>
         <message>
             <location filename="../src/core/Types.cpp" line="221" />
-            <location filename="../src/ui/GameListView.cpp" line="20" />
+            <location filename="../src/ui/GameListView.cpp" line="60" />
             <source>Last played</source>
             <translation>Последний запуск</translation>
         </message>
         <message>
             <location filename="../src/core/Types.cpp" line="222" />
-            <location filename="../src/ui/GameListView.cpp" line="20" />
+            <location filename="../src/ui/GameListView.cpp" line="60" />
             <source>Playtime</source>
             <translation>Время в игре</translation>
         </message>
@@ -1744,7 +1744,7 @@ Alternatively install the portable Wine build from this dialog.</source>
             <location filename="../src/ui/OnlineFixDialog.cpp" line="254" />
             <location filename="../src/ui/OnlineFixDialog.cpp" line="321" />
             <location filename="../src/ui/RunnerInstallDialog.cpp" line="347" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="350" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="351" />
             <location filename="../src/ui/SteamPromptDialog.cpp" line="79" />
             <location filename="../src/ui/ThunderstoreDialog.cpp" line="315" />
             <source>Cancel</source>
@@ -1804,7 +1804,7 @@ Alternatively install the portable Wine build from this dialog.</source>
             <location filename="../src/ui/AddEditDialog.cpp" line="277" />
             <location filename="../src/ui/AddEditDialog.cpp" line="332" />
             <location filename="../src/ui/AddEditDialog.cpp" line="344" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="228" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="229" />
             <source>Browse…</source>
             <translation>Обзор...</translation>
         </message>
@@ -1867,14 +1867,14 @@ Alternatively install the portable Wine build from this dialog.</source>
         <message>
             <location filename="../src/ui/AddEditDialog.cpp" line="311" />
             <location filename="../src/ui/AddEditDialog.cpp" line="377" />
-            <location filename="../src/ui/GameListView.cpp" line="19" />
+            <location filename="../src/ui/GameListView.cpp" line="59" />
             <location filename="../src/ui/LibraryImportDialog.cpp" line="50" />
             <source>Runner</source>
             <translation>Раннер</translation>
         </message>
         <message>
             <location filename="../src/ui/AddEditDialog.cpp" line="316" />
-            <location filename="../src/ui/GameListView.cpp" line="19" />
+            <location filename="../src/ui/GameListView.cpp" line="59" />
             <source>Platform</source>
             <translation>Платформа</translation>
         </message>
@@ -2408,14 +2408,14 @@ Alternatively install the portable Wine build from this dialog.</source>
         </message>
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="144" />
-            <location filename="../src/ui/MainWindow.cpp" line="1419" />
+            <location filename="../src/ui/MainWindow.cpp" line="1473" />
             <source>Play</source>
             <translation>Играть</translation>
         </message>
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="154" />
-            <location filename="../src/ui/GameSelectionBar.cpp" line="318" />
-            <location filename="../src/ui/MainWindow.cpp" line="1419" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="315" />
+            <location filename="../src/ui/MainWindow.cpp" line="1473" />
             <source>Stop</source>
             <translation>Остановить</translation>
         </message>
@@ -2426,13 +2426,13 @@ Alternatively install the portable Wine build from this dialog.</source>
         </message>
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="167" />
-            <location filename="../src/ui/MainWindow.cpp" line="1436" />
+            <location filename="../src/ui/MainWindow.cpp" line="1490" />
             <source>OnlineFix…</source>
             <translation>OnlineFix...</translation>
         </message>
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="173" />
-            <location filename="../src/ui/MainWindow.cpp" line="1439" />
+            <location filename="../src/ui/MainWindow.cpp" line="1493" />
             <source>Mods…</source>
             <translation>Моды...</translation>
         </message>
@@ -2545,7 +2545,7 @@ Alternatively install the portable Wine build from this dialog.</source>
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="338" />
             <location filename="../src/ui/MainWindow.cpp" line="725" />
-            <location filename="../src/ui/MainWindow.cpp" line="1442" />
+            <location filename="../src/ui/MainWindow.cpp" line="1496" />
             <source>Logs…</source>
             <translation>Журналы...</translation>
         </message>
@@ -2553,7 +2553,7 @@ Alternatively install the portable Wine build from this dialog.</source>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="344" />
             <location filename="../src/ui/LogsDialog.cpp" line="98" />
             <location filename="../src/ui/ModManagerDialog.cpp" line="205" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="304" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="305" />
             <source>Open folder</source>
             <translation>Открыть папку</translation>
         </message>
@@ -2618,38 +2618,38 @@ Alternatively install the portable Wine build from this dialog.</source>
             <translation>Информация о совместимости недоступна.</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="19" />
+            <location filename="../src/ui/GameListView.cpp" line="59" />
             <location filename="../src/ui/LibraryImportDialog.cpp" line="48" />
             <source>Game</source>
             <translation>Игра</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="20" />
+            <location filename="../src/ui/GameListView.cpp" line="60" />
             <location filename="../src/ui/MainWindow.cpp" line="754" />
-            <location filename="../src/ui/Sidebar.cpp" line="592" />
+            <location filename="../src/ui/Sidebar.cpp" line="607" />
             <source>Compatibility</source>
             <translation>Совместимость</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="75" />
+            <location filename="../src/ui/GameListView.cpp" line="80" />
             <source>★  %1</source>
             <translation>★  %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="106" />
-            <location filename="../src/ui/GameListView.cpp" line="177" />
+            <location filename="../src/ui/GameListView.cpp" line="111" />
+            <location filename="../src/ui/GameListView.cpp" line="182" />
             <source>%1
 This game is running.</source>
             <translation>%1
 Игра запущена.</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="133" />
+            <location filename="../src/ui/GameListView.cpp" line="138" />
             <source>The configured executable is missing.</source>
             <translation>Настроенный исполняемый файл отсутствует.</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="136" />
+            <location filename="../src/ui/GameListView.cpp" line="141" />
             <source>Filename signatures associated with OnlineFix were detected. Detection is not proof that a copy is functional.</source>
             <translation>Обнаружены сигнатуры имён файлов, связанные с OnlineFix. Обнаружение не доказывает, что копия работоспособна.</translation>
         </message>
@@ -2664,45 +2664,45 @@ This game is running.</source>
             <translation>Последний запуск %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="92" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="330" />
             <source>Apply the OnlineFix configuration for this launch. Vanta backs up every file it touches, and detection is not proof that a fix works.</source>
             <translation>Применить конфигурацию OnlineFix для этого запуска. Vanta создаёт резервную копию каждого изменяемого файла, а обнаружение не доказывает, что исправление работает.</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="101" />
-            <location filename="../src/ui/GameSelectionBar.cpp" line="266" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="98" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="263" />
             <source>OnlineFix off</source>
             <translation>OnlineFix отключён</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="133" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="333" />
             <source>More actions for this game</source>
             <translation>Другие действия для этой игры</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="272" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="269" />
             <source>Running now</source>
             <translation>Сейчас запущена</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="276" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="273" />
             <source>%1 · %2</source>
             <translation>%1 · %2</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="278" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="275" />
             <source>Executable missing</source>
             <translation>Исполняемый файл не найден</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="302" />
-            <location filename="../src/ui/GameSelectionBar.cpp" line="318" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="299" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="315" />
             <location filename="../src/ui/LogsDialog.cpp" line="52" />
             <source>Launch</source>
             <translation>Запустить</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="314" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="311" />
             <source>The configured executable is missing. Set the game's executable first.</source>
             <translation>Настроенный исполняемый файл отсутствует. Сначала укажите исполняемый файл игры.</translation>
         </message>
@@ -2860,19 +2860,19 @@ This game is running.</source>
         </message>
         <message>
             <location filename="../src/ui/LibraryView.cpp" line="159" />
-            <location filename="../src/ui/LibraryView.cpp" line="195" />
+            <location filename="../src/ui/LibraryView.cpp" line="200" />
             <location filename="../src/ui/MainWindow.cpp" line="837" />
             <source>Clear filters</source>
             <translation>Сбросить фильтры</translation>
         </message>
         <message>
-            <location filename="../src/ui/LibraryView.cpp" line="192" />
+            <location filename="../src/ui/LibraryView.cpp" line="197" />
             <location filename="../src/ui/MainWindow.cpp" line="1022" />
             <source>No games match your filters</source>
             <translation>Нет игр, соответствующих фильтрам</translation>
         </message>
         <message>
-            <location filename="../src/ui/LibraryView.cpp" line="193" />
+            <location filename="../src/ui/LibraryView.cpp" line="198" />
             <source>Try a different search, or clear the active filters to see your whole library.</source>
             <translation>Попробуйте другой запрос или сбросьте активные фильтры, чтобы увидеть всю библиотеку.</translation>
         </message>
@@ -3023,37 +3023,43 @@ This game is running.</source>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="252" />
-            <location filename="../src/ui/Sidebar.cpp" line="451" />
+            <location filename="../src/ui/Sidebar.cpp" line="466" />
             <source>All games</source>
             <translation>Все игры</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="279" />
+            <location filename="../src/ui/MainWindow.cpp" line="1338" />
             <source>Search your library…</source>
             <translation>Поиск по библиотеке...</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="285" />
+            <location filename="../src/ui/MainWindow.cpp" line="1340" />
             <source>Clear the search</source>
             <translation>Очистить поиск</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="299" />
+            <location filename="../src/ui/MainWindow.cpp" line="1342" />
             <source>Filters</source>
             <translation>Фильтры</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="307" />
+            <location filename="../src/ui/MainWindow.cpp" line="1344" />
             <source>Add game (Ctrl+N)</source>
             <translation>Добавить игру (Ctrl+N)</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="317" />
+            <location filename="../src/ui/MainWindow.cpp" line="1346" />
             <source>Change view</source>
             <translation>Сменить вид</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="333" />
+            <location filename="../src/ui/MainWindow.cpp" line="1348" />
             <source>More actions</source>
             <translation>Другие действия</translation>
         </message>
@@ -3065,7 +3071,7 @@ This game is running.</source>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="476" />
             <location filename="../src/ui/MainWindow.cpp" line="482" />
-            <location filename="../src/ui/MainWindow.cpp" line="1844" />
+            <location filename="../src/ui/MainWindow.cpp" line="1898" />
             <source>Launch failed</source>
             <translation>Не удалось запустить</translation>
         </message>
@@ -3134,7 +3140,7 @@ The launch log has the full command and any output from the process. Open it now
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="702" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="134" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="135" />
             <source>Cover size</source>
             <translation>Размер обложек</translation>
         </message>
@@ -3165,7 +3171,7 @@ The launch log has the full command and any output from the process. Open it now
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="730" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="338" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="339" />
             <source>Port external libraries…</source>
             <translation>Перенос внешних библиотек...</translation>
         </message>
@@ -3284,37 +3290,37 @@ The launch log has the full command and any output from the process. Open it now
             <translation>Журнал запуска пока не записан. Запустите игру один раз, и Vanta сохранит вывод раннера, чтобы вы могли посмотреть его здесь.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1296" />
+            <location filename="../src/ui/MainWindow.cpp" line="1297" />
             <source>Settings could not be saved.</source>
             <translation>Не удалось сохранить настройки.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1317" />
+            <location filename="../src/ui/MainWindow.cpp" line="1329" />
             <source>Settings saved.</source>
             <translation>Настройки сохранены.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1334" />
+            <location filename="../src/ui/MainWindow.cpp" line="1388" />
             <source>Checking for updates…</source>
             <translation>Проверка обновлений...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1347" />
+            <location filename="../src/ui/MainWindow.cpp" line="1401" />
             <source>Vanta %1 is available.</source>
             <translation>Доступна Vanta %1.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1357" />
+            <location filename="../src/ui/MainWindow.cpp" line="1411" />
             <source>The release page could not be opened in a browser.</source>
             <translation>Не удалось открыть страницу выпуска в браузере.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1364" />
+            <location filename="../src/ui/MainWindow.cpp" line="1418" />
             <source>Runner discovery refreshed.</source>
             <translation>Поиск раннеров обновлён.</translation>
         </message>
         <message numerus="yes">
-            <location filename="../src/ui/MainWindow.cpp" line="1382" />
+            <location filename="../src/ui/MainWindow.cpp" line="1436" />
             <source>Ported %n game(s).</source>
             <translation>
                 <numerusform>Перенесена %n игра.</numerusform>
@@ -3323,7 +3329,7 @@ The launch log has the full command and any output from the process. Open it now
             </translation>
         </message>
         <message numerus="yes">
-            <location filename="../src/ui/MainWindow.cpp" line="1404" />
+            <location filename="../src/ui/MainWindow.cpp" line="1458" />
             <source>Queued cover lookups for %n game(s).</source>
             <translation>
                 <numerusform>Поиск обложек поставлен в очередь для %n игры.</numerusform>
@@ -3332,271 +3338,271 @@ The launch log has the full command and any output from the process. Open it now
             </translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1406" />
+            <location filename="../src/ui/MainWindow.cpp" line="1460" />
             <source>All games in the library already have covers.</source>
             <translation>У всех игр в библиотеке уже есть обложки.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1426" />
+            <location filename="../src/ui/MainWindow.cpp" line="1480" />
             <source>Details</source>
             <translation>Сведения</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1428" />
+            <location filename="../src/ui/MainWindow.cpp" line="1482" />
             <source>Edit…</source>
             <translation>Изменить...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1431" />
+            <location filename="../src/ui/MainWindow.cpp" line="1485" />
             <source>Remove from favorites</source>
             <translation>Убрать из избранного</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1432" />
+            <location filename="../src/ui/MainWindow.cpp" line="1486" />
             <source>Add to favorites</source>
             <translation>Добавить в избранное</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1434" />
+            <location filename="../src/ui/MainWindow.cpp" line="1488" />
             <source>Scan now</source>
             <translation>Сканировать сейчас</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1444" />
+            <location filename="../src/ui/MainWindow.cpp" line="1498" />
             <source>Choose cover art…</source>
             <translation>Выбрать обложку...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1447" />
+            <location filename="../src/ui/MainWindow.cpp" line="1501" />
             <source>Open game folder</source>
             <translation>Открыть папку игры</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1450" />
+            <location filename="../src/ui/MainWindow.cpp" line="1504" />
             <source>Open prefix folder</source>
             <translation>Открыть папку префикса</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1454" />
+            <location filename="../src/ui/MainWindow.cpp" line="1508" />
             <source>Remove from library</source>
             <translation>Удалить из библиотеки</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1471" />
+            <location filename="../src/ui/MainWindow.cpp" line="1525" />
             <source>Welcome to Vanta</source>
             <translation>Добро пожаловать в Vanta</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1472" />
+            <location filename="../src/ui/MainWindow.cpp" line="1526" />
             <source>Vanta keeps your local game library in one place and launches native, Wine, and Proton games without hiding what it does. This short tour points out the main parts of the window. You can leave at any time and reopen it from the sidebar.</source>
             <translation>Vanta хранит вашу локальную библиотеку игр в одном месте и запускает нативные игры, а также игры для Wine и Proton, не скрывая своих действий. Этот короткий обзор показывает основные части окна. Вы можете выйти в любой момент и снова открыть его из боковой панели.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1480" />
+            <location filename="../src/ui/MainWindow.cpp" line="1534" />
             <source>Library filters</source>
             <translation>Фильтры библиотеки</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1481" />
+            <location filename="../src/ui/MainWindow.cpp" line="1535" />
             <source>The sidebar groups your games by source, runner, platform, and scan status. Groups collapse when you click their header, and Vanta can remember that layout. Settings, this tutorial, and About live at the bottom.</source>
             <translation>Боковая панель группирует игры по источнику, раннеру, платформе и статусу сканирования. Группы сворачиваются при нажатии на их заголовок, и Vanta может запоминать этот вид. Настройки, это руководство и «О программе» находятся внизу.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1484" />
+            <location filename="../src/ui/MainWindow.cpp" line="1538" />
             <source>Click a filter to narrow the library instantly.</source>
             <translation>Нажмите на фильтр, чтобы сразу сузить библиотеку.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1489" />
+            <location filename="../src/ui/MainWindow.cpp" line="1543" />
             <source>Search and filter</source>
             <translation>Поиск и фильтры</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1490" />
+            <location filename="../src/ui/MainWindow.cpp" line="1544" />
             <source>Search matches names, sources, runners, and paths. The filter button adds compatibility and installation filters on top of the current sidebar selection.</source>
             <translation>Поиск находит по названиям, источникам, раннерам и путям. Кнопка фильтров добавляет фильтры совместимости и установки к текущему выбору в боковой панели.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1493" />
+            <location filename="../src/ui/MainWindow.cpp" line="1547" />
             <source>Filters combine with the active sidebar item.</source>
             <translation>Фильтры сочетаются с выбранным элементом боковой панели.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1498" />
+            <location filename="../src/ui/MainWindow.cpp" line="1552" />
             <source>Add a game</source>
             <translation>Добавить игру</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1499" />
+            <location filename="../src/ui/MainWindow.cpp" line="1553" />
             <source>Point Vanta at a folder or an executable you already have. Vanta never downloads games. Adding a game also runs a read-only scan when automatic scanning is enabled, so runner and fix detection is available immediately.</source>
             <translation>Укажите Vanta папку или исполняемый файл, которые у вас уже есть. Vanta никогда не скачивает игры. При добавлении игры также выполняется сканирование только для чтения, если включено автоматическое сканирование, поэтому определение раннеров и фиксов становится доступно сразу.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1502" />
+            <location filename="../src/ui/MainWindow.cpp" line="1556" />
             <source>The editor has tabs for general details, the runner, OnlineFix, and environment variables.</source>
             <translation>В редакторе есть вкладки с общими сведениями, раннером, OnlineFix и переменными окружения.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1507" />
+            <location filename="../src/ui/MainWindow.cpp" line="1561" />
             <source>Change the view</source>
             <translation>Изменить вид</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1508" />
+            <location filename="../src/ui/MainWindow.cpp" line="1562" />
             <source>Switch between the cover grid and a compact table, resize covers, and toggle badges or subtle animations. Right-click any game for launch, edit, scan, and favourite actions.</source>
             <translation>Переключайтесь между сеткой обложек и компактной таблицей, меняйте размер обложек и включайте или отключайте значки и лёгкие анимации. Щёлкните игру правой кнопкой для запуска, редактирования, сканирования и добавления в избранное.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1511" />
+            <location filename="../src/ui/MainWindow.cpp" line="1565" />
             <source>The small arrow opens more view options.</source>
             <translation>Маленькая стрелка открывает дополнительные параметры вида.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1515" />
+            <location filename="../src/ui/MainWindow.cpp" line="1569" />
             <source>OnlineFix is supported, not guaranteed</source>
             <translation>OnlineFix поддерживается, но не гарантируется</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1516" />
+            <location filename="../src/ui/MainWindow.cpp" line="1570" />
             <source>Vanta can detect OnlineFix signature files and apply the launcher-side behaviour of OnlineFix Linux: INI updates with backups, the FreeTP app-id swap, ExtraProtection set to false, and launch-only Wine DLL overrides. Detection is not proof that a fix works, and Vanta never patches game binaries or downloads fix files.</source>
             <translation>Vanta может обнаруживать файлы подписи OnlineFix и применять поведение OnlineFix Linux на стороне лаунчера: обновление INI с резервными копиями, подмену app-id FreeTP, установку ExtraProtection в false и переопределения DLL Wine только на время запуска. Обнаружение не доказывает, что исправление работает, и Vanta никогда не патчит игровые бинарные файлы и не загружает файлы исправлений.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1525" />
+            <location filename="../src/ui/MainWindow.cpp" line="1579" />
             <source>Runners are discovered automatically</source>
             <translation>Раннеры обнаруживаются автоматически</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1526" />
+            <location filename="../src/ui/MainWindow.cpp" line="1580" />
             <source>Vanta finds Wine and Proton builds from Steam, Lutris, Heroic, Bottles, and its own runner folder. If you need a new runner, the runner dialog can install Wine through your package manager or download portable Wine and GE-Proton builds from their official GitHub releases.</source>
             <translation>Vanta находит сборки Wine и Proton в Steam, Lutris, Heroic, Bottles и в собственной папке раннеров. Если нужен новый раннер, в диалоге раннеров можно установить Wine через менеджер пакетов или скачать портативные сборки Wine и GE-Proton из их официальных релизов на GitHub.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1530" />
+            <location filename="../src/ui/MainWindow.cpp" line="1584" />
             <source>Open Settings → Runners, or use the main menu, to install a runner.</source>
             <translation>Откройте Настройки → Раннеры или воспользуйтесь главным меню, чтобы установить раннер.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1534" />
+            <location filename="../src/ui/MainWindow.cpp" line="1588" />
             <source>You are ready</source>
             <translation>Всё готово</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1535" />
+            <location filename="../src/ui/MainWindow.cpp" line="1589" />
             <source>Double-click a card to launch. Vanta tracks playtime and the last played time, keeps launch diagnostics for failures, and stops games cleanly, including the Wine prefix when needed. Reopen this tour from the sidebar whenever you want.</source>
             <translation>Дважды щёлкните карточку, чтобы запустить игру. Vanta учитывает время игры и время последнего запуска, сохраняет диагностику запуска при сбоях и корректно останавливает игры, включая префикс Wine при необходимости. Этот обзор можно снова открыть из боковой панели в любой момент.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1595" />
+            <location filename="../src/ui/MainWindow.cpp" line="1649" />
             <source>Set an executable for this game before launching it.</source>
             <translation>Укажите исполняемый файл для этой игры перед её запуском.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1641" />
-            <location filename="../src/ui/MainWindow.cpp" line="1673" />
-            <location filename="../src/ui/MainWindow.cpp" line="1697" />
+            <location filename="../src/ui/MainWindow.cpp" line="1695" />
+            <location filename="../src/ui/MainWindow.cpp" line="1727" />
+            <location filename="../src/ui/MainWindow.cpp" line="1751" />
             <source>Launch cancelled.</source>
             <translation>Запуск отменён.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1677" />
+            <location filename="../src/ui/MainWindow.cpp" line="1731" />
             <source>Launching without Steam. Online play will not work.</source>
             <translation>Запуск без Steam. Сетевая игра работать не будет.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1709" />
+            <location filename="../src/ui/MainWindow.cpp" line="1763" />
             <source>Starting Steam…</source>
             <translation>Запуск Steam...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1711" />
+            <location filename="../src/ui/MainWindow.cpp" line="1765" />
             <source>Vanta will launch the game once Steam is running and signed in.</source>
             <translation>Vanta запустит игру, как только Steam будет запущен и выполнен вход.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1741" />
-            <location filename="../src/ui/MainWindow.cpp" line="1783" />
+            <location filename="../src/ui/MainWindow.cpp" line="1795" />
+            <location filename="../src/ui/MainWindow.cpp" line="1837" />
             <source>The game is no longer in the library.</source>
             <translation>Игры больше нет в библиотеке.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1749" />
+            <location filename="../src/ui/MainWindow.cpp" line="1803" />
             <source>Steam is not running. Online features will not work for this session.</source>
             <translation>Steam не запущен. В этом сеансе сетевые функции работать не будут.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1753" />
+            <location filename="../src/ui/MainWindow.cpp" line="1807" />
             <source>Applying OnlineFix configuration…</source>
             <translation>Применение конфигурации OnlineFix...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1758" />
+            <location filename="../src/ui/MainWindow.cpp" line="1812" />
             <source>Wrote: %1</source>
             <translation>Записано: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1760" />
+            <location filename="../src/ui/MainWindow.cpp" line="1814" />
             <source>Backup: %1</source>
             <translation>Резервная копия: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1762" />
+            <location filename="../src/ui/MainWindow.cpp" line="1816" />
             <source>Error: %1</source>
             <translation>Ошибка: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1765" />
+            <location filename="../src/ui/MainWindow.cpp" line="1819" />
             <source>The OnlineFix configuration could not be updated.</source>
             <translation>Не удалось обновить конфигурацию OnlineFix.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1767" />
+            <location filename="../src/ui/MainWindow.cpp" line="1821" />
             <source>OnlineFix configuration failed. The launch was stopped before starting the game.</source>
             <translation>Не удалось настроить OnlineFix. Запуск был остановлен до старта игры.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1798" />
+            <location filename="../src/ui/MainWindow.cpp" line="1852" />
             <source>The launch plan could not be built.</source>
             <translation>Не удалось построить план запуска.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1803" />
+            <location filename="../src/ui/MainWindow.cpp" line="1857" />
             <source>Starting the game…</source>
             <translation>Запуск игры...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1813" />
+            <location filename="../src/ui/MainWindow.cpp" line="1867" />
             <source>The game could not be started.</source>
             <translation>Не удалось запустить игру.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1882" />
+            <location filename="../src/ui/MainWindow.cpp" line="1936" />
             <source>Game stopped.</source>
             <translation>Игра остановлена.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1886" />
+            <location filename="../src/ui/MainWindow.cpp" line="1940" />
             <source>The game</source>
             <translation>Игра</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1887" />
+            <location filename="../src/ui/MainWindow.cpp" line="1941" />
             <source>The game exited unexpectedly (code %1).</source>
             <translation>Игра неожиданно завершилась (код %1).</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1889" />
-            <location filename="../src/ui/MainWindow.cpp" line="1896" />
+            <location filename="../src/ui/MainWindow.cpp" line="1943" />
+            <location filename="../src/ui/MainWindow.cpp" line="1950" />
             <source>Game exited unexpectedly</source>
             <translation>Игра завершилась неожиданно</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1890" />
+            <location filename="../src/ui/MainWindow.cpp" line="1944" />
             <source>%1 exited with code %2. Diagnostics from the launch are below.</source>
             <translation>%1 завершился с кодом %2. Ниже приведена диагностика запуска.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1897" />
+            <location filename="../src/ui/MainWindow.cpp" line="1951" />
             <source>%1 exited with code %2. Vanta saved the launch log, including everything the runner printed, so you can see what happened.
 
 Open the log now?</source>
@@ -3605,67 +3611,67 @@ Open the log now?</source>
 Открыть журнал сейчас?</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1905" />
+            <location filename="../src/ui/MainWindow.cpp" line="1959" />
             <source>Game closed.</source>
             <translation>Игра закрыта.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1932" />
+            <location filename="../src/ui/MainWindow.cpp" line="1986" />
             <source>Added to favorites.</source>
             <translation>Добавлено в избранное.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1932" />
+            <location filename="../src/ui/MainWindow.cpp" line="1986" />
             <source>Removed from favorites.</source>
             <translation>Удалено из избранного.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1943" />
+            <location filename="../src/ui/MainWindow.cpp" line="1997" />
             <source>Remove game</source>
             <translation>Удалить игру</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1944" />
+            <location filename="../src/ui/MainWindow.cpp" line="1998" />
             <source>Remove %1 from the library?</source>
             <translation>Удалить %1 из библиотеки?</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1945" />
+            <location filename="../src/ui/MainWindow.cpp" line="1999" />
             <source>Game files are not touched. Only the library entry and its cached scan result are removed.</source>
             <translation>Файлы игры не затрагиваются. Удаляются только запись в библиотеке и её кэшированный результат сканирования.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1956" />
+            <location filename="../src/ui/MainWindow.cpp" line="2010" />
             <source>The game could not be removed from the library.</source>
             <translation>Не удалось удалить игру из библиотеки.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1961" />
+            <location filename="../src/ui/MainWindow.cpp" line="2015" />
             <source>Removed %1.</source>
             <translation>Удалено: %1.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1984" />
+            <location filename="../src/ui/MainWindow.cpp" line="2038" />
             <source>This game has no configured Wine prefix.</source>
             <translation>Для этой игры не настроен префикс Wine.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1988" />
+            <location filename="../src/ui/MainWindow.cpp" line="2042" />
             <source>The prefix folder does not exist yet and could not be created.</source>
             <translation>Папка префикса ещё не существует, и её не удалось создать.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1997" />
+            <location filename="../src/ui/MainWindow.cpp" line="2051" />
             <source>The folder no longer exists: %1</source>
             <translation>Папка больше не существует: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="2008" />
+            <location filename="../src/ui/MainWindow.cpp" line="2062" />
             <source>Quit Vanta</source>
             <translation>Выйти из Vanta</translation>
         </message>
         <message numerus="yes">
-            <location filename="../src/ui/MainWindow.cpp" line="2009" />
+            <location filename="../src/ui/MainWindow.cpp" line="2063" />
             <source>%n game(s) still running. Quit anyway?</source>
             <translation>
                 <numerusform>%n игра всё ещё выполняется. Всё равно выйти?</numerusform>
@@ -3674,7 +3680,7 @@ Open the log now?</source>
             </translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="2010" />
+            <location filename="../src/ui/MainWindow.cpp" line="2064" />
             <source>Running games will be stopped.</source>
             <translation>Запущенные игры будут остановлены.</translation>
         </message>
@@ -3792,7 +3798,7 @@ Open the log now?</source>
             <location filename="../src/core/Types.cpp" line="132" />
             <location filename="../src/ui/ModManagerDialog.cpp" line="276" />
             <location filename="../src/ui/OnlineFixDialog.cpp" line="109" />
-            <location filename="../src/ui/Sidebar.cpp" line="580" />
+            <location filename="../src/ui/Sidebar.cpp" line="595" />
             <source>Not detected</source>
             <translation>Не обнаружено</translation>
         </message>
@@ -3960,7 +3966,7 @@ Vanta copies each replaced file under BepInEx/.vanta-backups before writing. Not
         <message>
             <location filename="../src/core/Types.cpp" line="130" />
             <location filename="../src/ui/OnlineFixDialog.cpp" line="109" />
-            <location filename="../src/ui/Sidebar.cpp" line="562" />
+            <location filename="../src/ui/Sidebar.cpp" line="577" />
             <source>Detected</source>
             <translation>Обнаружено</translation>
         </message>
@@ -4324,6 +4330,8 @@ This will remove the runner files.</source>
             <location filename="../src/ui/SettingsDialog.cpp" line="53" />
             <location filename="../src/ui/Sidebar.cpp" line="262" />
             <location filename="../src/ui/Sidebar.cpp" line="268" />
+            <location filename="../src/ui/Sidebar.cpp" line="337" />
+            <location filename="../src/ui/Sidebar.cpp" line="340" />
             <source>Settings</source>
             <translation>Настройки</translation>
         </message>
@@ -4349,202 +4357,202 @@ This will remove the runner files.</source>
         </message>
         <message>
             <location filename="../src/ui/SettingsDialog.cpp" line="124" />
-            <source>Translations come from the community. Changing the language takes effect after Vanta restarts.</source>
-            <translation>Переводы создаёт сообщество. Смена языка вступает в силу после перезапуска Vanta.</translation>
+            <source>Translations come from the community. The interface switches to the new language when the settings are saved.</source>
+            <translation>Переводы создаёт сообщество. Интерфейс переключается на новый язык при сохранении настроек.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="127" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="128" />
             <source>Enable subtle hover and selection animations</source>
             <translation>Включить лёгкие анимации наведения и выделения</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="139" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="140" />
             <source>Default view</source>
             <translation>Вид по умолчанию</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="145" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="146" />
             <source>Sort by</source>
             <translation>Сортировка</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="147" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="148" />
             <source>Sort ascending</source>
             <translation>Сортировать по возрастанию</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="150" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="151" />
             <source>Show runner and platform badges on cards</source>
             <translation>Показывать значки раннера и платформы на карточках</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="153" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="154" />
             <source>Remember the selected sidebar filter</source>
             <translation>Запоминать выбранный фильтр боковой панели</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="156" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="157" />
             <source>Remember collapsed sidebar groups</source>
             <translation>Запоминать свёрнутые группы боковой панели</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="159" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="160" />
             <source>Show the tutorial again</source>
             <translation>Показать обучение снова</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="170" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="171" />
             <source>Appearance</source>
             <translation>Внешний вид</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="174" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="175" />
             <source>Scan new games automatically when they are added</source>
             <translation>Автоматически сканировать новые игры при добавлении</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="176" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="177" />
             <source>Rescan when the game folder changed since the last scan</source>
             <translation>Повторно сканировать, если папка игры изменилась с прошлого сканирования</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="181" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="182" />
             <source> levels</source>
             <translation> уровней</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="182" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="183" />
             <source>Scan depth</source>
             <translation>Глубина сканирования</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="187" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="188" />
             <source> entries</source>
             <translation> записей</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="188" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="189" />
             <source>Scan entry limit</source>
             <translation>Предел записей сканирования</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="191" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="192" />
             <source>Scans run in the background and are read-only, except for confirmed OnlineFix INI updates and the Photon Newtonsoft.Json link. Lower limits keep very large folders responsive.</source>
             <translation>Сканирование выполняется в фоне и только читает данные, кроме подтверждённых обновлений INI OnlineFix и ссылки на Photon Newtonsoft.Json. Меньшие ограничения сохраняют отзывчивость очень больших папок.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="194" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="195" />
             <source>Scanning</source>
             <translation>Сканирование</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="199" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="200" />
             <source>Ask before every launch</source>
             <translation>Спрашивать перед каждым запуском</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="201" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="202" />
             <source>Always apply when detected</source>
             <translation>Всегда применять при обнаружении</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="203" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="204" />
             <source>Never apply</source>
             <translation>Никогда не применять</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="205" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="206" />
             <source>Launch policy</source>
             <translation>Политика запуска</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="207" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="208" />
             <source>Require Steam to be running before an OnlineFix launch</source>
             <translation>Требовать запущенный Steam перед запуском с OnlineFix</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="212" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="213" />
             <source>Per-game modes override this policy. OnlineFix overrides are applied to the launch environment only and are never saved into the game's stored environment. Configuration files are backed up before they are changed. Vanta cannot verify that a fix works.</source>
             <translation>Режимы для отдельных игр переопределяют эту политику. Переопределения OnlineFix применяются только к среде запуска и никогда не сохраняются в сохранённой среде игры. Файлы конфигурации копируются перед изменением. Vanta не может проверить, работает ли фикс.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="226" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="227" />
             <source>Optional custom Wine executable or build folder</source>
             <translation>Необязательный пользовательский исполняемый файл или папка сборки Wine</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="233" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="234" />
             <source>Custom Wine</source>
             <translation>Другой Wine</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="239" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="240" />
             <source>Custom Proton paths</source>
             <translation>Свои пути к Proton</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="243" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="244" />
             <source>Add folder…</source>
             <translation>Добавить папку...</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="247" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="248" />
             <source>Remove</source>
             <translation>Удалить</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="254" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="255" />
             <source>Download or install runners…</source>
             <translation>Скачать или установить раннеры...</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="264" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="265" />
             <source>Wine log detail</source>
             <translation>Детализация журнала Wine</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="266" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="267" />
             <source>Controls how much Wine writes to the launch log. “Errors only” keeps real failures visible without the fixme noise. Every launch keeps the full output in the log viewer, so raising this is only useful while diagnosing a problem.</source>
             <translation>Определяет, сколько Wine пишет в журнал запуска. «Только ошибки» сохраняет видимыми реальные сбои без шума fixme. Каждый запуск сохраняет полный вывод в просмотрщике журнала, поэтому повышать этот уровень стоит только при диагностике проблемы.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="276" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="277" />
             <source>Vanta also detects runners installed by Steam, Lutris, Heroic and Bottles, including Flatpak installations. Detected runners are available in the game editor without extra setup.</source>
             <translation>Vanta также обнаруживает раннеры, установленные Steam, Lutris, Heroic и Bottles, включая установки Flatpak. Обнаруженные раннеры доступны в редакторе игры без дополнительной настройки.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="279" />
-            <location filename="../src/ui/Sidebar.cpp" line="590" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="280" />
+            <location filename="../src/ui/Sidebar.cpp" line="605" />
             <source>Runners</source>
             <translation>Раннеры</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="284" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="285" />
             <source>Fetch missing cover art automatically when a game is added</source>
             <translation>Автоматически загружать отсутствующие обложки при добавлении игры</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="290" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="291" />
             <source>SteamGridDB API key</source>
             <translation>Ключ API SteamGridDB</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="292" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="293" />
             <source>Covers come from SteamGridDB. Vanta ships with a working key, so the field can stay empty; paste your own key from steamgriddb.com/profile/preferences/api if you want the lookups to use your account instead. Names are matched fuzzily, so a typo like “Testris” still resolves to “Tetris”.</source>
             <translation>Обложки берутся из SteamGridDB. Vanta поставляется с рабочим ключом, поэтому поле можно оставить пустым; вставьте свой ключ со страницы steamgriddb.com/profile/preferences/api, если хотите, чтобы поиск использовал вашу учётную запись. Имена сопоставляются нечётко, поэтому опечатка вроде «Testris» всё равно найдёт «Tetris».</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="311" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="312" />
             <source>Cover folder</source>
             <translation>Папка обложек</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="312" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="313" />
             <source>Covers</source>
             <translation>Обложки</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="320" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="321" />
             <source>Library: %1
 Settings: %2
 Scan cache: %3</source>
@@ -4553,106 +4561,112 @@ Scan cache: %3</source>
 Кэш сканирования: %3</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="322" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="323" />
             <source>Data files</source>
             <translation>Файлы данных</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="324" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="325" />
             <source>Vanta stores everything under the XDG config and cache directories using atomic writes. Library and settings files can be copied to another machine to move your setup.</source>
             <translation>Vanta хранит все данные в каталогах конфигурации и кэша XDG, используя атомарную запись. Файлы библиотеки и настроек можно скопировать на другой компьютер, чтобы перенести вашу конфигурацию.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="333" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="334" />
             <source>External library porting</source>
             <translation>Перенос из внешних библиотек</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="335" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="336" />
             <source>Scan your machine for installed games from Lutris and Heroic Games Launcher, and import them into Vanta automatically.</source>
             <translation>Находить на вашем компьютере игры, установленные через Lutris и Heroic Games Launcher, и автоматически переносить их в Vanta.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="345" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="346" />
             <source>Data</source>
             <translation>Данные</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="355" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="356" />
             <source>Save settings</source>
             <translation>Сохранить настройки</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="459" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="460" />
             <source>Select a Wine executable</source>
             <translation>Выберите исполняемый файл Wine</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="467" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="468" />
             <source>Select a Proton build folder</source>
             <translation>Выберите папку сборки Proton</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="516" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="517" />
             <source>Detected Wine builds: %1</source>
             <translation>Найденные сборки Wine: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="517" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="518" />
             <source>Detected Proton builds: %1</source>
             <translation>Обнаруженные сборки Proton: %1</translation>
         </message>
         <message>
             <location filename="../src/ui/Sidebar.cpp" line="217" />
+            <location filename="../src/ui/Sidebar.cpp" line="336" />
             <source>GAME LIBRARY</source>
             <translation>БИБЛИОТЕКА ИГР</translation>
         </message>
         <message>
             <location filename="../src/ui/Sidebar.cpp" line="263" />
             <location filename="../src/ui/Sidebar.cpp" line="269" />
+            <location filename="../src/ui/Sidebar.cpp" line="338" />
+            <location filename="../src/ui/Sidebar.cpp" line="341" />
             <source>Tutorial</source>
             <translation>Руководство</translation>
         </message>
         <message>
             <location filename="../src/ui/Sidebar.cpp" line="264" />
             <location filename="../src/ui/Sidebar.cpp" line="270" />
+            <location filename="../src/ui/Sidebar.cpp" line="339" />
+            <location filename="../src/ui/Sidebar.cpp" line="342" />
             <source>About</source>
             <translation>О программе</translation>
         </message>
         <message>
             <location filename="../src/ui/Sidebar.cpp" line="272" />
+            <location filename="../src/ui/Sidebar.cpp" line="343" />
             <source>Version %1</source>
             <translation>Версия %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="334" />
-            <location filename="../src/ui/Sidebar.cpp" line="588" />
+            <location filename="../src/ui/Sidebar.cpp" line="349" />
+            <location filename="../src/ui/Sidebar.cpp" line="603" />
             <source>Library</source>
             <translation>Библиотека</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="459" />
+            <location filename="../src/ui/Sidebar.cpp" line="474" />
             <source>Favorites</source>
             <translation>Избранное</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="471" />
+            <location filename="../src/ui/Sidebar.cpp" line="486" />
             <source>Recently played</source>
             <translation>Недавно запускавшиеся</translation>
         </message>
         <message>
             <location filename="../src/core/Types.cpp" line="131" />
-            <location filename="../src/ui/Sidebar.cpp" line="571" />
+            <location filename="../src/ui/Sidebar.cpp" line="586" />
             <source>Needs attention</source>
             <translation>Требует внимания</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="589" />
+            <location filename="../src/ui/Sidebar.cpp" line="604" />
             <source>Sources</source>
             <translation>Источники</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="591" />
+            <location filename="../src/ui/Sidebar.cpp" line="606" />
             <source>Platforms</source>
             <translation>Платформы</translation>
         </message>
@@ -5042,62 +5056,66 @@ Continue only if you want to change the loader version.</source>
         </message>
         <message>
             <location filename="../src/ui/TutorialOverlay.cpp" line="85" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="150" />
             <source>Skip tutorial</source>
             <translation>Пропустить обучение</translation>
         </message>
         <message>
             <location filename="../src/ui/TutorialOverlay.cpp" line="97" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="151" />
             <source>Back</source>
             <translation>Назад</translation>
         </message>
         <message>
             <location filename="../src/ui/TutorialOverlay.cpp" line="105" />
-            <location filename="../src/ui/TutorialOverlay.cpp" line="163" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="173" />
             <source>Next</source>
             <translation>Далее</translation>
         </message>
         <message>
-            <location filename="../src/ui/TutorialOverlay.cpp" line="160" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="170" />
             <source>Step %1 of %2</source>
             <translation>Шаг %1 из %2</translation>
         </message>
         <message>
-            <location filename="../src/ui/TutorialOverlay.cpp" line="162" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="172" />
             <source>Finish</source>
             <translation>Готово</translation>
         </message>
         <message>
             <location filename="../src/ui/UpdateBanner.cpp" line="66" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="125" />
             <source>Open release page</source>
             <translation>Открыть страницу релиза</translation>
         </message>
         <message>
             <location filename="../src/ui/UpdateBanner.cpp" line="80" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="126" />
             <source>Hide this notification until the next launch</source>
             <translation>Скрыть это уведомление до следующего запуска</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="97" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="105" />
             <source>A newer Vanta release is available</source>
             <translation>Доступна более новая версия Vanta</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="98" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="106" />
             <source>Vanta %1 is available</source>
             <translation>Доступна Vanta %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="102" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="110" />
             <source>The update is installed through your distribution's package manager, so Vanta only opens the release page.</source>
             <translation>Обновление устанавливается через пакетный менеджер вашего дистрибутива, поэтому Vanta лишь открывает страницу релиза.</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="104" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="112" />
             <source>You are running %1. The update is installed through your distribution's package manager, so Vanta only opens the release page.</source>
             <translation>У вас установлена версия %1. Обновление устанавливается через менеджер пакетов вашего дистрибутива, поэтому Vanta только открывает страницу выпуска.</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="111" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="119" />
             <source>%1 — %2</source>
             <translation>%1 — %2</translation>
         </message>

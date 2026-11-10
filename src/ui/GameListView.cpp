@@ -15,10 +15,7 @@ GameListView::GameListView(ThemeManager *theme, QWidget *parent)
 {
     setObjectName(QStringLiteral("gameList"));
     setColumnCount(6);
-    setHorizontalHeaderLabels({
-        Vanta::tr("Game"), Vanta::tr("Runner"), Vanta::tr("Platform"),
-        Vanta::tr("Compatibility"), Vanta::tr("Last played"), Vanta::tr("Playtime")
-    });
+    retranslate();
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSelectionMode(QAbstractItemView::SingleSelection);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -53,6 +50,14 @@ GameListView::GameListView(ThemeManager *theme, QWidget *parent)
         const QString id = idForRow(item->row());
         if (!id.isEmpty())
             emit gameActivated(id);
+    });
+}
+
+void GameListView::retranslate()
+{
+    setHorizontalHeaderLabels({
+        Vanta::tr("Game"), Vanta::tr("Runner"), Vanta::tr("Platform"),
+        Vanta::tr("Compatibility"), Vanta::tr("Last played"), Vanta::tr("Playtime")
     });
 }
 

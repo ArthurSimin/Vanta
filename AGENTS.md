@@ -452,3 +452,16 @@ Sources are a fixed set, not free text. To add one:
 - Describe the user-visible effect in the body, not the mechanics of the diff.
 - Before committing: clean build, zero warnings, manual smoke test of the
   touched flow.
+- **Land every significant change as a pull request.** A feature, a bug fix, a
+  release, or anything that touches several files goes on a branch and through
+  a PR — not straight to `main`. Real changes usually carry a bug or two, and
+  the PR is the safety net that catches them before they reach a release. Only
+  trivial one-line chores (a typo, a comment, a version string) may skip it.
+- **Request a CodeRabbit review on every pull request.** Right after opening
+  one, post the single comment `@coderabbitai review` (the same command used on
+  the earlier PRs). This repository is below CodeRabbit's automatic-review star
+  threshold, so without the comment the PR gets no review at all. CodeRabbit is
+  incremental: if you push more commits after a review, post
+  `@coderabbitai review` again and wait for the fresh review. Do not treat a PR
+  as ready to merge until CodeRabbit has reviewed the final revision and the CI
+  build is green.

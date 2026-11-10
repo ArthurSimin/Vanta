@@ -28,6 +28,7 @@ public:
     void setSteps(const QList<Step> &steps);
     void start(int index = 0);
     void finish();
+    void retranslate();
     int currentStep() const { return m_index; }
 
 signals:

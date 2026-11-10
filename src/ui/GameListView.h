@@ -18,6 +18,7 @@ public:
     void setSelectedGame(const QString &gameId);
     void setRunningGames(const QStringList &gameIds);
     void refreshTheme();
+    void retranslate();
     QString selectedGameId() const;
 
 signals:

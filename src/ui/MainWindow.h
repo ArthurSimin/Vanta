@@ -59,6 +59,9 @@ private:
     void refreshSidebar();
     void refreshStatus();
     void refreshIcons();
+    // Re-applies translated text to the widgets that outlive the settings
+    // dialog, so a language change lands without a restart.
+    void retranslateUi();
     void refreshSelectionBar();
     void updateFilterLabel();
     void applyFilter();

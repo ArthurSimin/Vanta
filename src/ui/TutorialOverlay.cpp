@@ -143,6 +143,16 @@ void TutorialOverlay::finish()
     emit finished();
 }
 
+void TutorialOverlay::retranslate()
+{
+    // The two navigation buttons and the counter are rebuilt here; the step
+    // text itself is supplied by the caller through setSteps().
+    m_skipButton->setText(Vanta::tr("Skip tutorial"));
+    m_backButton->setText(Vanta::tr("Back"));
+    if (!m_steps.isEmpty())
+        showStep(m_index);
+}
+
 void TutorialOverlay::showStep(int index)
 {
     if (m_steps.isEmpty())

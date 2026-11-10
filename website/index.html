@@ -24,6 +24,14 @@
 </head>
 <body>
 
+<!-- Directional blur used while the page eases to a section. The vertical
+     deviation is what makes it read as motion rather than focus. -->
+<svg class="nav-blur-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <filter id="nav-motion-blur" x="-5%" y="-5%" width="110%" height="110%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="0 7"/>
+  </filter>
+</svg>
+
 <header class="nav">
   <div class="nav-inner">
     <a class="brand" href="#top">
@@ -54,7 +62,7 @@
   <section class="hero">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <span class="pill">v1.2.0 · released 10 November 2026</span>
+        <span class="pill">v1.3.0 · released 10 November 2026</span>
         <h1>Your games. Your runners.<br>One <em>honest</em> launcher.</h1>
         <p class="lede">
           Vanta keeps a local library of the games you already own, launches native
@@ -137,6 +145,15 @@
         </article>
 
         <article class="card">
+          <h3><span class="glyph">文</span> Speaks your language</h3>
+          <p>The whole interface — menus, dialogs, the tutorial, scan reports and
+          status messages — is translated. Russian, Brazilian Portuguese, Portuguese
+          and Spanish catalogs ship inside the binary, the language follows your
+          desktop by default, and picking another one applies the moment you save
+          Settings. More languages are a pull request away.</p>
+        </article>
+
+        <article class="card">
           <h3><span class="glyph">⌘</span> Honest diagnostics</h3>
           <p>Every launch stores its runner output in a terminal-styled log, written
           while the game is still running, so a game that closed on its own can be
@@ -216,7 +233,7 @@
             </tr>
             <tr>
               <th scope="row">Release cadence</th>
-              <td class="vanta"><span class="yes"><a href="https://github.com/ArthurSimin/Vanta/releases" rel="noopener">7 releases, 7–10 Nov 2026</a></span><br><small>v1.0.0 → v1.2.0</small></td>
+              <td class="vanta"><span class="yes"><a href="https://github.com/ArthurSimin/Vanta/releases" rel="noopener">8 releases, 7–10 Nov 2026</a></span><br><small>v1.0.0 → v1.3.0</small></td>
               <td>Last stable v0.5.22, Feb 2026</td>
               <td>Roughly monthly<br><small>latest v2.22.4, Oct 2026</small></td>
               <td>Latest v2.7.1, Jul 2026</td>
@@ -266,12 +283,13 @@
 
   <section id="download" class="section">
     <div class="wrap download">
-      <h2>Get Vanta 1.2.0</h2>
-      <p>A full interface translation system with Russian, Brazilian Portuguese,
-      Portuguese and Spanish catalogs, a language picker in Settings, and a
-      documented path for the community to contribute more languages.</p>
+      <h2>Get Vanta 1.3.0</h2>
+      <p>Changing the interface language now applies the moment you save Settings —
+      no restart. Scan reports are rebuilt in the new language alongside it, and the
+      Russian, Brazilian Portuguese, Portuguese and Spanish catalogs still ship
+      inside the binary.</p>
       <div class="cta center">
-        <a class="btn primary lg" href="https://github.com/ArthurSimin/Vanta/releases/latest" rel="noopener">Download v1.2.0</a>
+        <a class="btn primary lg" href="https://github.com/ArthurSimin/Vanta/releases/latest" rel="noopener">Download v1.3.0</a>
         <a class="btn lg" href="https://github.com/ArthurSimin/Vanta#readme" rel="noopener">Build from source</a>
       </div>
       <ul class="packages">
@@ -320,6 +338,109 @@
         try { localStorage.setItem('vanta-theme', next); } catch (e) {}
       });
     }
+  })();
+</script>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var nav = document.querySelector('.nav');
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function currentY() {
+      return window.pageYOffset || root.scrollTop || 0;
+    }
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    // --- In-page navigation -------------------------------------------------
+    // Links ease to their section instead of jumping, and the page takes a
+    // little directional blur while it travels, dropped again as it settles.
+    var frame = 0;
+    var run = 0;
+
+    function animateTo(target) {
+      var navHeight = nav ? nav.offsetHeight : 0;
+      var maxY = Math.max(0, (root.scrollHeight || 0) - window.innerHeight);
+      var destination = Math.min(maxY,
+        Math.max(0, target.getBoundingClientRect().top + currentY() - navHeight - 12));
+      var start = currentY();
+      var distance = destination - start;
+
+      run += 1;
+      var mine = run;
+      if (frame) window.cancelAnimationFrame(frame);
+
+      if (reduceMotion.matches || Math.abs(distance) < 4) {
+        root.classList.remove('nav-animating');
+        window.scrollTo(0, destination);
+        return;
+      }
+
+      // Per-frame jumps must not be re-smoothed by the stylesheet.
+      var previousBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
+      root.classList.add('nav-animating');
+
+      var duration = Math.min(950, Math.max(450, Math.abs(distance) * 0.55));
+      var startedAt = null;
+
+      function settle() {
+        if (mine !== run) return;
+        root.classList.remove('nav-animating');
+        root.style.scrollBehavior = previousBehavior;
+      }
+
+      function step(now) {
+        if (mine !== run) return;
+        if (startedAt === null) startedAt = now;
+        var t = Math.min(1, (now - startedAt) / duration);
+        window.scrollTo(0, start + distance * easeInOutCubic(t));
+        if (t < 1) frame = window.requestAnimationFrame(step);
+        else settle();
+      }
+
+      frame = window.requestAnimationFrame(step);
+    }
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll('a[href^="#"]'),
+      function (link) {
+        var id = link.getAttribute('href');
+        if (!id || id === '#') return;
+        var target = document.getElementById(id.slice(1));
+        if (!target) return;
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          animateTo(target);
+          if (window.history && history.replaceState) history.replaceState(null, '', id);
+        });
+      });
+
+    // --- Reveal on scroll ---------------------------------------------------
+    // The hidden state is only applied when motion is allowed, so the content
+    // stays visible without JavaScript and under reduced motion.
+    var revealables = document.querySelectorAll(
+      '.section-head, .card, .table-wrap, .callout, .download > *');
+    if (reduceMotion.matches || !('IntersectionObserver' in window))
+      return;
+
+    root.classList.add('motion-ready');
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+
+    Array.prototype.forEach.call(revealables, function (element, index) {
+      element.classList.add('reveal');
+      element.style.setProperty('--reveal-delay', (index % 6) * 55 + 'ms');
+      observer.observe(element);
+    });
   })();
 </script>
 </body>

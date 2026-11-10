@@ -89,9 +89,6 @@ GameSelectionBar::GameSelectionBar(ThemeManager *theme, QWidget *parent)
     m_fixToggle->setCursor(Qt::PointingHandCursor);
     m_fixToggle->setToolButtonStyle(Qt::ToolButtonTextOnly);
     m_fixToggle->setFixedHeight(22);
-    m_fixToggle->setToolTip(Vanta::tr(
-        "Apply the OnlineFix configuration for this launch. Vanta backs up every file it touches, "
-        "and detection is not proof that a fix works."));
     QFont chipFont = m_fixToggle->font();
     chipFont.setPixelSize(10);
     chipFont.setBold(true);
@@ -130,7 +127,6 @@ GameSelectionBar::GameSelectionBar(ThemeManager *theme, QWidget *parent)
     m_menuButton = new QToolButton(m_body);
     m_menuButton->setObjectName(QStringLiteral("selectionBarMenu"));
     m_menuButton->setCursor(Qt::PointingHandCursor);
-    m_menuButton->setToolTip(Vanta::tr("More actions for this game"));
     m_menuButton->setIconSize(QSize(14, 14));
     m_menuButton->setFixedSize(30, 36);
     connect(m_menuButton, &QToolButton::clicked, this, [this] {
@@ -172,6 +168,7 @@ GameSelectionBar::GameSelectionBar(ThemeManager *theme, QWidget *parent)
     setMaximumHeight(0);
     setGame(Game());
     refreshTheme();
+    retranslate();
 }
 
 void GameSelectionBar::setGame(const Game &game)
@@ -324,6 +321,18 @@ void GameSelectionBar::updatePrimaryButton()
                              m_running ? m_theme->colors().danger : QColor(Qt::white), 15);
         Icons::setButtonIcon(m_menuButton, Glyph::ChevronDown, m_theme->colors().text, 15);
     }
+}
+
+void GameSelectionBar::retranslate()
+{
+    // The tooltips are built once, so a language change has to reset them as
+    // well as the labels that updateContent() and updatePrimaryButton() cover.
+    m_fixToggle->setToolTip(Vanta::tr(
+        "Apply the OnlineFix configuration for this launch. Vanta backs up every file it touches, "
+        "and detection is not proof that a fix works."));
+    m_menuButton->setToolTip(Vanta::tr("More actions for this game"));
+    updateContent();
+    updatePrimaryButton();
 }
 
 void GameSelectionBar::refreshTheme()

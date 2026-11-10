@@ -108,11 +108,25 @@ code {
 
 .nav-links { display: flex; gap: 1.35rem; margin-left: 0.75rem; }
 .nav-links a {
+  position: relative;
   color: var(--muted);
   font-weight: 600;
   font-size: 0.92rem;
 }
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -0.4rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent-hover);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.22s ease;
+}
 .nav-links a:hover { color: var(--text); text-decoration: none; }
+.nav-links a:hover::after,
+.nav-links a:focus-visible::after { transform: scaleX(1); }
 
 .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 0.6rem; }
 
@@ -449,6 +463,33 @@ table.compare thead th.vanta {
   font-size: 0.82rem;
 }
 
+/* ---------- motion ---------- */
+
+/* The page blurs a little while it eases to a section, so the jump reads as
+   movement instead of a teleport. The first declaration is the fallback; the
+   second, the directional SVG filter, wins only where url() filters work. */
+main { transition: filter 0.28s ease; }
+.nav-animating main { filter: blur(2px); }
+.nav-animating main { filter: url(#nav-motion-blur); }
+/* A filter makes main a containing block, which would unsettle the table's
+   sticky header mid-scroll. Pin it back to normal for the moment it lasts. */
+.nav-animating table.compare thead th { position: static; }
+
+/* Reveal on scroll. The hidden state is gated on a class the script adds, so
+   the content is never hidden without JavaScript or under reduced motion. */
+.motion-ready .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.motion-ready .reveal.revealed {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.55s ease, transform 0.6s cubic-bezier(0.22, 0.72, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.card:hover .glyph { background: color-mix(in srgb, var(--accent) 26%, var(--accent-soft)); }
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 900px) {
@@ -463,5 +504,8 @@ table.compare thead th.vanta {
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  * { transition: none !important; }
+  * { transition: none !important; animation: none !important; }
+  /* The script already skips both, but keep the stylesheet honest on its own. */
+  .motion-ready .reveal { opacity: 1; transform: none; }
+  .nav-animating main { filter: none; }
 }

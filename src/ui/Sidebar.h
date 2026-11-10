@@ -29,6 +29,7 @@ public:
     void setCurrentItem(const QString &id);
     void setCollapsedGroups(const QJsonObject &collapsed);
     void refreshTheme();
+    void retranslate();
 
     QString currentItem() const { return m_currentId; }
     QString labelFor(const QString &id) const;
@@ -54,6 +55,7 @@ private:
     QScrollArea *m_scroll = nullptr;
     QWidget *m_content = nullptr;
     QVBoxLayout *m_groupsLayout = nullptr;
+    QLabel *m_taglineLabel = nullptr;
     QLabel *m_versionLabel = nullptr;
     QPushButton *m_settingsButton = nullptr;
     QPushButton *m_tutorialButton = nullptr;

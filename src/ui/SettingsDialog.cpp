@@ -121,7 +121,8 @@ void SettingsDialog::buildUi()
         m_languageCombo->addItem(language.nativeName, language.code);
     appearanceForm->addRow(Vanta::tr("Language"), m_languageCombo);
     appearanceForm->addRow(UiHelp::helpLabel(
-        Vanta::tr("Translations come from the community. Changing the language takes effect after Vanta restarts."),
+        Vanta::tr("Translations come from the community. The interface switches to the new language when the "
+                  "settings are saved."),
         appearance));
 
     m_animationsCheck = new QCheckBox(Vanta::tr("Enable subtle hover and selection animations"), appearance);

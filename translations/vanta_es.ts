@@ -224,13 +224,13 @@
         </message>
         <message>
             <location filename="../src/core/Launcher.cpp" line="37" />
-            <location filename="../src/ui/MainWindow.cpp" line="1587" />
+            <location filename="../src/ui/MainWindow.cpp" line="1641" />
             <source>The previous session is still shutting down. Try again in a moment.</source>
             <translation>La sesión anterior aún se está cerrando. Inténtalo de nuevo en un momento.</translation>
         </message>
         <message>
             <location filename="../src/core/Launcher.cpp" line="38" />
-            <location filename="../src/ui/MainWindow.cpp" line="1583" />
+            <location filename="../src/ui/MainWindow.cpp" line="1637" />
             <source>This game is already running.</source>
             <translation>Este juego ya se está ejecutando.</translation>
         </message>
@@ -1289,7 +1289,7 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
         </message>
         <message>
             <location filename="../src/core/Scanner.cpp" line="768" />
-            <location filename="../src/ui/GameListView.cpp" line="85" />
+            <location filename="../src/ui/GameListView.cpp" line="90" />
             <source>OnlineFix detected</source>
             <translation>OnlineFix detectado</translation>
         </message>
@@ -1557,13 +1557,13 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
         </message>
         <message>
             <location filename="../src/core/Types.cpp" line="221" />
-            <location filename="../src/ui/GameListView.cpp" line="20" />
+            <location filename="../src/ui/GameListView.cpp" line="60" />
             <source>Last played</source>
             <translation>Última vez jugado</translation>
         </message>
         <message>
             <location filename="../src/core/Types.cpp" line="222" />
-            <location filename="../src/ui/GameListView.cpp" line="20" />
+            <location filename="../src/ui/GameListView.cpp" line="60" />
             <source>Playtime</source>
             <translation>Tiempo de juego</translation>
         </message>
@@ -1744,7 +1744,7 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
             <location filename="../src/ui/OnlineFixDialog.cpp" line="254" />
             <location filename="../src/ui/OnlineFixDialog.cpp" line="321" />
             <location filename="../src/ui/RunnerInstallDialog.cpp" line="347" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="350" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="351" />
             <location filename="../src/ui/SteamPromptDialog.cpp" line="79" />
             <location filename="../src/ui/ThunderstoreDialog.cpp" line="315" />
             <source>Cancel</source>
@@ -1804,7 +1804,7 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
             <location filename="../src/ui/AddEditDialog.cpp" line="277" />
             <location filename="../src/ui/AddEditDialog.cpp" line="332" />
             <location filename="../src/ui/AddEditDialog.cpp" line="344" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="228" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="229" />
             <source>Browse…</source>
             <translation>Examinar...</translation>
         </message>
@@ -1867,14 +1867,14 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
         <message>
             <location filename="../src/ui/AddEditDialog.cpp" line="311" />
             <location filename="../src/ui/AddEditDialog.cpp" line="377" />
-            <location filename="../src/ui/GameListView.cpp" line="19" />
+            <location filename="../src/ui/GameListView.cpp" line="59" />
             <location filename="../src/ui/LibraryImportDialog.cpp" line="50" />
             <source>Runner</source>
             <translation>Runner</translation>
         </message>
         <message>
             <location filename="../src/ui/AddEditDialog.cpp" line="316" />
-            <location filename="../src/ui/GameListView.cpp" line="19" />
+            <location filename="../src/ui/GameListView.cpp" line="59" />
             <source>Platform</source>
             <translation>Plataforma</translation>
         </message>
@@ -2408,14 +2408,14 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
         </message>
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="144" />
-            <location filename="../src/ui/MainWindow.cpp" line="1419" />
+            <location filename="../src/ui/MainWindow.cpp" line="1473" />
             <source>Play</source>
             <translation>Jugar</translation>
         </message>
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="154" />
-            <location filename="../src/ui/GameSelectionBar.cpp" line="318" />
-            <location filename="../src/ui/MainWindow.cpp" line="1419" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="315" />
+            <location filename="../src/ui/MainWindow.cpp" line="1473" />
             <source>Stop</source>
             <translation>Detener</translation>
         </message>
@@ -2426,13 +2426,13 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
         </message>
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="167" />
-            <location filename="../src/ui/MainWindow.cpp" line="1436" />
+            <location filename="../src/ui/MainWindow.cpp" line="1490" />
             <source>OnlineFix…</source>
             <translation>OnlineFix...</translation>
         </message>
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="173" />
-            <location filename="../src/ui/MainWindow.cpp" line="1439" />
+            <location filename="../src/ui/MainWindow.cpp" line="1493" />
             <source>Mods…</source>
             <translation>Mods...</translation>
         </message>
@@ -2545,7 +2545,7 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
         <message>
             <location filename="../src/ui/GameDetailsDialog.cpp" line="338" />
             <location filename="../src/ui/MainWindow.cpp" line="725" />
-            <location filename="../src/ui/MainWindow.cpp" line="1442" />
+            <location filename="../src/ui/MainWindow.cpp" line="1496" />
             <source>Logs…</source>
             <translation>Registros...</translation>
         </message>
@@ -2553,7 +2553,7 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
             <location filename="../src/ui/GameDetailsDialog.cpp" line="344" />
             <location filename="../src/ui/LogsDialog.cpp" line="98" />
             <location filename="../src/ui/ModManagerDialog.cpp" line="205" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="304" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="305" />
             <source>Open folder</source>
             <translation>Abrir carpeta</translation>
         </message>
@@ -2618,38 +2618,38 @@ También puede instalar la versión portátil de Wine desde este diálogo.</tran
             <translation>No hay información de compatibilidad disponible.</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="19" />
+            <location filename="../src/ui/GameListView.cpp" line="59" />
             <location filename="../src/ui/LibraryImportDialog.cpp" line="48" />
             <source>Game</source>
             <translation>Juego</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="20" />
+            <location filename="../src/ui/GameListView.cpp" line="60" />
             <location filename="../src/ui/MainWindow.cpp" line="754" />
-            <location filename="../src/ui/Sidebar.cpp" line="592" />
+            <location filename="../src/ui/Sidebar.cpp" line="607" />
             <source>Compatibility</source>
             <translation>Compatibilidad</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="75" />
+            <location filename="../src/ui/GameListView.cpp" line="80" />
             <source>★  %1</source>
             <translation>★  %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="106" />
-            <location filename="../src/ui/GameListView.cpp" line="177" />
+            <location filename="../src/ui/GameListView.cpp" line="111" />
+            <location filename="../src/ui/GameListView.cpp" line="182" />
             <source>%1
 This game is running.</source>
             <translation>%1
 Este juego se está ejecutando.</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="133" />
+            <location filename="../src/ui/GameListView.cpp" line="138" />
             <source>The configured executable is missing.</source>
             <translation>Falta el ejecutable configurado.</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameListView.cpp" line="136" />
+            <location filename="../src/ui/GameListView.cpp" line="141" />
             <source>Filename signatures associated with OnlineFix were detected. Detection is not proof that a copy is functional.</source>
             <translation>Se detectaron firmas de nombre de archivo asociadas a OnlineFix. La detección no es prueba de que una copia funcione.</translation>
         </message>
@@ -2664,45 +2664,45 @@ Este juego se está ejecutando.</translation>
             <translation>Jugado por última vez %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="92" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="330" />
             <source>Apply the OnlineFix configuration for this launch. Vanta backs up every file it touches, and detection is not proof that a fix works.</source>
             <translation>Aplica la configuración de OnlineFix para este inicio. Vanta hace una copia de seguridad de cada archivo que toca, y la detección no es prueba de que un fix funcione.</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="101" />
-            <location filename="../src/ui/GameSelectionBar.cpp" line="266" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="98" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="263" />
             <source>OnlineFix off</source>
             <translation>OnlineFix desactivado</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="133" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="333" />
             <source>More actions for this game</source>
             <translation>Más acciones para este juego</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="272" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="269" />
             <source>Running now</source>
             <translation>En ejecución</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="276" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="273" />
             <source>%1 · %2</source>
             <translation>%1 · %2</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="278" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="275" />
             <source>Executable missing</source>
             <translation>Falta el ejecutable</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="302" />
-            <location filename="../src/ui/GameSelectionBar.cpp" line="318" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="299" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="315" />
             <location filename="../src/ui/LogsDialog.cpp" line="52" />
             <source>Launch</source>
             <translation>Iniciar</translation>
         </message>
         <message>
-            <location filename="../src/ui/GameSelectionBar.cpp" line="314" />
+            <location filename="../src/ui/GameSelectionBar.cpp" line="311" />
             <source>The configured executable is missing. Set the game's executable first.</source>
             <translation>Falta el ejecutable configurado. Define primero el ejecutable del juego.</translation>
         </message>
@@ -2858,19 +2858,19 @@ Este juego se está ejecutando.</translation>
         </message>
         <message>
             <location filename="../src/ui/LibraryView.cpp" line="159" />
-            <location filename="../src/ui/LibraryView.cpp" line="195" />
+            <location filename="../src/ui/LibraryView.cpp" line="200" />
             <location filename="../src/ui/MainWindow.cpp" line="837" />
             <source>Clear filters</source>
             <translation>Limpiar filtros</translation>
         </message>
         <message>
-            <location filename="../src/ui/LibraryView.cpp" line="192" />
+            <location filename="../src/ui/LibraryView.cpp" line="197" />
             <location filename="../src/ui/MainWindow.cpp" line="1022" />
             <source>No games match your filters</source>
             <translation>Ningún juego coincide con tus filtros</translation>
         </message>
         <message>
-            <location filename="../src/ui/LibraryView.cpp" line="193" />
+            <location filename="../src/ui/LibraryView.cpp" line="198" />
             <source>Try a different search, or clear the active filters to see your whole library.</source>
             <translation>Prueba otra búsqueda o limpia los filtros activos para ver toda tu biblioteca.</translation>
         </message>
@@ -3021,37 +3021,43 @@ Este juego se está ejecutando.</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="252" />
-            <location filename="../src/ui/Sidebar.cpp" line="451" />
+            <location filename="../src/ui/Sidebar.cpp" line="466" />
             <source>All games</source>
             <translation>Todos los juegos</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="279" />
+            <location filename="../src/ui/MainWindow.cpp" line="1338" />
             <source>Search your library…</source>
             <translation>Buscar en tu biblioteca...</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="285" />
+            <location filename="../src/ui/MainWindow.cpp" line="1340" />
             <source>Clear the search</source>
             <translation>Limpiar la búsqueda</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="299" />
+            <location filename="../src/ui/MainWindow.cpp" line="1342" />
             <source>Filters</source>
             <translation>Filtros</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="307" />
+            <location filename="../src/ui/MainWindow.cpp" line="1344" />
             <source>Add game (Ctrl+N)</source>
             <translation>Añadir juego (Ctrl+N)</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="317" />
+            <location filename="../src/ui/MainWindow.cpp" line="1346" />
             <source>Change view</source>
             <translation>Cambiar vista</translation>
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="333" />
+            <location filename="../src/ui/MainWindow.cpp" line="1348" />
             <source>More actions</source>
             <translation>Más acciones</translation>
         </message>
@@ -3063,7 +3069,7 @@ Este juego se está ejecutando.</translation>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="476" />
             <location filename="../src/ui/MainWindow.cpp" line="482" />
-            <location filename="../src/ui/MainWindow.cpp" line="1844" />
+            <location filename="../src/ui/MainWindow.cpp" line="1898" />
             <source>Launch failed</source>
             <translation>Falló el inicio</translation>
         </message>
@@ -3131,7 +3137,7 @@ El registro de inicio contiene el comando completo y cualquier salida del proces
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="702" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="134" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="135" />
             <source>Cover size</source>
             <translation>Tamaño de portada</translation>
         </message>
@@ -3162,7 +3168,7 @@ El registro de inicio contiene el comando completo y cualquier salida del proces
         </message>
         <message>
             <location filename="../src/ui/MainWindow.cpp" line="730" />
-            <location filename="../src/ui/SettingsDialog.cpp" line="338" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="339" />
             <source>Port external libraries…</source>
             <translation>Portar bibliotecas externas...</translation>
         </message>
@@ -3280,37 +3286,37 @@ El registro de inicio contiene el comando completo y cualquier salida del proces
             <translation>Aún no se ha registrado ningún registro de inicio. Inicia un juego una vez y Vanta conservará la salida del runner para que puedas inspeccionarla aquí después.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1296" />
+            <location filename="../src/ui/MainWindow.cpp" line="1297" />
             <source>Settings could not be saved.</source>
             <translation>No se pudieron guardar los ajustes.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1317" />
+            <location filename="../src/ui/MainWindow.cpp" line="1329" />
             <source>Settings saved.</source>
             <translation>Ajustes guardados.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1334" />
+            <location filename="../src/ui/MainWindow.cpp" line="1388" />
             <source>Checking for updates…</source>
             <translation>Buscando actualizaciones...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1347" />
+            <location filename="../src/ui/MainWindow.cpp" line="1401" />
             <source>Vanta %1 is available.</source>
             <translation>Vanta %1 está disponible.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1357" />
+            <location filename="../src/ui/MainWindow.cpp" line="1411" />
             <source>The release page could not be opened in a browser.</source>
             <translation>No se pudo abrir la página de la versión en un navegador.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1364" />
+            <location filename="../src/ui/MainWindow.cpp" line="1418" />
             <source>Runner discovery refreshed.</source>
             <translation>Detección de runners actualizada.</translation>
         </message>
         <message numerus="yes">
-            <location filename="../src/ui/MainWindow.cpp" line="1382" />
+            <location filename="../src/ui/MainWindow.cpp" line="1436" />
             <source>Ported %n game(s).</source>
             <translation>
                 <numerusform>%n juego portado.</numerusform>
@@ -3318,7 +3324,7 @@ El registro de inicio contiene el comando completo y cualquier salida del proces
             </translation>
         </message>
         <message numerus="yes">
-            <location filename="../src/ui/MainWindow.cpp" line="1404" />
+            <location filename="../src/ui/MainWindow.cpp" line="1458" />
             <source>Queued cover lookups for %n game(s).</source>
             <translation>
                 <numerusform>Búsqueda de portadas en cola para %n juego.</numerusform>
@@ -3326,271 +3332,271 @@ El registro de inicio contiene el comando completo y cualquier salida del proces
             </translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1406" />
+            <location filename="../src/ui/MainWindow.cpp" line="1460" />
             <source>All games in the library already have covers.</source>
             <translation>Todos los juegos de la biblioteca ya tienen portada.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1426" />
+            <location filename="../src/ui/MainWindow.cpp" line="1480" />
             <source>Details</source>
             <translation>Detalles</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1428" />
+            <location filename="../src/ui/MainWindow.cpp" line="1482" />
             <source>Edit…</source>
             <translation>Editar...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1431" />
+            <location filename="../src/ui/MainWindow.cpp" line="1485" />
             <source>Remove from favorites</source>
             <translation>Quitar de favoritos</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1432" />
+            <location filename="../src/ui/MainWindow.cpp" line="1486" />
             <source>Add to favorites</source>
             <translation>Añadir a favoritos</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1434" />
+            <location filename="../src/ui/MainWindow.cpp" line="1488" />
             <source>Scan now</source>
             <translation>Analizar ahora</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1444" />
+            <location filename="../src/ui/MainWindow.cpp" line="1498" />
             <source>Choose cover art…</source>
             <translation>Elegir portada...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1447" />
+            <location filename="../src/ui/MainWindow.cpp" line="1501" />
             <source>Open game folder</source>
             <translation>Abrir carpeta del juego</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1450" />
+            <location filename="../src/ui/MainWindow.cpp" line="1504" />
             <source>Open prefix folder</source>
             <translation>Abrir carpeta del prefijo</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1454" />
+            <location filename="../src/ui/MainWindow.cpp" line="1508" />
             <source>Remove from library</source>
             <translation>Quitar de la biblioteca</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1471" />
+            <location filename="../src/ui/MainWindow.cpp" line="1525" />
             <source>Welcome to Vanta</source>
             <translation>Bienvenido a Vanta</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1472" />
+            <location filename="../src/ui/MainWindow.cpp" line="1526" />
             <source>Vanta keeps your local game library in one place and launches native, Wine, and Proton games without hiding what it does. This short tour points out the main parts of the window. You can leave at any time and reopen it from the sidebar.</source>
             <translation>Vanta reúne tu biblioteca de juegos local en un solo lugar e inicia juegos nativos, de Wine y de Proton sin ocultar lo que hace. Este breve recorrido señala las partes principales de la ventana. Puedes salir en cualquier momento y volver a abrirlo desde la barra lateral.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1480" />
+            <location filename="../src/ui/MainWindow.cpp" line="1534" />
             <source>Library filters</source>
             <translation>Filtros de la biblioteca</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1481" />
+            <location filename="../src/ui/MainWindow.cpp" line="1535" />
             <source>The sidebar groups your games by source, runner, platform, and scan status. Groups collapse when you click their header, and Vanta can remember that layout. Settings, this tutorial, and About live at the bottom.</source>
             <translation>La barra lateral agrupa tus juegos por origen, runner, plataforma y estado de análisis. Los grupos se contraen al hacer clic en su encabezado, y Vanta puede recordar esa disposición. Los ajustes, este tutorial y Acerca de están en la parte inferior.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1484" />
+            <location filename="../src/ui/MainWindow.cpp" line="1538" />
             <source>Click a filter to narrow the library instantly.</source>
             <translation>Haz clic en un filtro para reducir la biblioteca al instante.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1489" />
+            <location filename="../src/ui/MainWindow.cpp" line="1543" />
             <source>Search and filter</source>
             <translation>Buscar y filtrar</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1490" />
+            <location filename="../src/ui/MainWindow.cpp" line="1544" />
             <source>Search matches names, sources, runners, and paths. The filter button adds compatibility and installation filters on top of the current sidebar selection.</source>
             <translation>La búsqueda coincide con nombres, orígenes, runners y rutas. El botón de filtros añade filtros de compatibilidad e instalación sobre la selección actual de la barra lateral.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1493" />
+            <location filename="../src/ui/MainWindow.cpp" line="1547" />
             <source>Filters combine with the active sidebar item.</source>
             <translation>Los filtros se combinan con el elemento activo de la barra lateral.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1498" />
+            <location filename="../src/ui/MainWindow.cpp" line="1552" />
             <source>Add a game</source>
             <translation>Añadir un juego</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1499" />
+            <location filename="../src/ui/MainWindow.cpp" line="1553" />
             <source>Point Vanta at a folder or an executable you already have. Vanta never downloads games. Adding a game also runs a read-only scan when automatic scanning is enabled, so runner and fix detection is available immediately.</source>
             <translation>Señala a Vanta una carpeta o un ejecutable que ya tengas. Vanta nunca descarga juegos. Añadir un juego también ejecuta un análisis de solo lectura cuando el análisis automático está activado, de modo que la detección de runners y de fixes está disponible de inmediato.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1502" />
+            <location filename="../src/ui/MainWindow.cpp" line="1556" />
             <source>The editor has tabs for general details, the runner, OnlineFix, and environment variables.</source>
             <translation>El editor tiene pestañas para los detalles generales, el runner, OnlineFix y las variables de entorno.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1507" />
+            <location filename="../src/ui/MainWindow.cpp" line="1561" />
             <source>Change the view</source>
             <translation>Cambiar la vista</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1508" />
+            <location filename="../src/ui/MainWindow.cpp" line="1562" />
             <source>Switch between the cover grid and a compact table, resize covers, and toggle badges or subtle animations. Right-click any game for launch, edit, scan, and favourite actions.</source>
             <translation>Cambia entre la cuadrícula de portadas y una tabla compacta, ajusta el tamaño de las portadas y activa o desactiva las insignias o las animaciones sutiles. Haz clic derecho en cualquier juego para iniciarlo, editarlo, analizarlo o marcarlo como favorito.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1511" />
+            <location filename="../src/ui/MainWindow.cpp" line="1565" />
             <source>The small arrow opens more view options.</source>
             <translation>La flecha pequeña abre más opciones de vista.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1515" />
+            <location filename="../src/ui/MainWindow.cpp" line="1569" />
             <source>OnlineFix is supported, not guaranteed</source>
             <translation>OnlineFix es compatible, no está garantizado</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1516" />
+            <location filename="../src/ui/MainWindow.cpp" line="1570" />
             <source>Vanta can detect OnlineFix signature files and apply the launcher-side behaviour of OnlineFix Linux: INI updates with backups, the FreeTP app-id swap, ExtraProtection set to false, and launch-only Wine DLL overrides. Detection is not proof that a fix works, and Vanta never patches game binaries or downloads fix files.</source>
             <translation>Vanta puede detectar archivos de firma de OnlineFix y aplicar el comportamiento del lado del lanzador de OnlineFix Linux: actualizaciones del INI con copias de seguridad, el intercambio de app-id de FreeTP, ExtraProtection establecido en false y anulaciones de DLL de Wine solo para el inicio. La detección no es prueba de que un fix funcione, y Vanta nunca parchea los binarios del juego ni descarga archivos de fix.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1525" />
+            <location filename="../src/ui/MainWindow.cpp" line="1579" />
             <source>Runners are discovered automatically</source>
             <translation>Los runners se detectan automáticamente</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1526" />
+            <location filename="../src/ui/MainWindow.cpp" line="1580" />
             <source>Vanta finds Wine and Proton builds from Steam, Lutris, Heroic, Bottles, and its own runner folder. If you need a new runner, the runner dialog can install Wine through your package manager or download portable Wine and GE-Proton builds from their official GitHub releases.</source>
             <translation>Vanta encuentra compilaciones de Wine y Proton en Steam, Lutris, Heroic, Bottles y su propia carpeta de runners. Si necesitas un runner nuevo, el diálogo de runners puede instalar Wine a través de tu gestor de paquetes o descargar compilaciones portátiles de Wine y GE-Proton desde sus versiones oficiales de GitHub.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1530" />
+            <location filename="../src/ui/MainWindow.cpp" line="1584" />
             <source>Open Settings → Runners, or use the main menu, to install a runner.</source>
             <translation>Abre Ajustes → Runners, o usa el menú principal, para instalar un runner.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1534" />
+            <location filename="../src/ui/MainWindow.cpp" line="1588" />
             <source>You are ready</source>
             <translation>Todo listo</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1535" />
+            <location filename="../src/ui/MainWindow.cpp" line="1589" />
             <source>Double-click a card to launch. Vanta tracks playtime and the last played time, keeps launch diagnostics for failures, and stops games cleanly, including the Wine prefix when needed. Reopen this tour from the sidebar whenever you want.</source>
             <translation>Haz doble clic en una tarjeta para iniciar. Vanta registra el tiempo de juego y la última vez que se jugó, conserva los diagnósticos de inicio para los fallos y detiene los juegos limpiamente, incluido el prefijo de Wine cuando es necesario. Vuelve a abrir este recorrido desde la barra lateral cuando quieras.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1595" />
+            <location filename="../src/ui/MainWindow.cpp" line="1649" />
             <source>Set an executable for this game before launching it.</source>
             <translation>Configura un ejecutable para este juego antes de iniciarlo.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1641" />
-            <location filename="../src/ui/MainWindow.cpp" line="1673" />
-            <location filename="../src/ui/MainWindow.cpp" line="1697" />
+            <location filename="../src/ui/MainWindow.cpp" line="1695" />
+            <location filename="../src/ui/MainWindow.cpp" line="1727" />
+            <location filename="../src/ui/MainWindow.cpp" line="1751" />
             <source>Launch cancelled.</source>
             <translation>Inicio cancelado.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1677" />
+            <location filename="../src/ui/MainWindow.cpp" line="1731" />
             <source>Launching without Steam. Online play will not work.</source>
             <translation>Iniciando sin Steam. El juego en línea no funcionará.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1709" />
+            <location filename="../src/ui/MainWindow.cpp" line="1763" />
             <source>Starting Steam…</source>
             <translation>Iniciando Steam...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1711" />
+            <location filename="../src/ui/MainWindow.cpp" line="1765" />
             <source>Vanta will launch the game once Steam is running and signed in.</source>
             <translation>Vanta iniciará el juego cuando Steam esté en ejecución y con la sesión iniciada.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1741" />
-            <location filename="../src/ui/MainWindow.cpp" line="1783" />
+            <location filename="../src/ui/MainWindow.cpp" line="1795" />
+            <location filename="../src/ui/MainWindow.cpp" line="1837" />
             <source>The game is no longer in the library.</source>
             <translation>El juego ya no está en la biblioteca.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1749" />
+            <location filename="../src/ui/MainWindow.cpp" line="1803" />
             <source>Steam is not running. Online features will not work for this session.</source>
             <translation>Steam no está en ejecución. Las funciones en línea no funcionarán en esta sesión.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1753" />
+            <location filename="../src/ui/MainWindow.cpp" line="1807" />
             <source>Applying OnlineFix configuration…</source>
             <translation>Aplicando la configuración de OnlineFix...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1758" />
+            <location filename="../src/ui/MainWindow.cpp" line="1812" />
             <source>Wrote: %1</source>
             <translation>Escrito: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1760" />
+            <location filename="../src/ui/MainWindow.cpp" line="1814" />
             <source>Backup: %1</source>
             <translation>Copia de seguridad: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1762" />
+            <location filename="../src/ui/MainWindow.cpp" line="1816" />
             <source>Error: %1</source>
             <translation>Error: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1765" />
+            <location filename="../src/ui/MainWindow.cpp" line="1819" />
             <source>The OnlineFix configuration could not be updated.</source>
             <translation>No se pudo actualizar la configuración de OnlineFix.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1767" />
+            <location filename="../src/ui/MainWindow.cpp" line="1821" />
             <source>OnlineFix configuration failed. The launch was stopped before starting the game.</source>
             <translation>La configuración de OnlineFix falló. El inicio se detuvo antes de arrancar el juego.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1798" />
+            <location filename="../src/ui/MainWindow.cpp" line="1852" />
             <source>The launch plan could not be built.</source>
             <translation>No se pudo construir el plan de inicio.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1803" />
+            <location filename="../src/ui/MainWindow.cpp" line="1857" />
             <source>Starting the game…</source>
             <translation>Iniciando el juego...</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1813" />
+            <location filename="../src/ui/MainWindow.cpp" line="1867" />
             <source>The game could not be started.</source>
             <translation>No se pudo iniciar el juego.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1882" />
+            <location filename="../src/ui/MainWindow.cpp" line="1936" />
             <source>Game stopped.</source>
             <translation>Juego detenido.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1886" />
+            <location filename="../src/ui/MainWindow.cpp" line="1940" />
             <source>The game</source>
             <translation>El juego</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1887" />
+            <location filename="../src/ui/MainWindow.cpp" line="1941" />
             <source>The game exited unexpectedly (code %1).</source>
             <translation>El juego se cerró inesperadamente (código %1).</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1889" />
-            <location filename="../src/ui/MainWindow.cpp" line="1896" />
+            <location filename="../src/ui/MainWindow.cpp" line="1943" />
+            <location filename="../src/ui/MainWindow.cpp" line="1950" />
             <source>Game exited unexpectedly</source>
             <translation>El juego se cerró inesperadamente</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1890" />
+            <location filename="../src/ui/MainWindow.cpp" line="1944" />
             <source>%1 exited with code %2. Diagnostics from the launch are below.</source>
             <translation>%1 se cerró con el código %2. Los diagnósticos del inicio aparecen a continuación.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1897" />
+            <location filename="../src/ui/MainWindow.cpp" line="1951" />
             <source>%1 exited with code %2. Vanta saved the launch log, including everything the runner printed, so you can see what happened.
 
 Open the log now?</source>
@@ -3599,67 +3605,67 @@ Open the log now?</source>
 ¿Abrir el registro ahora?</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1905" />
+            <location filename="../src/ui/MainWindow.cpp" line="1959" />
             <source>Game closed.</source>
             <translation>Juego cerrado.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1932" />
+            <location filename="../src/ui/MainWindow.cpp" line="1986" />
             <source>Added to favorites.</source>
             <translation>Añadido a favoritos.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1932" />
+            <location filename="../src/ui/MainWindow.cpp" line="1986" />
             <source>Removed from favorites.</source>
             <translation>Quitado de favoritos.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1943" />
+            <location filename="../src/ui/MainWindow.cpp" line="1997" />
             <source>Remove game</source>
             <translation>Quitar juego</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1944" />
+            <location filename="../src/ui/MainWindow.cpp" line="1998" />
             <source>Remove %1 from the library?</source>
             <translation>¿Quitar %1 de la biblioteca?</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1945" />
+            <location filename="../src/ui/MainWindow.cpp" line="1999" />
             <source>Game files are not touched. Only the library entry and its cached scan result are removed.</source>
             <translation>No se tocan los archivos del juego. Solo se eliminan la entrada de la biblioteca y su resultado de análisis en caché.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1956" />
+            <location filename="../src/ui/MainWindow.cpp" line="2010" />
             <source>The game could not be removed from the library.</source>
             <translation>No se pudo quitar el juego de la biblioteca.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1961" />
+            <location filename="../src/ui/MainWindow.cpp" line="2015" />
             <source>Removed %1.</source>
             <translation>Se quitó %1.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1984" />
+            <location filename="../src/ui/MainWindow.cpp" line="2038" />
             <source>This game has no configured Wine prefix.</source>
             <translation>Este juego no tiene un prefijo de Wine configurado.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1988" />
+            <location filename="../src/ui/MainWindow.cpp" line="2042" />
             <source>The prefix folder does not exist yet and could not be created.</source>
             <translation>La carpeta del prefijo aún no existe y no se pudo crear.</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="1997" />
+            <location filename="../src/ui/MainWindow.cpp" line="2051" />
             <source>The folder no longer exists: %1</source>
             <translation>La carpeta ya no existe: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="2008" />
+            <location filename="../src/ui/MainWindow.cpp" line="2062" />
             <source>Quit Vanta</source>
             <translation>Salir de Vanta</translation>
         </message>
         <message numerus="yes">
-            <location filename="../src/ui/MainWindow.cpp" line="2009" />
+            <location filename="../src/ui/MainWindow.cpp" line="2063" />
             <source>%n game(s) still running. Quit anyway?</source>
             <translation>
                 <numerusform>%n juego todavía en ejecución. ¿Salir de todos modos?</numerusform>
@@ -3667,7 +3673,7 @@ Open the log now?</source>
             </translation>
         </message>
         <message>
-            <location filename="../src/ui/MainWindow.cpp" line="2010" />
+            <location filename="../src/ui/MainWindow.cpp" line="2064" />
             <source>Running games will be stopped.</source>
             <translation>Los juegos en ejecución se detendrán.</translation>
         </message>
@@ -3785,7 +3791,7 @@ Open the log now?</source>
             <location filename="../src/core/Types.cpp" line="132" />
             <location filename="../src/ui/ModManagerDialog.cpp" line="276" />
             <location filename="../src/ui/OnlineFixDialog.cpp" line="109" />
-            <location filename="../src/ui/Sidebar.cpp" line="580" />
+            <location filename="../src/ui/Sidebar.cpp" line="595" />
             <source>Not detected</source>
             <translation>No detectado</translation>
         </message>
@@ -3953,7 +3959,7 @@ Vanta copia cada archivo reemplazado en BepInEx/.vanta-backups antes de escribir
         <message>
             <location filename="../src/core/Types.cpp" line="130" />
             <location filename="../src/ui/OnlineFixDialog.cpp" line="109" />
-            <location filename="../src/ui/Sidebar.cpp" line="562" />
+            <location filename="../src/ui/Sidebar.cpp" line="577" />
             <source>Detected</source>
             <translation>Detectado</translation>
         </message>
@@ -4317,6 +4323,8 @@ Esto quitará los archivos del runner.</translation>
             <location filename="../src/ui/SettingsDialog.cpp" line="53" />
             <location filename="../src/ui/Sidebar.cpp" line="262" />
             <location filename="../src/ui/Sidebar.cpp" line="268" />
+            <location filename="../src/ui/Sidebar.cpp" line="337" />
+            <location filename="../src/ui/Sidebar.cpp" line="340" />
             <source>Settings</source>
             <translation>Ajustes</translation>
         </message>
@@ -4342,202 +4350,202 @@ Esto quitará los archivos del runner.</translation>
         </message>
         <message>
             <location filename="../src/ui/SettingsDialog.cpp" line="124" />
-            <source>Translations come from the community. Changing the language takes effect after Vanta restarts.</source>
-            <translation>Las traducciones provienen de la comunidad. El cambio de idioma se aplica después de reiniciar Vanta.</translation>
+            <source>Translations come from the community. The interface switches to the new language when the settings are saved.</source>
+            <translation>Las traducciones provienen de la comunidad. La interfaz cambia al nuevo idioma cuando se guardan los ajustes.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="127" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="128" />
             <source>Enable subtle hover and selection animations</source>
             <translation>Activar animaciones sutiles al pasar el cursor y al seleccionar</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="139" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="140" />
             <source>Default view</source>
             <translation>Vista predeterminada</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="145" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="146" />
             <source>Sort by</source>
             <translation>Ordenar por</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="147" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="148" />
             <source>Sort ascending</source>
             <translation>Orden ascendente</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="150" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="151" />
             <source>Show runner and platform badges on cards</source>
             <translation>Mostrar distintivos de runner y plataforma en las tarjetas</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="153" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="154" />
             <source>Remember the selected sidebar filter</source>
             <translation>Recordar el filtro seleccionado de la barra lateral</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="156" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="157" />
             <source>Remember collapsed sidebar groups</source>
             <translation>Recordar los grupos contraídos de la barra lateral</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="159" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="160" />
             <source>Show the tutorial again</source>
             <translation>Mostrar de nuevo el tutorial</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="170" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="171" />
             <source>Appearance</source>
             <translation>Apariencia</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="174" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="175" />
             <source>Scan new games automatically when they are added</source>
             <translation>Analizar automáticamente los juegos nuevos al añadirlos</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="176" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="177" />
             <source>Rescan when the game folder changed since the last scan</source>
             <translation>Volver a analizar cuando la carpeta del juego haya cambiado desde el último análisis</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="181" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="182" />
             <source> levels</source>
             <translation> niveles</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="182" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="183" />
             <source>Scan depth</source>
             <translation>Profundidad de análisis</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="187" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="188" />
             <source> entries</source>
             <translation> entradas</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="188" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="189" />
             <source>Scan entry limit</source>
             <translation>Límite de entradas del análisis</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="191" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="192" />
             <source>Scans run in the background and are read-only, except for confirmed OnlineFix INI updates and the Photon Newtonsoft.Json link. Lower limits keep very large folders responsive.</source>
             <translation>Los análisis se ejecutan en segundo plano y son de solo lectura, salvo las actualizaciones confirmadas de INI de OnlineFix y el enlace Newtonsoft.Json de Photon. Unos límites más bajos mantienen ágiles las carpetas muy grandes.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="194" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="195" />
             <source>Scanning</source>
             <translation>Analizando</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="199" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="200" />
             <source>Ask before every launch</source>
             <translation>Preguntar antes de cada inicio</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="201" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="202" />
             <source>Always apply when detected</source>
             <translation>Aplicar siempre cuando se detecte</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="203" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="204" />
             <source>Never apply</source>
             <translation>No aplicar nunca</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="205" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="206" />
             <source>Launch policy</source>
             <translation>Política de inicio</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="207" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="208" />
             <source>Require Steam to be running before an OnlineFix launch</source>
             <translation>Requerir que Steam esté en ejecución antes de un inicio con OnlineFix</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="212" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="213" />
             <source>Per-game modes override this policy. OnlineFix overrides are applied to the launch environment only and are never saved into the game's stored environment. Configuration files are backed up before they are changed. Vanta cannot verify that a fix works.</source>
             <translation>Los modos por juego anulan esta política. Las sustituciones de OnlineFix se aplican solo al entorno de inicio y nunca se guardan en el entorno almacenado del juego. Se hace una copia de seguridad de los archivos de configuración antes de cambiarlos. Vanta no puede verificar que un fix funcione.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="226" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="227" />
             <source>Optional custom Wine executable or build folder</source>
             <translation>Ejecutable o carpeta de compilación de Wine personalizados (opcional)</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="233" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="234" />
             <source>Custom Wine</source>
             <translation>Wine personalizado</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="239" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="240" />
             <source>Custom Proton paths</source>
             <translation>Rutas de Proton personalizadas</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="243" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="244" />
             <source>Add folder…</source>
             <translation>Añadir carpeta...</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="247" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="248" />
             <source>Remove</source>
             <translation>Quitar</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="254" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="255" />
             <source>Download or install runners…</source>
             <translation>Descargar o instalar runners...</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="264" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="265" />
             <source>Wine log detail</source>
             <translation>Detalle del registro de Wine</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="266" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="267" />
             <source>Controls how much Wine writes to the launch log. “Errors only” keeps real failures visible without the fixme noise. Every launch keeps the full output in the log viewer, so raising this is only useful while diagnosing a problem.</source>
             <translation>Controla cuánto escribe Wine en el registro de inicio. «Solo errores» mantiene visibles los fallos reales sin el ruido de los fixme. Cada inicio conserva la salida completa en el visor de registros, así que subir esto solo es útil al diagnosticar un problema.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="276" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="277" />
             <source>Vanta also detects runners installed by Steam, Lutris, Heroic and Bottles, including Flatpak installations. Detected runners are available in the game editor without extra setup.</source>
             <translation>Vanta también detecta los runners instalados por Steam, Lutris, Heroic y Bottles, incluidas las instalaciones de Flatpak. Los runners detectados están disponibles en el editor de juegos sin configuración adicional.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="279" />
-            <location filename="../src/ui/Sidebar.cpp" line="590" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="280" />
+            <location filename="../src/ui/Sidebar.cpp" line="605" />
             <source>Runners</source>
             <translation>Runners</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="284" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="285" />
             <source>Fetch missing cover art automatically when a game is added</source>
             <translation>Obtener automáticamente las portadas que falten al añadir un juego</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="290" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="291" />
             <source>SteamGridDB API key</source>
             <translation>Clave de API de SteamGridDB</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="292" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="293" />
             <source>Covers come from SteamGridDB. Vanta ships with a working key, so the field can stay empty; paste your own key from steamgriddb.com/profile/preferences/api if you want the lookups to use your account instead. Names are matched fuzzily, so a typo like “Testris” still resolves to “Tetris”.</source>
             <translation>Las portadas provienen de SteamGridDB. Vanta incluye una clave que funciona, así que el campo puede quedarse vacío; pega tu propia clave de steamgriddb.com/profile/preferences/api si quieres que las búsquedas usen tu cuenta. Los nombres se comparan de forma aproximada, así que un error tipográfico como «Testris» sigue resolviéndose a «Tetris».</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="311" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="312" />
             <source>Cover folder</source>
             <translation>Carpeta de portadas</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="312" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="313" />
             <source>Covers</source>
             <translation>Portadas</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="320" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="321" />
             <source>Library: %1
 Settings: %2
 Scan cache: %3</source>
@@ -4546,106 +4554,112 @@ Ajustes: %2
 Caché de análisis: %3</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="322" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="323" />
             <source>Data files</source>
             <translation>Archivos de datos</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="324" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="325" />
             <source>Vanta stores everything under the XDG config and cache directories using atomic writes. Library and settings files can be copied to another machine to move your setup.</source>
             <translation>Vanta guarda todo en los directorios de configuración y caché de XDG mediante escrituras atómicas. Los archivos de biblioteca y ajustes se pueden copiar a otra máquina para trasladar tu configuración.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="333" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="334" />
             <source>External library porting</source>
             <translation>Importación de bibliotecas externas</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="335" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="336" />
             <source>Scan your machine for installed games from Lutris and Heroic Games Launcher, and import them into Vanta automatically.</source>
             <translation>Analiza tu equipo en busca de juegos instalados desde Lutris y Heroic Games Launcher, y los importa a Vanta automáticamente.</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="345" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="346" />
             <source>Data</source>
             <translation>Datos</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="355" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="356" />
             <source>Save settings</source>
             <translation>Guardar ajustes</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="459" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="460" />
             <source>Select a Wine executable</source>
             <translation>Selecciona un ejecutable de Wine</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="467" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="468" />
             <source>Select a Proton build folder</source>
             <translation>Selecciona una carpeta de compilación de Proton</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="516" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="517" />
             <source>Detected Wine builds: %1</source>
             <translation>Compilaciones de Wine detectadas: %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/SettingsDialog.cpp" line="517" />
+            <location filename="../src/ui/SettingsDialog.cpp" line="518" />
             <source>Detected Proton builds: %1</source>
             <translation>Compilaciones de Proton detectadas: %1</translation>
         </message>
         <message>
             <location filename="../src/ui/Sidebar.cpp" line="217" />
+            <location filename="../src/ui/Sidebar.cpp" line="336" />
             <source>GAME LIBRARY</source>
             <translation>BIBLIOTECA DE JUEGOS</translation>
         </message>
         <message>
             <location filename="../src/ui/Sidebar.cpp" line="263" />
             <location filename="../src/ui/Sidebar.cpp" line="269" />
+            <location filename="../src/ui/Sidebar.cpp" line="338" />
+            <location filename="../src/ui/Sidebar.cpp" line="341" />
             <source>Tutorial</source>
             <translation>Tutorial</translation>
         </message>
         <message>
             <location filename="../src/ui/Sidebar.cpp" line="264" />
             <location filename="../src/ui/Sidebar.cpp" line="270" />
+            <location filename="../src/ui/Sidebar.cpp" line="339" />
+            <location filename="../src/ui/Sidebar.cpp" line="342" />
             <source>About</source>
             <translation>Acerca de</translation>
         </message>
         <message>
             <location filename="../src/ui/Sidebar.cpp" line="272" />
+            <location filename="../src/ui/Sidebar.cpp" line="343" />
             <source>Version %1</source>
             <translation>Versión %1</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="334" />
-            <location filename="../src/ui/Sidebar.cpp" line="588" />
+            <location filename="../src/ui/Sidebar.cpp" line="349" />
+            <location filename="../src/ui/Sidebar.cpp" line="603" />
             <source>Library</source>
             <translation>Biblioteca</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="459" />
+            <location filename="../src/ui/Sidebar.cpp" line="474" />
             <source>Favorites</source>
             <translation>Favoritos</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="471" />
+            <location filename="../src/ui/Sidebar.cpp" line="486" />
             <source>Recently played</source>
             <translation>Jugados recientemente</translation>
         </message>
         <message>
             <location filename="../src/core/Types.cpp" line="131" />
-            <location filename="../src/ui/Sidebar.cpp" line="571" />
+            <location filename="../src/ui/Sidebar.cpp" line="586" />
             <source>Needs attention</source>
             <translation>Requieren atención</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="589" />
+            <location filename="../src/ui/Sidebar.cpp" line="604" />
             <source>Sources</source>
             <translation>Orígenes</translation>
         </message>
         <message>
-            <location filename="../src/ui/Sidebar.cpp" line="591" />
+            <location filename="../src/ui/Sidebar.cpp" line="606" />
             <source>Platforms</source>
             <translation>Plataformas</translation>
         </message>
@@ -5032,62 +5046,66 @@ Continúa solo si quieres cambiar la versión del cargador.</translation>
         </message>
         <message>
             <location filename="../src/ui/TutorialOverlay.cpp" line="85" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="150" />
             <source>Skip tutorial</source>
             <translation>Omitir tutorial</translation>
         </message>
         <message>
             <location filename="../src/ui/TutorialOverlay.cpp" line="97" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="151" />
             <source>Back</source>
             <translation>Atrás</translation>
         </message>
         <message>
             <location filename="../src/ui/TutorialOverlay.cpp" line="105" />
-            <location filename="../src/ui/TutorialOverlay.cpp" line="163" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="173" />
             <source>Next</source>
             <translation>Siguiente</translation>
         </message>
         <message>
-            <location filename="../src/ui/TutorialOverlay.cpp" line="160" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="170" />
             <source>Step %1 of %2</source>
             <translation>Paso %1 de %2</translation>
         </message>
         <message>
-            <location filename="../src/ui/TutorialOverlay.cpp" line="162" />
+            <location filename="../src/ui/TutorialOverlay.cpp" line="172" />
             <source>Finish</source>
             <translation>Finalizar</translation>
         </message>
         <message>
             <location filename="../src/ui/UpdateBanner.cpp" line="66" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="125" />
             <source>Open release page</source>
             <translation>Abrir página de la versión</translation>
         </message>
         <message>
             <location filename="../src/ui/UpdateBanner.cpp" line="80" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="126" />
             <source>Hide this notification until the next launch</source>
             <translation>Ocultar esta notificación hasta el próximo inicio</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="97" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="105" />
             <source>A newer Vanta release is available</source>
             <translation>Hay una versión más reciente de Vanta disponible</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="98" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="106" />
             <source>Vanta %1 is available</source>
             <translation>Vanta %1 está disponible</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="102" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="110" />
             <source>The update is installed through your distribution's package manager, so Vanta only opens the release page.</source>
             <translation>La actualización se instala a través del gestor de paquetes de tu distribución, por lo que Vanta solo abre la página de la versión.</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="104" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="112" />
             <source>You are running %1. The update is installed through your distribution's package manager, so Vanta only opens the release page.</source>
             <translation>Estás usando %1. La actualización se instala a través del gestor de paquetes de tu distribución, por lo que Vanta solo abre la página de la versión.</translation>
         </message>
         <message>
-            <location filename="../src/ui/UpdateBanner.cpp" line="111" />
+            <location filename="../src/ui/UpdateBanner.cpp" line="119" />
             <source>%1 — %2</source>
             <translation>%1 — %2</translation>
         </message>

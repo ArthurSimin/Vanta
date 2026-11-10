@@ -1282,6 +1282,7 @@ void MainWindow::openLogsForSelection()
 
 void MainWindow::openSettingsDialog()
 {
+    const QString previousLanguage = m_library.settings().language;
     SettingsDialog dialog(m_library.settings(), &m_theme, &m_library, this);
     connect(&dialog, &SettingsDialog::runnersChanged, this, [this] { refreshStatus(); });
     connect(&dialog, &SettingsDialog::libraryChanged, this, [this] { refreshLibrary(); });
@@ -1314,9 +1315,62 @@ void MainWindow::openSettingsDialog()
     refreshSidebar();
     applyFilter();
     refreshIcons();
+
+    if (settings.language != previousLanguage) {
+        I18n::install(settings.language);
+        retranslateUi();
+        // A scan result carries report text translated when the scan ran, so the
+        // cached reports are in the language that was just left. Drop them and
+        // rescan, exactly as the language check does on the next start.
+        m_scanner.clearCache();
+        scanLibrary(false);
+    }
+
     setStatusMessage(Vanta::tr("Settings saved."));
     if (dialog.replayTutorialRequested())
         showTutorial(0);
+}
+
+void MainWindow::retranslateUi()
+{
+    // Header widgets whose text is written once at construction.
+    if (m_searchField)
+        m_searchField->setPlaceholderText(Vanta::tr("Search your library…"));
+    if (m_searchClearButton)
+        m_searchClearButton->setToolTip(Vanta::tr("Clear the search"));
+    if (m_filterButton)
+        m_filterButton->setToolTip(Vanta::tr("Filters"));
+    if (m_addButton)
+        m_addButton->setToolTip(Vanta::tr("Add game (Ctrl+N)"));
+    if (m_viewOptionsButton)
+        m_viewOptionsButton->setToolTip(Vanta::tr("Change view"));
+    if (m_mainMenuButton)
+        m_mainMenuButton->setToolTip(Vanta::tr("More actions"));
+
+    // The view and main menus are rebuilt from state inside refreshIcons(), and
+    // it also refreshes the filter menu and the selection strip tooltips.
+    refreshIcons();
+    if (m_sidebar)
+        m_sidebar->retranslate();
+    if (m_libraryView)
+        m_libraryView->retranslate();
+    if (m_selectionBar)
+        m_selectionBar->retranslate();
+    if (m_updateBanner)
+        m_updateBanner->retranslate();
+
+    if (m_tutorial) {
+        const bool active = m_tutorial->isVisible();
+        const int step = m_tutorial->currentStep();
+        showTutorialSteps();
+        m_tutorial->retranslate();
+        if (active)
+            m_tutorial->start(step);
+    }
+
+    updateFilterLabel();
+    applyFilter();
+    refreshStatus();
 }
 
 void MainWindow::openAboutDialog()

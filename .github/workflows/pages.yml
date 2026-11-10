@@ -12,15 +12,17 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -28,6 +30,8 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

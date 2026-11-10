@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     QStringList loadWarnings;
     I18n::install(storage.loadSettings(&loadWarnings).language);
 
-    MainWindow window;
+    MainWindow window(loadWarnings);
     window.show();
     return app.exec();
 }

@@ -52,7 +52,7 @@ for code in "${shipped[@]}" "${scaffolds[@]}"; do
     catalogs+=("-ts" "translations/vanta_${code}.ts")
 done
 
-"$lupdate" src "${catalogs[@]}"
+"$lupdate" -no-obsolete src "${catalogs[@]}"
 
 for code in "${shipped[@]}"; do
     "$lrelease" "translations/vanta_${code}.ts" -qm "resources/i18n/vanta_${code}.qm"

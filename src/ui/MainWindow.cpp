@@ -52,11 +52,12 @@ namespace {
 constexpr int kSidebarWidth = 232;
 }
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(const QStringList &startupWarnings, QWidget *parent)
     : QMainWindow(parent)
     , m_library(m_storage)
     , m_scanner(m_storage, m_library)
     , m_launcher(this)
+    , m_startupWarnings(startupWarnings)
 {
     setObjectName(QStringLiteral("mainWindow"));
     setWindowTitle(QStringLiteral("Vanta"));
@@ -133,8 +134,11 @@ MainWindow::MainWindow(QWidget *parent)
     refreshIcons();
     updateRunningState();
 
-    if (!m_library.loadWarnings().isEmpty())
-        setStatusMessage(m_library.loadWarnings().join(QStringLiteral(" ")), 12000);
+    if (!m_library.loadWarnings().isEmpty() || !m_startupWarnings.isEmpty()) {
+        QStringList warnings = m_startupWarnings;
+        warnings.append(m_library.loadWarnings());
+        setStatusMessage(warnings.join(QStringLiteral(" ")), 12000);
+    }
 
     QTimer::singleShot(400, this, [this] {
         if (!m_library.settings().tutorialCompleted)
@@ -1022,10 +1026,8 @@ void MainWindow::applyFilter()
         m_libraryView->showResults();
     }
 
-    if (m_subtitleLabel) {
-        const QString suffix = games.size() == 1 ? Vanta::tr("game") : Vanta::tr("games");
-        m_subtitleLabel->setText(Vanta::tr("%1 %2").arg(games.size()).arg(suffix));
-    }
+    if (m_subtitleLabel)
+        m_subtitleLabel->setText(Vanta::tr("%n game(s)", nullptr, static_cast<int>(games.size())));
     refreshSelectionBar();
 }
 

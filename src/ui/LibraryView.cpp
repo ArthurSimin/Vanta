@@ -185,6 +185,11 @@ void LibraryView::refreshTheme()
                          m_emptyOffersAdd ? QColor(Qt::white) : m_theme->colors().text, 16);
 }
 
+void LibraryView::retranslate()
+{
+    m_list->retranslate();
+}
+
 void LibraryView::updatePage()
 {
     if (m_games.isEmpty() || m_showEmpty) {

@@ -214,13 +214,13 @@ Sidebar::Sidebar(ThemeManager *theme, QWidget *parent)
     nameFont.setWeight(QFont::Black);
     name->setFont(nameFont);
     titles->addWidget(name);
-    auto *tagline = new QLabel(Vanta::tr("GAME LIBRARY"), logoArea);
-    tagline->setProperty("class", QStringLiteral("sidebarTagline"));
-    QFont taglineFont = tagline->font();
+    m_taglineLabel = new QLabel(Vanta::tr("GAME LIBRARY"), logoArea);
+    m_taglineLabel->setProperty("class", QStringLiteral("sidebarTagline"));
+    QFont taglineFont = m_taglineLabel->font();
     taglineFont.setPixelSize(9);
     taglineFont.setBold(true);
-    tagline->setFont(taglineFont);
-    titles->addWidget(tagline);
+    m_taglineLabel->setFont(taglineFont);
+    titles->addWidget(m_taglineLabel);
     logoLayout->addLayout(titles, 1);
     root->addWidget(logoArea);
 
@@ -326,6 +326,21 @@ void Sidebar::refreshTheme()
     Icons::setButtonIcon(m_settingsButton, Glyph::Settings, colors.muted, 16);
     Icons::setButtonIcon(m_tutorialButton, Glyph::Play, colors.muted, 16);
     Icons::setButtonIcon(m_aboutButton, Glyph::Info, colors.muted, 16);
+    rebuild();
+}
+
+void Sidebar::retranslate()
+{
+    // The footer and the tagline are built once in the constructor, so they are
+    // not covered by rebuild(); the item rows and group titles are.
+    m_taglineLabel->setText(Vanta::tr("GAME LIBRARY"));
+    m_settingsButton->setText(Vanta::tr("Settings"));
+    m_tutorialButton->setText(Vanta::tr("Tutorial"));
+    m_aboutButton->setText(Vanta::tr("About"));
+    m_labels.insert(QStringLiteral("footer.settings"), Vanta::tr("Settings"));
+    m_labels.insert(QStringLiteral("footer.tutorial"), Vanta::tr("Tutorial"));
+    m_labels.insert(QStringLiteral("footer.about"), Vanta::tr("About"));
+    m_versionLabel->setText(Vanta::tr("Version %1").arg(QStringLiteral(VANTA_VERSION)));
     rebuild();
 }
 

@@ -30,6 +30,9 @@ public:
     void showEmptyState(const QString &title, const QString &message, bool offerAdd);
     void showResults();
     void refreshTheme();
+    // Re-applies translated text owned by the view itself. The empty-state text
+    // comes from the caller, which is expected to refresh it too.
+    void retranslate();
 
     QString selectedGameId() const { return m_selectedId; }
     ViewMode viewMode() const { return m_viewMode; }

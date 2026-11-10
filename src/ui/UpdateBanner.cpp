@@ -91,13 +91,21 @@ void UpdateBanner::showRelease(const UpdateRelease &release, const QString &curr
     if (!release.isValid())
         return;
 
+    m_release = release;
+    m_currentVersion = currentVersion;
     m_url = release.htmlUrl;
-    const QString version = UpdateChecker::normaliseVersion(release.tagName);
+    applyText();
+    show();
+}
+
+void UpdateBanner::applyText()
+{
+    const QString version = UpdateChecker::normaliseVersion(m_release.tagName);
     m_headline->setText(version.isEmpty()
                             ? Vanta::tr("A newer Vanta release is available")
                             : Vanta::tr("Vanta %1 is available").arg(version));
 
-    const QString current = UpdateChecker::normaliseVersion(currentVersion);
+    const QString current = UpdateChecker::normaliseVersion(m_currentVersion);
     QString detail = current.isEmpty()
         ? Vanta::tr("The update is installed through your distribution's package manager, so Vanta only "
                          "opens the release page.")
@@ -107,11 +115,17 @@ void UpdateBanner::showRelease(const UpdateRelease &release, const QString &curr
 
     // The release title is optional prose; show it only when it adds something
     // the tag does not already say.
-    if (titleAddsDetail(release.name, release.tagName, version))
-        detail = Vanta::tr("%1 — %2").arg(release.name.trimmed(), detail);
+    if (titleAddsDetail(m_release.name, m_release.tagName, version))
+        detail = Vanta::tr("%1 — %2").arg(m_release.name.trimmed(), detail);
     m_detail->setText(detail);
+}
 
-    show();
+void UpdateBanner::retranslate()
+{
+    m_openButton->setText(Vanta::tr("Open release page"));
+    m_dismissButton->setToolTip(Vanta::tr("Hide this notification until the next launch"));
+    if (isShowing() && m_release.isValid())
+        applyText();
 }
 
 void UpdateBanner::hideBanner()

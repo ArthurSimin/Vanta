@@ -29,6 +29,7 @@ public:
     void setGame(const Game &game);
     void setRunning(bool running);
     void refreshTheme();
+    void retranslate();
 
     QString gameId() const { return m_game.id; }
 

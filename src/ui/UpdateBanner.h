@@ -22,6 +22,7 @@ public:
 
     void showRelease(const UpdateRelease &release, const QString &currentVersion);
     void hideBanner();
+    void retranslate();
     bool isShowing() const;
 
 signals:
@@ -31,6 +32,9 @@ signals:
 private:
     void buildUi();
     void refreshIcons();
+    // Writes the headline and detail for the stored release. Called when the
+    // banner is shown and again after a language change.
+    void applyText();
 
     ThemeManager *m_theme = nullptr;
     QLabel *m_glyph = nullptr;
@@ -38,5 +42,7 @@ private:
     QLabel *m_detail = nullptr;
     QPushButton *m_openButton = nullptr;
     QToolButton *m_dismissButton = nullptr;
+    UpdateRelease m_release;
+    QString m_currentVersion;
     QString m_url;
 };

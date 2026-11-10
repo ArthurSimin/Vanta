@@ -102,6 +102,33 @@ runs on every distribution from Ubuntu 22.04 onward. On Qt 6.2 and 6.3 the
 Wine and/or Proton are only needed to launch Windows games. Vanta starts and
 runs fine without them.
 
+## Install with one command
+
+Copy this into a terminal. The script reads the newest release, works out
+whether Vanta is already installed and which package your distribution needs,
+and either installs Vanta or updates the copy you have. It shows what it found
+before changing anything.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ArthurSimin/Vanta/main/scripts/install.sh | sh
+```
+
+It verifies the release SHA-256 checksum, uses `sudo` on a text console and
+`pkexec` in a graphical terminal when it is available, and falls back to the
+portable tarball in `/usr/local` when no supported package manager is found.
+The script is plain POSIX `sh`; read it first if you prefer.
+
+To skip the confirmation prompt, pass `--yes` after `sh -s --`; `--help` lists
+every option:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ArthurSimin/Vanta/main/scripts/install.sh | sh -s -- --yes
+curl -fsSL https://raw.githubusercontent.com/ArthurSimin/Vanta/main/scripts/install.sh | sh -s -- --help
+```
+
+If you would rather download a package yourself, the table below lists the
+format for each distribution.
+
 ## Installing a package
 
 Just head over to [Releases](https://github.com/ArthurSimin/Vanta/releases) and grab the correct package for your distribution. Prebuilt packages are attached to every release, built on Ubuntu 22.04 against Qt 6.2 so one package covers a whole family of distributions rather than a single release.

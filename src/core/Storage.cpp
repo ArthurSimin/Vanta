@@ -217,8 +217,13 @@ ScanCache Storage::loadScanCache(QStringList *warnings)
     // ScanResult carries report text (architecture, component explanations,
     // warnings) that is translated when the scan runs, so a cache written under
     // another interface language would paint stale strings. Treat it as empty
-    // and let the scanner rebuild it in the active language.
-    if (root.value(QStringLiteral("language")).toString() != I18n::currentCode())
+    // and let the scanner rebuild it in the active language. A cache written
+    // before the key existed predates translations and is English, so a missing
+    // value is read as "en" to keep it for English users after an upgrade.
+    QString cachedLanguage = root.value(QStringLiteral("language")).toString();
+    if (cachedLanguage.isEmpty())
+        cachedLanguage = QStringLiteral("en");
+    if (cachedLanguage != I18n::currentCode())
         return cache;
     const QJsonObject scans = root.value(QStringLiteral("scans")).toObject();
     for (auto it = scans.constBegin(); it != scans.constEnd(); ++it) {

@@ -1,4 +1,5 @@
 #include "CoverFetcher.h"
+#include "I18n.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -113,22 +114,22 @@ QString describeFailure(int status, const QString &fallback)
     switch (status) {
     case 401:
     case 403:
-        return QStringLiteral("SteamGridDB rejected the API key.");
+        return Vanta::tr("SteamGridDB rejected the API key.");
     case 404:
-        return QStringLiteral("SteamGridDB has no entry for this game.");
+        return Vanta::tr("SteamGridDB has no entry for this game.");
     case 429:
-        return QStringLiteral("SteamGridDB is rate limiting this API key. Try again in a minute.");
+        return Vanta::tr("SteamGridDB is rate limiting this API key. Try again in a minute.");
     case 500:
     case 502:
     case 503:
     case 504:
-        return QStringLiteral("SteamGridDB is having server trouble. Try again later.");
+        return Vanta::tr("SteamGridDB is having server trouble. Try again later.");
     default:
         break;
     }
     if (status > 0)
-        return QStringLiteral("%1 (HTTP %2).").arg(fallback).arg(status);
-    return QStringLiteral("%1. Check your internet connection.").arg(fallback);
+        return Vanta::tr("%1 (HTTP %2).").arg(fallback).arg(status);
+    return Vanta::tr("%1. Check your internet connection.").arg(fallback);
 }
 }
 
@@ -306,7 +307,7 @@ void CoverFetcher::fetchCover(const QString &gameId, const QString &gameName)
     if (gameId.isEmpty() || gameName.trimmed().isEmpty())
         return;
     if (!hasApiKey()) {
-        emit failed(gameId, QStringLiteral("No SteamGridDB API key is configured."));
+        emit failed(gameId, Vanta::tr("No SteamGridDB API key is configured."));
         return;
     }
     if (m_reply) {
@@ -336,7 +337,7 @@ void CoverFetcher::listCoverArt(const QString &gameId, const QString &gameName)
         cleanupReply();
     }
     if (!hasApiKey()) {
-        emit failed(gameId, QStringLiteral("No SteamGridDB API key is configured."));
+        emit failed(gameId, Vanta::tr("No SteamGridDB API key is configured."));
         return;
     }
     m_pendingGameId = gameId;
@@ -414,13 +415,13 @@ void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
 
         if (error != QNetworkReply::NoError) {
             emitFailed(gameId, describeFailure(
-                status, QStringLiteral("SteamGridDB could not be searched")));
+                status, Vanta::tr("SteamGridDB could not be searched")));
             return;
         }
 
         const QJsonObject root = QJsonDocument::fromJson(payload).object();
         if (!root.value(QStringLiteral("success")).toBool()) {
-            emitFailed(gameId, QStringLiteral("SteamGridDB returned no results for “%1”.").arg(gameName));
+            emitFailed(gameId, Vanta::tr("SteamGridDB returned no results for “%1”.").arg(gameName));
             return;
         }
 
@@ -441,7 +442,7 @@ void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
         }
 
         if (best.gameId.isEmpty() || best.score < 45) {
-            emitFailed(gameId, QStringLiteral("No SteamGridDB match was close enough to “%1”.").arg(gameName));
+            emitFailed(gameId, Vanta::tr("No SteamGridDB match was close enough to “%1”.").arg(gameName));
             return;
         }
 
@@ -476,7 +477,7 @@ void CoverFetcher::requestGrids(const QString &gameId, const QString &steamGridI
 
         if (error != QNetworkReply::NoError) {
             emitFailed(gameId, describeFailure(
-                status, QStringLiteral("SteamGridDB has no grid list for the matched game")));
+                status, Vanta::tr("SteamGridDB has no grid list for the matched game")));
             return;
         }
 
@@ -501,7 +502,7 @@ void CoverFetcher::requestGrids(const QString &gameId, const QString &steamGridI
         }
 
         if (artworks.isEmpty()) {
-            emitFailed(gameId, QStringLiteral("SteamGridDB has no portrait grid for this game yet."));
+            emitFailed(gameId, Vanta::tr("SteamGridDB has no portrait grid for this game yet."));
             return;
         }
 
@@ -555,7 +556,7 @@ void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl)
         cleanupReply();
 
         if (error != QNetworkReply::NoError || payload.isEmpty()) {
-            emitFailed(gameId, QStringLiteral("The cover image could not be downloaded."));
+            emitFailed(gameId, Vanta::tr("The cover image could not be downloaded."));
             return;
         }
 
@@ -564,17 +565,17 @@ void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl)
         // leave a truncated image that the grid then paints as a broken card.
         QSaveFile file(path);
         if (!file.open(QIODevice::WriteOnly)) {
-            emitFailed(gameId, QStringLiteral("The cover image could not be saved to %1.").arg(path));
+            emitFailed(gameId, Vanta::tr("The cover image could not be saved to %1.").arg(path));
             return;
         }
         if (file.write(payload) != payload.size() || !file.commit()) {
             file.cancelWriting();
-            emitFailed(gameId, QStringLiteral("The cover image could not be saved to %1.").arg(path));
+            emitFailed(gameId, Vanta::tr("The cover image could not be saved to %1.").arg(path));
             return;
         }
         if (QFileInfo(path).size() <= 0) {
             QFile::remove(path);
-            emitFailed(gameId, QStringLiteral("The downloaded cover image was empty."));
+            emitFailed(gameId, Vanta::tr("The downloaded cover image was empty."));
             return;
         }
         // A previous fetch may have saved the same cover under another extension.

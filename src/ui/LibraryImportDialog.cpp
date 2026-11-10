@@ -1,4 +1,5 @@
 #include "LibraryImportDialog.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "Library.h"
 #include "ThemeManager.h"
@@ -13,7 +14,7 @@
 #include <QVBoxLayout>
 
 LibraryImportDialog::LibraryImportDialog(GameLibrary *library, ThemeManager *theme, QWidget *parent)
-    : VantaDialog(QStringLiteral("Port external libraries"), theme, parent)
+    : VantaDialog(Vanta::tr("Port external libraries"), theme, parent)
     , m_library(library)
     , m_theme(theme)
 {
@@ -33,21 +34,21 @@ void LibraryImportDialog::buildUi()
     auto *layout = bodyLayout();
 
     layout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Vanta scans your system for games installed through Lutris and Heroic Games Launcher. "
-                       "Select which games you want to port into your Vanta library. Games already in your library are marked and skipped."),
+        Vanta::tr("Vanta scans your system for games installed through Lutris and Heroic Games Launcher. "
+                  "Select which games you want to port into your Vanta library. Games already in your library are marked and skipped."),
         this));
 
-    m_summaryLabel = new QLabel(QStringLiteral("Scanning external libraries…"), this);
+    m_summaryLabel = new QLabel(Vanta::tr("Scanning external libraries…"), this);
     m_summaryLabel->setProperty("class", QStringLiteral("muted"));
     layout->addWidget(m_summaryLabel);
 
     m_tree = new QTreeWidget(this);
     m_tree->setObjectName(QStringLiteral("importTree"));
     m_tree->setHeaderLabels({
-        QStringLiteral("Game"),
-        QStringLiteral("Source"),
-        QStringLiteral("Runner"),
-        QStringLiteral("Location / Executable")
+        Vanta::tr("Game"),
+        Vanta::tr("Source"),
+        Vanta::tr("Runner"),
+        Vanta::tr("Location / Executable")
     });
     m_tree->setRootIsDecorated(false);
     m_tree->setAlternatingRowColors(true);
@@ -61,14 +62,14 @@ void LibraryImportDialog::buildUi()
     auto *bottomRow = new QHBoxLayout;
     bottomRow->setSpacing(8);
 
-    m_selectAllButton = new QPushButton(QStringLiteral("Select all new"), this);
+    m_selectAllButton = new QPushButton(Vanta::tr("Select all new"), this);
     m_selectAllButton->setCursor(Qt::PointingHandCursor);
     // Enter belongs to Port selected games, not to the first button in the row.
     m_selectAllButton->setAutoDefault(false);
     connect(m_selectAllButton, &QPushButton::clicked, this, [this] { selectAll(true); });
     bottomRow->addWidget(m_selectAllButton);
 
-    m_deselectAllButton = new QPushButton(QStringLiteral("Deselect all"), this);
+    m_deselectAllButton = new QPushButton(Vanta::tr("Deselect all"), this);
     m_deselectAllButton->setCursor(Qt::PointingHandCursor);
     m_deselectAllButton->setAutoDefault(false);
     connect(m_deselectAllButton, &QPushButton::clicked, this, [this] { selectAll(false); });
@@ -76,13 +77,13 @@ void LibraryImportDialog::buildUi()
 
     bottomRow->addStretch(1);
 
-    m_closeButton = new QPushButton(QStringLiteral("Cancel"), this);
+    m_closeButton = new QPushButton(Vanta::tr("Cancel"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
     m_closeButton->setAutoDefault(false);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::reject);
     bottomRow->addWidget(m_closeButton);
 
-    m_importButton = new QPushButton(QStringLiteral("Port selected games"), this);
+    m_importButton = new QPushButton(Vanta::tr("Port selected games"), this);
     m_importButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_importButton);
     m_importButton->setDefault(true);
@@ -110,7 +111,7 @@ void LibraryImportDialog::populateGames()
 
         item->setText(0, cand.game.name);
         item->setText(1, cand.sourceLauncher);
-        item->setText(2, runnerName(cand.game.runner));
+        item->setText(2, runnerDisplayName(cand.game.runner));
 
         const QString pathDisplay = !cand.game.executable.isEmpty()
             ? cand.game.executable
@@ -128,7 +129,7 @@ void LibraryImportDialog::populateGames()
             item->setCheckState(0, Qt::Unchecked);
             item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
             item->setForeground(0, colors.muted);
-            item->setText(0, QStringLiteral("%1 (Already in library)").arg(cand.game.name));
+            item->setText(0, Vanta::tr("%1 (Already in library)").arg(cand.game.name));
             ++alreadyInCount;
         } else {
             item->setCheckState(0, Qt::Checked);
@@ -138,24 +139,23 @@ void LibraryImportDialog::populateGames()
 
     QStringList sourceSummaries;
     if (lutrisCount > 0)
-        sourceSummaries.append(QStringLiteral("%1 from Lutris").arg(lutrisCount));
+        sourceSummaries.append(Vanta::tr("%1 from Lutris").arg(lutrisCount));
     if (heroicCount > 0)
-        sourceSummaries.append(QStringLiteral("%1 from Heroic").arg(heroicCount));
+        sourceSummaries.append(Vanta::tr("%1 from Heroic").arg(heroicCount));
 
     const QString sourcesText = sourceSummaries.isEmpty()
-        ? QStringLiteral("no external games found")
+        ? Vanta::tr("no external games found")
         : sourceSummaries.join(QStringLiteral(", "));
 
     m_summaryLabel->setText(
-        QStringLiteral("Found %1 external game%2 (%3). %4 ready to port, %5 already present.")
-            .arg(QString::number(m_candidates.size()),
-                 m_candidates.size() == 1 ? QString() : QStringLiteral("s"),
-                 sourcesText,
+        Vanta::tr("Found %n external game(s) (%1). %2 ready to port, %3 already present.",
+                  nullptr, static_cast<int>(m_candidates.size()))
+            .arg(sourcesText,
                  QString::number(newCount),
                  QString::number(alreadyInCount)));
 
     m_importButton->setEnabled(newCount > 0);
-    m_importButton->setText(QStringLiteral("Port %1 games to Vanta").arg(newCount));
+    m_importButton->setText(Vanta::tr("Port %1 games to Vanta").arg(newCount));
 }
 
 void LibraryImportDialog::selectAll(bool select)
@@ -172,8 +172,8 @@ void LibraryImportDialog::selectAll(bool select)
     }
     m_importButton->setEnabled(checkedCount > 0);
     m_importButton->setText(checkedCount > 0
-        ? QStringLiteral("Port %1 games to Vanta").arg(checkedCount)
-        : QStringLiteral("Port selected games"));
+        ? Vanta::tr("Port %1 games to Vanta").arg(checkedCount)
+        : Vanta::tr("Port selected games"));
 }
 
 void LibraryImportDialog::importSelected()
@@ -196,8 +196,8 @@ void LibraryImportDialog::importSelected()
     }
 
     if (toAdd.isEmpty()) {
-        QMessageBox::information(this, QStringLiteral("No games selected"),
-                                 QStringLiteral("No new games were selected for porting."));
+        QMessageBox::information(this, Vanta::tr("No games selected"),
+                                 Vanta::tr("No new games were selected for porting."));
         return;
     }
 
@@ -214,8 +214,8 @@ void LibraryImportDialog::importSelected()
         // the library could not be saved. Saying "ported" for entries that will
         // disappear on the next start would be a lie.
         QMessageBox::warning(
-            this, QStringLiteral("Could not save the library"),
-            QStringLiteral("%1 of %2 games could not be saved. The library file may be unwritable.")
+            this, Vanta::tr("Could not save the library"),
+            Vanta::tr("%1 of %2 games could not be saved. The library file may be unwritable.")
                 .arg(QString::number(addedGames.size() - imported), QString::number(addedGames.size())));
         return;
     }
@@ -224,9 +224,9 @@ void LibraryImportDialog::importSelected()
 
     QMessageBox::information(
         this,
-        QStringLiteral("Port completed"),
-        QStringLiteral("Successfully ported %1 game%2 into your Vanta library.")
-            .arg(QString::number(imported), imported == 1 ? QString() : QStringLiteral("s")));
+        Vanta::tr("Port completed"),
+        Vanta::tr("Successfully ported %n game(s) into your Vanta library.",
+                  nullptr, static_cast<int>(imported)));
 
     accept();
 }

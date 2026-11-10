@@ -14,4 +14,10 @@
     <file alias="ubisoft.svg">resources/icons/brand/ubisoft.svg</file>
     <file alias="proton.svg">resources/icons/brand/proton.svg</file>
   </qresource>
+  <qresource prefix="/i18n">
+    <file alias="vanta_es.qm">resources/i18n/vanta_es.qm</file>
+    <file alias="vanta_pt.qm">resources/i18n/vanta_pt.qm</file>
+    <file alias="vanta_pt_BR.qm">resources/i18n/vanta_pt_BR.qm</file>
+    <file alias="vanta_ru.qm">resources/i18n/vanta_ru.qm</file>
+  </qresource>
 </RCC>

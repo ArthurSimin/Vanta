@@ -1,5 +1,6 @@
 #include "Launcher.h"
 
+#include "I18n.h"
 #include "LaunchLogs.h"
 
 #include <QDir>
@@ -33,29 +34,29 @@ bool GameLauncher::launch(const Game &game, const LaunchPlan &plan, QString *err
         // instance to finish, so the caller gets a reason it can act on.
         if (error)
             *error = existing->started && !existing->running
-                ? QStringLiteral("The previous session is still shutting down. Try again in a moment.")
-                : QStringLiteral("This game is already running.");
+                ? Vanta::tr("The previous session is still shutting down. Try again in a moment.")
+                : Vanta::tr("This game is already running.");
         return false;
     }
     if (!plan.isValid()) {
         if (error)
-            *error = QStringLiteral("The launch plan has no program.");
+            *error = Vanta::tr("The launch plan has no program.");
         return false;
     }
     if (!QFileInfo(plan.workingDirectory).isDir()) {
         if (error)
-            *error = QStringLiteral("The working directory does not exist: %1").arg(plan.workingDirectory);
+            *error = Vanta::tr("The working directory does not exist: %1").arg(plan.workingDirectory);
         return false;
     }
     if (runnerIsWineLike(plan.runner)) {
         if (plan.prefixBase.isEmpty() || !QDir().mkpath(plan.prefixBase)) {
             if (error)
-                *error = QStringLiteral("Could not create the game prefix: %1").arg(plan.prefixBase);
+                *error = Vanta::tr("Could not create the game prefix: %1").arg(plan.prefixBase);
             return false;
         }
         if (plan.runner == RunnerType::Wine && !QDir().mkpath(plan.winePrefix)) {
             if (error)
-                *error = QStringLiteral("Could not create the Wine prefix: %1").arg(plan.winePrefix);
+                *error = Vanta::tr("Could not create the Wine prefix: %1").arg(plan.winePrefix);
             return false;
         }
     }
@@ -132,7 +133,7 @@ bool GameLauncher::launch(const Game &game, const LaunchPlan &plan, QString *err
 
     connect(process, &QProcess::errorOccurred, this, [this, gameId, process](QProcess::ProcessError processError) {
         if (processError == QProcess::FailedToStart) {
-            emitFailure(gameId, QStringLiteral("The launch process could not be started: %1").arg(process->errorString()));
+            emitFailure(gameId, Vanta::tr("The launch process could not be started: %1").arg(process->errorString()));
         }
     });
 
@@ -329,7 +330,7 @@ void GameLauncher::completeInstance(const QString &gameId, int exitCode, QProces
     m_instances.erase(it);
 
     if (crashed) {
-        const QString message = QStringLiteral("%1 exited unexpectedly with code %2.").arg(gameName).arg(exitCode);
+        const QString message = Vanta::tr("%1 exited unexpectedly with code %2.").arg(gameName).arg(exitCode);
         emit gameFinished(gameId, elapsedMs / 1000, exitCode, true, false,
                           message + QStringLiteral("\n\n") + diagnostic, logPath);
     } else {

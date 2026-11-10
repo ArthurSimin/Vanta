@@ -1,5 +1,7 @@
 #include "IniFile.h"
 
+#include "I18n.h"
+
 #include <QFile>
 #include <QFileInfo>
 #include <QSaveFile>
@@ -19,13 +21,13 @@ bool IniFile::load(const QString &path, QString *error)
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         if (error)
-            *error = QStringLiteral("Could not read %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not read %1: %2").arg(path, file.errorString());
         return false;
     }
     const QByteArray data = file.readAll();
     if (file.error() != QFileDevice::NoError) {
         if (error)
-            *error = QStringLiteral("Could not read %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not read %1: %2").arg(path, file.errorString());
         return false;
     }
 
@@ -236,7 +238,7 @@ bool IniFile::saveAs(const QString &path, QString *error)
     QSaveFile file(path);
     if (!file.open(QIODevice::WriteOnly)) {
         if (error)
-            *error = QStringLiteral("Could not write %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not write %1: %2").arg(path, file.errorString());
         return false;
     }
     QByteArray data;
@@ -250,7 +252,7 @@ bool IniFile::saveAs(const QString &path, QString *error)
         // corrupt the rest, so refuse instead.
         if (text.contains(QRegularExpression(QStringLiteral("[^\\x00-\\xFF]")))) {
             if (error)
-                *error = QStringLiteral("%1 is not UTF-8 and cannot represent the new text, so it was left "
+                *error = Vanta::tr("%1 is not UTF-8 and cannot represent the new text, so it was left "
                                         "unchanged.").arg(path);
             file.cancelWriting();
             return false;
@@ -263,13 +265,13 @@ bool IniFile::saveAs(const QString &path, QString *error)
         data.append(m_newline.toUtf8());
     if (file.write(data) != data.size()) {
         if (error)
-            *error = QStringLiteral("Could not write %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not write %1: %2").arg(path, file.errorString());
         file.cancelWriting();
         return false;
     }
     if (!file.commit()) {
         if (error)
-            *error = QStringLiteral("Could not finish writing %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not finish writing %1: %2").arg(path, file.errorString());
         return false;
     }
     m_changed = false;

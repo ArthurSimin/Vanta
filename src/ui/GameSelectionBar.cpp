@@ -1,4 +1,5 @@
 #include "GameSelectionBar.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -21,7 +22,7 @@ QString playtimeText(const Game &game)
 {
     if (game.playtimeSeconds <= 0)
         return {};
-    return QStringLiteral("%1 played").arg(formatPlaytime(game.playtimeSeconds));
+    return Vanta::tr("%1 played").arg(formatPlaytime(game.playtimeSeconds));
 }
 
 // A Custom runner may be a complete command line with no game executable at
@@ -37,8 +38,8 @@ bool executableMissing(const Game &game)
 QString lastPlayedText(const Game &game)
 {
     if (!game.lastPlayed.isValid())
-        return QStringLiteral("Never played");
-    return QStringLiteral("Last played %1").arg(formatLastPlayed(game.lastPlayed));
+        return Vanta::tr("Never played");
+    return Vanta::tr("Last played %1").arg(formatLastPlayed(game.lastPlayed));
 }
 }
 
@@ -88,7 +89,7 @@ GameSelectionBar::GameSelectionBar(ThemeManager *theme, QWidget *parent)
     m_fixToggle->setCursor(Qt::PointingHandCursor);
     m_fixToggle->setToolButtonStyle(Qt::ToolButtonTextOnly);
     m_fixToggle->setFixedHeight(22);
-    m_fixToggle->setToolTip(QStringLiteral(
+    m_fixToggle->setToolTip(Vanta::tr(
         "Apply the OnlineFix configuration for this launch. Vanta backs up every file it touches, "
         "and detection is not proof that a fix works."));
     QFont chipFont = m_fixToggle->font();
@@ -97,7 +98,7 @@ GameSelectionBar::GameSelectionBar(ThemeManager *theme, QWidget *parent)
     m_fixToggle->setFont(chipFont);
     m_fixToggle->setVisible(false);
     connect(m_fixToggle, &QToolButton::toggled, this, [this](bool on) {
-        m_fixToggle->setText(on ? QStringLiteral("OnlineFix") : QStringLiteral("OnlineFix off"));
+        m_fixToggle->setText(on ? QStringLiteral("OnlineFix") : Vanta::tr("OnlineFix off"));
     });
     titleRow->addWidget(m_fixToggle, 0, Qt::AlignVCenter);
     titleRow->addStretch(1);
@@ -129,7 +130,7 @@ GameSelectionBar::GameSelectionBar(ThemeManager *theme, QWidget *parent)
     m_menuButton = new QToolButton(m_body);
     m_menuButton->setObjectName(QStringLiteral("selectionBarMenu"));
     m_menuButton->setCursor(Qt::PointingHandCursor);
-    m_menuButton->setToolTip(QStringLiteral("More actions for this game"));
+    m_menuButton->setToolTip(Vanta::tr("More actions for this game"));
     m_menuButton->setIconSize(QSize(14, 14));
     m_menuButton->setFixedSize(30, 36);
     connect(m_menuButton, &QToolButton::clicked, this, [this] {
@@ -262,19 +263,19 @@ void GameSelectionBar::updateContent()
 
     m_fixToggle->setVisible(m_game.showsOnlineFix());
     m_fixToggle->setText(m_fixToggle->isChecked() ? QStringLiteral("OnlineFix")
-                                                  : QStringLiteral("OnlineFix off"));
+                                                  : Vanta::tr("OnlineFix off"));
 
     QStringList parts;
     // While the game is open the stored last-played time is stale, and on a
     // first run it is not set at all. Reporting the live state is honest and
     // stops a running game from claiming it was never played.
-    parts.append(m_running ? QStringLiteral("Running now") : lastPlayedText(m_game));
+    parts.append(m_running ? Vanta::tr("Running now") : lastPlayedText(m_game));
     const QString playtime = playtimeText(m_game);
     if (!playtime.isEmpty())
         parts.append(playtime);
-    parts.append(QStringLiteral("%1 · %2").arg(runnerName(m_game.runner), platformName(m_game.platform)));
+    parts.append(Vanta::tr("%1 · %2").arg(runnerDisplayName(m_game.runner), platformDisplayName(m_game.platform)));
     if (executableMissing(m_game))
-        parts.append(QStringLiteral("Executable missing"));
+        parts.append(Vanta::tr("Executable missing"));
     m_meta->setText(parts.join(QStringLiteral("   ·   ")));
 
     const ThemeColors colors = m_theme ? m_theme->colors() : ThemeColors();
@@ -298,7 +299,7 @@ void GameSelectionBar::updateContent()
 void GameSelectionBar::updatePrimaryButton()
 {
     if (m_game.id.isEmpty()) {
-        m_launchButton->setText(QStringLiteral("Launch"));
+        m_launchButton->setText(Vanta::tr("Launch"));
         m_launchButton->setEnabled(false);
         m_menuButton->setEnabled(false);
         return;
@@ -310,11 +311,11 @@ void GameSelectionBar::updatePrimaryButton()
     const bool canLaunch = m_running || !executableMissing(m_game);
     m_launchButton->setEnabled(canLaunch);
     m_launchButton->setToolTip(canLaunch ? QString()
-        : QStringLiteral("The configured executable is missing. Set the game's executable first."));
+        : Vanta::tr("The configured executable is missing. Set the game's executable first."));
     m_menuButton->setEnabled(true);
     m_launchButton->setProperty("primary", !m_running);
     m_launchButton->setProperty("danger", m_running);
-    m_launchButton->setText(m_running ? QStringLiteral("Stop") : QStringLiteral("Launch"));
+    m_launchButton->setText(m_running ? Vanta::tr("Stop") : Vanta::tr("Launch"));
     m_launchButton->style()->unpolish(m_launchButton);
     m_launchButton->style()->polish(m_launchButton);
 

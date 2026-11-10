@@ -1,4 +1,5 @@
 #include "LaunchPlan.h"
+#include "I18n.h"
 #include "OnlineFix.h"
 #include "RunnerDetector.h"
 #include "SteamPrecondition.h"
@@ -27,7 +28,7 @@ QString resolveCommand(const QString &configured, const QString &fallbackName, b
     if (configured.trimmed().isEmpty()) {
         const QString found = QStandardPaths::findExecutable(fallbackName);
         if (found.isEmpty() && error)
-            *error = QStringLiteral("%1 was not found. Set a runner path in the game's settings.").arg(fallbackName);
+            *error = Vanta::tr("%1 was not found. Set a runner path in the game's settings.").arg(fallbackName);
         return found;
     }
     const QFileInfo info(configured);
@@ -41,20 +42,20 @@ QString resolveCommand(const QString &configured, const QString &fallbackName, b
         if (!found.isEmpty())
             return found;
         if (error)
-            *error = QStringLiteral("Runner path does not exist: %1").arg(configured);
+            *error = Vanta::tr("Runner path does not exist: %1").arg(configured);
         return {};
     }
     if (info.isDir()) {
         if (error) {
             *error = directoryStyle
-                ? QStringLiteral("No Proton launcher was found in %1").arg(configured)
-                : QStringLiteral("The runner path points to a directory, not an executable: %1").arg(configured);
+                ? Vanta::tr("No Proton launcher was found in %1").arg(configured)
+                : Vanta::tr("The runner path points to a directory, not an executable: %1").arg(configured);
         }
         return {};
     }
     if (!info.isExecutable()) {
         if (error)
-            *error = QStringLiteral("The runner is not executable: %1").arg(configured);
+            *error = Vanta::tr("The runner is not executable: %1").arg(configured);
         return {};
     }
     return info.absoluteFilePath();
@@ -90,12 +91,12 @@ QString resolveWineCommand(const QString &configured, QString *error)
         const QString wine = wineExecutableInBuildFolder(configured);
         if (wine.isEmpty()) {
             if (error)
-                *error = QStringLiteral("No wine binary was found in the Wine build folder: %1").arg(configured);
+                *error = Vanta::tr("No wine binary was found in the Wine build folder: %1").arg(configured);
             return {};
         }
         if (!QFileInfo(wine).isExecutable()) {
             if (error)
-                *error = QStringLiteral("The Wine binary is not executable: %1").arg(wine);
+                *error = Vanta::tr("The Wine binary is not executable: %1").arg(wine);
             return {};
         }
         return wine;
@@ -249,12 +250,12 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
     if (game.runner == RunnerType::Native) {
         if (executable.isEmpty() || !executableInfo.exists() || !executableInfo.isFile()) {
             if (error)
-                *error = QStringLiteral("The game executable is missing: %1").arg(game.executable);
+                *error = Vanta::tr("The game executable is missing: %1").arg(game.executable);
             return {};
         }
         if (!executableInfo.isExecutable()) {
             if (error)
-                *error = QStringLiteral("The game executable is not executable: %1").arg(executable);
+                *error = Vanta::tr("The game executable is not executable: %1").arg(executable);
             return {};
         }
         // A Windows preloader never loads into a Linux process, so native
@@ -277,7 +278,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
                     "launcher was found, so the native game starts without the doorstop preloader."));
             } else if (!QFileInfo(nativeLauncher).isExecutable()) {
                 if (error)
-                    *error = QStringLiteral("The BepInEx launcher script is not executable: %1")
+                    *error = Vanta::tr("The BepInEx launcher script is not executable: %1")
                                  .arg(nativeLauncher);
                 return {};
             }
@@ -295,7 +296,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
     } else if (game.runner == RunnerType::Wine) {
         if (!executableInfo.exists() || !executableInfo.isFile()) {
             if (error)
-                *error = QStringLiteral("The game executable is missing: %1").arg(game.executable);
+                *error = Vanta::tr("The game executable is missing: %1").arg(game.executable);
             return {};
         }
         QString runnerError;
@@ -304,7 +305,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
         const QString wine = resolveWineCommand(configuredWine, &runnerError);
         if (wine.isEmpty()) {
             if (error)
-                *error = runnerError.isEmpty() ? QStringLiteral("Wine was not found.") : runnerError;
+                *error = runnerError.isEmpty() ? Vanta::tr("Wine was not found.") : runnerError;
             return {};
         }
         command << wine << executable;
@@ -319,14 +320,14 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
     } else if (game.runner == RunnerType::Proton) {
         if (!executableInfo.exists() || !executableInfo.isFile()) {
             if (error)
-                *error = QStringLiteral("The game executable is missing: %1").arg(game.executable);
+                *error = Vanta::tr("The game executable is missing: %1").arg(game.executable);
             return {};
         }
         QString runnerError;
         const QString proton = resolveCommand(game.runnerPath, QStringLiteral("proton"), true, &runnerError);
         if (proton.isEmpty()) {
             if (error)
-                *error = runnerError.isEmpty() ? QStringLiteral("Proton was not found.") : runnerError;
+                *error = runnerError.isEmpty() ? Vanta::tr("Proton was not found.") : runnerError;
             return {};
         }
         const QString overrides = OnlineFixOverrides::compose(game, onlineFixInfo, onlineFixActive, plan.bepinexApplied);
@@ -388,12 +389,12 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
         const QString flatpak = QStandardPaths::findExecutable(QStringLiteral("flatpak"));
         if (flatpak.isEmpty()) {
             if (error)
-                *error = QStringLiteral("The flatpak command was not found.");
+                *error = Vanta::tr("The flatpak command was not found.");
             return {};
         }
         if (game.runnerPath.trimmed().isEmpty()) {
             if (error)
-                *error = QStringLiteral("Set the Flatpak application ID in the runner path field.");
+                *error = Vanta::tr("Set the Flatpak application ID in the runner path field.");
             return {};
         }
         command << flatpak << QStringLiteral("run") << game.runnerPath;
@@ -401,13 +402,13 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
     } else {
         if (game.runnerPath.trimmed().isEmpty()) {
             if (error)
-                *error = QStringLiteral("Set the custom runner command.");
+                *error = Vanta::tr("Set the custom runner command.");
             return {};
         }
         const QStringList custom = splitArguments(game.runnerPath);
         if (custom.isEmpty()) {
             if (error)
-                *error = QStringLiteral("The custom runner command is empty.");
+                *error = Vanta::tr("The custom runner command is empty.");
             return {};
         }
         const QString executablePath = custom.first();
@@ -415,7 +416,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
             ? executablePath : QStandardPaths::findExecutable(executablePath);
         if (resolved.isEmpty() || !QFileInfo::exists(resolved)) {
             if (error)
-                *error = QStringLiteral("Custom runner command was not found: %1").arg(executablePath);
+                *error = Vanta::tr("Custom runner command was not found: %1").arg(executablePath);
             return {};
         }
         command << resolved;
@@ -427,7 +428,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
             // executable is configured at all.
             if (!executableInfo.exists() || !executableInfo.isFile()) {
                 if (error)
-                    *error = QStringLiteral("The game executable is missing: %1").arg(game.executable);
+                    *error = Vanta::tr("The game executable is missing: %1").arg(game.executable);
                 return {};
             }
             command << executable;
@@ -437,7 +438,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
 
     if (command.isEmpty()) {
         if (error)
-            *error = QStringLiteral("The launch command could not be assembled.");
+            *error = Vanta::tr("The launch command could not be assembled.");
         return {};
     }
     plan.program = command.first();
@@ -450,7 +451,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
     }
     if (!QFileInfo(plan.workingDirectory).isDir()) {
         if (error)
-            *error = QStringLiteral("The working directory does not exist: %1").arg(plan.workingDirectory);
+            *error = Vanta::tr("The working directory does not exist: %1").arg(plan.workingDirectory);
         return {};
     }
 
@@ -461,7 +462,7 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
             ? wrapper : QStandardPaths::findExecutable(wrapper);
         if (resolvedWrapper.isEmpty() || !QFileInfo(resolvedWrapper).isFile()) {
             if (error)
-                *error = QStringLiteral("The wrapper command was not found: %1").arg(wrapper);
+                *error = Vanta::tr("The wrapper command was not found: %1").arg(wrapper);
             return {};
         }
         preArgs.first() = QFileInfo(resolvedWrapper).absoluteFilePath();

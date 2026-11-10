@@ -1,4 +1,5 @@
 #include "UpdateChecker.h"
+#include "I18n.h"
 #include "Version.h"
 
 #include <QJsonArray>
@@ -216,19 +217,19 @@ void UpdateChecker::handleReply(QNetworkReply *reply)
         // Rate limiting is the common failure and it is not actionable, so say
         // so plainly instead of leaking the HTTP phrasing.
         if (status == 403 || status == 429)
-            emit checkFailed(QStringLiteral("GitHub is rate limiting update checks right now."));
+            emit checkFailed(Vanta::tr("GitHub is rate limiting update checks right now."));
         else if (status == 404)
-            emit checkFailed(QStringLiteral("The release feed could not be found."));
+            emit checkFailed(Vanta::tr("The release feed could not be found."));
         else if (status >= 400)
-            emit checkFailed(QStringLiteral("GitHub returned HTTP %1.").arg(status));
+            emit checkFailed(Vanta::tr("GitHub returned HTTP %1.").arg(status));
         else
-            emit checkFailed(QStringLiteral("The update check could not reach GitHub: %1").arg(errorText));
+            emit checkFailed(Vanta::tr("The update check could not reach GitHub: %1").arg(errorText));
         return;
     }
 
     const UpdateRelease release = parseRelease(payload);
     if (!release.isValid()) {
-        emit checkFailed(QStringLiteral("The release feed could not be read."));
+        emit checkFailed(Vanta::tr("The release feed could not be read."));
         return;
     }
 

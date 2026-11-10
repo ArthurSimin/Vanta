@@ -70,6 +70,9 @@ struct Game
 struct AppSettings
 {
     ThemeChoice theme = ThemeChoice::System;
+    // Stable language code from I18n::languages(), or "system"/"en". It is a
+    // code, never a display name, so it survives a change of UI language.
+    QString language = QStringLiteral("system");
     bool animations = true;
     CoverSize coverSize = CoverSize::Medium;
     SortMode sortMode = SortMode::Name;

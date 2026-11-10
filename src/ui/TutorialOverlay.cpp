@@ -1,5 +1,6 @@
 #include "TutorialOverlay.h"
 #include "Common.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 #include "Version.h"
@@ -81,7 +82,7 @@ void TutorialOverlay::buildUi()
 
     auto *footer = new QHBoxLayout;
     footer->setSpacing(8);
-    m_skipButton = new QPushButton(QStringLiteral("Skip tutorial"), m_bubble);
+    m_skipButton = new QPushButton(Vanta::tr("Skip tutorial"), m_bubble);
     m_skipButton->setObjectName(QStringLiteral("tutorialSkip"));
     m_skipButton->setCursor(Qt::PointingHandCursor);
     connect(m_skipButton, &QPushButton::clicked, this, [this] {
@@ -93,7 +94,7 @@ void TutorialOverlay::buildUi()
     footer->addWidget(m_skipButton);
     footer->addStretch(1);
 
-    m_backButton = new QPushButton(QStringLiteral("Back"), m_bubble);
+    m_backButton = new QPushButton(Vanta::tr("Back"), m_bubble);
     m_backButton->setCursor(Qt::PointingHandCursor);
     connect(m_backButton, &QPushButton::clicked, this, [this] {
         if (m_index > 0)
@@ -101,7 +102,7 @@ void TutorialOverlay::buildUi()
     });
     footer->addWidget(m_backButton);
 
-    m_nextButton = new QPushButton(QStringLiteral("Next"), m_bubble);
+    m_nextButton = new QPushButton(Vanta::tr("Next"), m_bubble);
     m_nextButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_nextButton);
     connect(m_nextButton, &QPushButton::clicked, this, [this] {
@@ -156,10 +157,10 @@ void TutorialOverlay::showStep(int index)
     m_body->setText(step.body);
     m_hint->setText(step.targetHint);
     m_hint->setVisible(!step.targetHint.isEmpty());
-    m_counter->setText(QStringLiteral("Step %1 of %2").arg(m_index + 1).arg(m_steps.size()));
+    m_counter->setText(Vanta::tr("Step %1 of %2").arg(m_index + 1).arg(m_steps.size()));
     m_backButton->setEnabled(m_index > 0);
-    m_nextButton->setText(m_index + 1 == m_steps.size() ? QStringLiteral("Finish")
-                                                        : QStringLiteral("Next"));
+    m_nextButton->setText(m_index + 1 == m_steps.size() ? Vanta::tr("Finish")
+                                                        : Vanta::tr("Next"));
     if (m_theme)
         Icons::setButtonIcon(m_nextButton, m_index + 1 == m_steps.size() ? Glyph::Check : Glyph::ChevronRight,
                              QColor(Qt::white), 16);

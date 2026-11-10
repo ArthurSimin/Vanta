@@ -1,4 +1,5 @@
 #include "UpdateBanner.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -62,7 +63,7 @@ void UpdateBanner::buildUi()
     texts->addWidget(m_detail);
     layout->addLayout(texts, 1);
 
-    m_openButton = new QPushButton(QStringLiteral("Open release page"), this);
+    m_openButton = new QPushButton(Vanta::tr("Open release page"), this);
     m_openButton->setObjectName(QStringLiteral("updateBannerOpen"));
     m_openButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_openButton);
@@ -76,7 +77,7 @@ void UpdateBanner::buildUi()
     m_dismissButton = new QToolButton(this);
     m_dismissButton->setObjectName(QStringLiteral("updateBannerDismiss"));
     m_dismissButton->setCursor(Qt::PointingHandCursor);
-    m_dismissButton->setToolTip(QStringLiteral("Hide this notification until the next launch"));
+    m_dismissButton->setToolTip(Vanta::tr("Hide this notification until the next launch"));
     m_dismissButton->setIconSize(QSize(14, 14));
     connect(m_dismissButton, &QToolButton::clicked, this, [this] {
         hideBanner();
@@ -93,21 +94,21 @@ void UpdateBanner::showRelease(const UpdateRelease &release, const QString &curr
     m_url = release.htmlUrl;
     const QString version = UpdateChecker::normaliseVersion(release.tagName);
     m_headline->setText(version.isEmpty()
-                            ? QStringLiteral("A newer Vanta release is available")
-                            : QStringLiteral("Vanta %1 is available").arg(version));
+                            ? Vanta::tr("A newer Vanta release is available")
+                            : Vanta::tr("Vanta %1 is available").arg(version));
 
     const QString current = UpdateChecker::normaliseVersion(currentVersion);
     QString detail = current.isEmpty()
-        ? QStringLiteral("The update is installed through your distribution's package manager, so Vanta only "
+        ? Vanta::tr("The update is installed through your distribution's package manager, so Vanta only "
                          "opens the release page.")
-        : QStringLiteral("You are running %1. The update is installed through your distribution's package manager, "
+        : Vanta::tr("You are running %1. The update is installed through your distribution's package manager, "
                          "so Vanta only opens the release page.")
               .arg(current);
 
     // The release title is optional prose; show it only when it adds something
     // the tag does not already say.
     if (titleAddsDetail(release.name, release.tagName, version))
-        detail = QStringLiteral("%1 — %2").arg(release.name.trimmed(), detail);
+        detail = Vanta::tr("%1 — %2").arg(release.name.trimmed(), detail);
     m_detail->setText(detail);
 
     show();

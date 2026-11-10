@@ -1,4 +1,6 @@
+#include "I18n.h"
 #include "MainWindow.h"
+#include "Storage.h"
 #include "Version.h"
 
 #include <QApplication>
@@ -25,6 +27,13 @@ int main(int argc, char *argv[])
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/vanta.svg")));
 
     QLocale::setDefault(QLocale::system());
+
+    // The catalog is installed before the first window exists, so the first
+    // paint is already translated. Storage reads settings.json without needing
+    // the library, so a saved language is known this early.
+    Storage storage;
+    QStringList loadWarnings;
+    I18n::install(storage.loadSettings(&loadWarnings).language);
 
     MainWindow window;
     window.show();

@@ -1,5 +1,6 @@
 #include "ThunderstoreDialog.h"
 
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -111,7 +112,7 @@ ThunderstoreDialog::ThunderstoreDialog(const Game &game, const BepInExInstall &i
         connect(m_theme, &ThemeManager::themeChanged, this, &ThunderstoreDialog::refreshIcons);
 
     if (!m_target.isValid() || !QFileInfo::exists(m_game.effectiveDirectory())) {
-        setStatus(QStringLiteral("The game folder is not available, so mods cannot be installed."), true);
+        setStatus(Vanta::tr("The game folder is not available, so mods cannot be installed."), true);
         return;
     }
 
@@ -125,7 +126,7 @@ ThunderstoreDialog::ThunderstoreDialog(const Game &game, const BepInExInstall &i
     m_candidateIndex = 0;
     if (m_candidates.isEmpty()) {
         m_searchField->setEnabled(true);
-        setStatus(QStringLiteral("Enter the Thunderstore community slug for this game and choose Load."), false);
+        setStatus(Vanta::tr("Enter the Thunderstore community slug for this game and choose Load."), false);
         return;
     }
     startLoading(m_candidates.first(), true);
@@ -134,22 +135,22 @@ ThunderstoreDialog::ThunderstoreDialog(const Game &game, const BepInExInstall &i
 void ThunderstoreDialog::buildUi()
 {
     bodyLayout()->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Browse the public package list of a Thunderstore community and install a release with "
+        Vanta::tr("Browse the public package list of a Thunderstore community and install a release with "
                        "its declared dependencies. Vanta downloads packages only, never games. Files are backed "
                        "up before an existing file is replaced."),
         this));
 
     auto *communityRow = new QHBoxLayout;
     communityRow->setSpacing(8);
-    communityRow->addWidget(new QLabel(QStringLiteral("Community"), this));
+    communityRow->addWidget(new QLabel(Vanta::tr("Community"), this));
     m_communityField = new QLineEdit(this);
     m_communityField->setPlaceholderText(
-        QStringLiteral("bopl-battle or https://thunderstore.io/c/bopl-battle/"));
+        Vanta::tr("bopl-battle or https://thunderstore.io/c/bopl-battle/"));
     m_communityField->setClearButtonEnabled(true);
     connect(m_communityField, &QLineEdit::returnPressed, this, &ThunderstoreDialog::loadCommunity);
     communityRow->addWidget(m_communityField, 1);
 
-    m_autoButton = new QPushButton(QStringLiteral("Detect"), this);
+    m_autoButton = new QPushButton(Vanta::tr("Detect"), this);
     m_autoButton->setCursor(Qt::PointingHandCursor);
     // Enter in the community field is handled by returnPressed above. Leaving
     // these two as auto-default buttons made Qt also press Detect, which then
@@ -160,14 +161,14 @@ void ThunderstoreDialog::buildUi()
         m_candidateIndex = 0;
         m_autoLoading = false;
         if (m_candidates.isEmpty()) {
-            setStatus(QStringLiteral("The game name does not suggest a community slug. Enter one manually."), true);
+            setStatus(Vanta::tr("The game name does not suggest a community slug. Enter one manually."), true);
             return;
         }
         startLoading(m_candidates.first(), true);
     });
     communityRow->addWidget(m_autoButton);
 
-    m_loadButton = new QPushButton(QStringLiteral("Load"), this);
+    m_loadButton = new QPushButton(Vanta::tr("Load"), this);
     m_loadButton->setCursor(Qt::PointingHandCursor);
     m_loadButton->setAutoDefault(false);
     connect(m_loadButton, &QPushButton::clicked, this, &ThunderstoreDialog::loadCommunity);
@@ -177,12 +178,12 @@ void ThunderstoreDialog::buildUi()
     auto *searchRow = new QHBoxLayout;
     searchRow->setSpacing(8);
     m_searchField = new QLineEdit(this);
-    m_searchField->setPlaceholderText(QStringLiteral("Search packages by name, author, or description"));
+    m_searchField->setPlaceholderText(Vanta::tr("Search packages by name, author, or description"));
     m_searchField->setClearButtonEnabled(true);
     connect(m_searchField, &QLineEdit::textChanged, this, &ThunderstoreDialog::filterTable);
     searchRow->addWidget(m_searchField, 1);
 
-    m_linkButton = new QPushButton(QStringLiteral("Install from link…"), this);
+    m_linkButton = new QPushButton(Vanta::tr("Install from link…"), this);
     m_linkButton->setCursor(Qt::PointingHandCursor);
     connect(m_linkButton, &QPushButton::clicked, this, &ThunderstoreDialog::installFromLink);
     searchRow->addWidget(m_linkButton);
@@ -197,8 +198,8 @@ void ThunderstoreDialog::buildUi()
     m_table = new QTableWidget(this);
     m_table->setObjectName(QStringLiteral("thunderstoreTable"));
     m_table->setColumnCount(4);
-    m_table->setHorizontalHeaderLabels({QStringLiteral("Package"), QStringLiteral("Author"),
-                                        QStringLiteral("Version"), QStringLiteral("Downloads")});
+    m_table->setHorizontalHeaderLabels({Vanta::tr("Package"), Vanta::tr("Author"),
+                                        Vanta::tr("Version"), Vanta::tr("Downloads")});
     m_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -238,13 +239,13 @@ void ThunderstoreDialog::buildUi()
     m_categoryLabel = UiHelp::mutedLabel(QString(), detailPanel);
     detailLayout->addWidget(m_categoryLabel);
 
-    detailLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("Description"), detailPanel));
+    detailLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("Description"), detailPanel));
     m_descriptionLabel = new QLabel(detailPanel);
     m_descriptionLabel->setWordWrap(true);
     m_descriptionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     detailLayout->addWidget(m_descriptionLabel);
 
-    detailLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("Dependencies"), detailPanel));
+    detailLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("Dependencies"), detailPanel));
     m_dependencyLabel = new QLabel(detailPanel);
     m_dependencyLabel->setWordWrap(true);
     m_dependencyLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -252,7 +253,7 @@ void ThunderstoreDialog::buildUi()
     m_compatibilityLabel = UiHelp::helpLabel(QString(), detailPanel);
     detailLayout->addWidget(m_compatibilityLabel);
     m_dependencyHint = UiHelp::mutedLabel(
-        QStringLiteral("Listed dependencies are downloaded first; the BepInEx pack is skipped when "
+        Vanta::tr("Listed dependencies are downloaded first; the BepInEx pack is skipped when "
                        "BepInEx is already installed."),
         detailPanel);
     m_dependencyHint->setWordWrap(true);
@@ -275,13 +276,13 @@ void ThunderstoreDialog::buildUi()
 
     auto *detailButtons = new QHBoxLayout;
     detailButtons->setSpacing(8);
-    m_installButton = new QPushButton(QStringLiteral("Install"), detailColumn);
+    m_installButton = new QPushButton(Vanta::tr("Install"), detailColumn);
     m_installButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_installButton);
     connect(m_installButton, &QPushButton::clicked, this, &ThunderstoreDialog::installSelected);
     detailButtons->addWidget(m_installButton);
 
-    m_pageButton = new QPushButton(QStringLiteral("Open page"), detailColumn);
+    m_pageButton = new QPushButton(Vanta::tr("Open page"), detailColumn);
     m_pageButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makeFlat(m_pageButton);
     connect(m_pageButton, &QPushButton::clicked, this, [this] {
@@ -311,7 +312,7 @@ void ThunderstoreDialog::buildUi()
     m_progress->setVisible(false);
     statusRow->addWidget(m_progress);
 
-    m_cancelButton = new QPushButton(QStringLiteral("Cancel"), this);
+    m_cancelButton = new QPushButton(Vanta::tr("Cancel"), this);
     m_cancelButton->setCursor(Qt::PointingHandCursor);
     m_cancelButton->setVisible(false);
     connect(m_cancelButton, &QPushButton::clicked, this, &ThunderstoreDialog::cancelOperation);
@@ -320,7 +321,7 @@ void ThunderstoreDialog::buildUi()
 
     auto *footer = new QHBoxLayout;
     footer->addStretch(1);
-    m_closeButton = new QPushButton(QStringLiteral("Close"), this);
+    m_closeButton = new QPushButton(Vanta::tr("Close"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::reject);
     footer->addWidget(m_closeButton);
@@ -361,7 +362,7 @@ void ThunderstoreDialog::startLoading(const QString &input, bool automatic)
 {
     const QString slug = Thunderstore::communitySlug(input);
     if (slug.isEmpty()) {
-        setStatus(QStringLiteral("Enter a community slug such as bopl-battle, or paste a Thunderstore community link."),
+        setStatus(Vanta::tr("Enter a community slug such as bopl-battle, or paste a Thunderstore community link."),
                   true);
         setBusy(false);
         return;
@@ -379,13 +380,13 @@ void ThunderstoreDialog::startLoading(const QString &input, bool automatic)
     m_autoLoading = automatic;
     setBusy(true);
     if (automatic && m_candidates.size() > 1) {
-        setStatus(QStringLiteral("Looking for a Thunderstore community for “%1” (%2 of %3)…")
+        setStatus(Vanta::tr("Looking for a Thunderstore community for “%1” (%2 of %3)…")
                       .arg(m_game.name)
                       .arg(m_candidateIndex + 1)
                       .arg(m_candidates.size()),
                   false);
     } else {
-        setStatus(QStringLiteral("Loading packages from %1…").arg(slug), false);
+        setStatus(Vanta::tr("Loading packages from %1…").arg(slug), false);
     }
     m_thunderstore->loadPackages();
 }
@@ -403,14 +404,14 @@ void ThunderstoreDialog::loadCommunity()
 void ThunderstoreDialog::installFromLink()
 {
     if (m_busy) {
-        setStatus(QStringLiteral("Wait for the current operation to finish first."), true);
+        setStatus(Vanta::tr("Wait for the current operation to finish first."), true);
         return;
     }
 
     const QString clipboard = QGuiApplication::clipboard()->text().trimmed();
     const QString input = QInputDialog::getText(
-        this, QStringLiteral("Install from link"),
-        QStringLiteral("Paste a Thunderstore package link:"),
+        this, Vanta::tr("Install from link"),
+        Vanta::tr("Paste a Thunderstore package link:"),
         QLineEdit::Normal, clipboard).trimmed();
     if (input.isEmpty())
         return;
@@ -419,7 +420,7 @@ void ThunderstoreDialog::installFromLink()
     QString owner;
     QString name;
     if (!Thunderstore::packageFromLink(input, &community, &owner, &name)) {
-        setStatus(QStringLiteral("That is not a Thunderstore package link. Paste a link such as "
+        setStatus(Vanta::tr("That is not a Thunderstore package link. Paste a link such as "
                                  "https://thunderstore.io/c/bopl-battle/p/OkakTeam/GrenadeSplitter/."),
                   true);
         return;
@@ -459,7 +460,7 @@ void ThunderstoreDialog::installFromLink()
             m_candidateIndex = 0;
             startLoading(fallbackCommunity, false);
         } else {
-            setStatus(QStringLiteral("Load the game's Thunderstore community first, or paste a full package "
+            setStatus(Vanta::tr("Load the game's Thunderstore community first, or paste a full package "
                                      "link that includes /c/<community>/."),
                       true);
         }
@@ -468,7 +469,7 @@ void ThunderstoreDialog::installFromLink()
 
     m_loadingPackages = true;
     setBusy(true);
-    setStatus(QStringLiteral("Looking up %1/%2 on Thunderstore…").arg(owner, name), false);
+    setStatus(Vanta::tr("Looking up %1/%2 on Thunderstore…").arg(owner, name), false);
     m_thunderstore->loadPackage(owner, name);
 }
 
@@ -489,11 +490,10 @@ void ThunderstoreDialog::handlePackages(const QString &community,
     setBusy(false);
 
     if (packages.isEmpty()) {
-        setStatus(QStringLiteral("This community has no packages Vanta can read."), true);
+        setStatus(Vanta::tr("This community has no packages Vanta can read."), true);
     } else {
-        setStatus(QStringLiteral("Loaded %1 package%2 from %3.")
-                      .arg(packages.size())
-                      .arg(packages.size() == 1 ? QString() : QStringLiteral("s"), community),
+        setStatus(Vanta::tr("Loaded %n package(s) from %1.", nullptr, packages.size())
+                      .arg(community),
                   false);
     }
     emit communityResolved(community);
@@ -511,7 +511,7 @@ void ThunderstoreDialog::handlePackages(const QString &community,
         }
         m_loadingPackages = true;
         setBusy(true);
-        setStatus(QStringLiteral("Looking up %1/%2 on Thunderstore…").arg(owner, name), false);
+        setStatus(Vanta::tr("Looking up %1/%2 on Thunderstore…").arg(owner, name), false);
         m_thunderstore->loadPackage(owner, name);
     }
 }
@@ -535,7 +535,7 @@ void ThunderstoreDialog::handlePackage(const ThunderstorePackage &package)
     setBusy(false);
     if (added)
         populateTable();
-    setStatus(QStringLiteral("Loaded %1 %2.").arg(package.name, package.latest().versionNumber), false);
+    setStatus(Vanta::tr("Loaded %1 %2.").arg(package.name, package.latest().versionNumber), false);
     beginInstall(package, package.latest());
 }
 
@@ -557,7 +557,7 @@ void ThunderstoreDialog::handleDownload(const QString &context, const QByteArray
         m_installing = false;
         setBusy(false);
         clearInstallQueue();
-        setStatus(QStringLiteral("%1 No files were written.").arg(error), true);
+        setStatus(Vanta::tr("%1 No files were written.").arg(error), true);
         return;
     }
 
@@ -581,7 +581,7 @@ void ThunderstoreDialog::handleFailure(const QString &context, const QString &me
         m_detailsFullName.clear();
         populateTable();
         setBusy(false);
-        setStatus(message + QLatin1Char(' ') + QStringLiteral(
+        setStatus(message + QLatin1Char(' ') + Vanta::tr(
             "Enter the community slug or paste a Thunderstore community link, then choose Load."), true);
         m_pendingLinkOwner.clear();
         m_pendingLinkName.clear();
@@ -603,7 +603,7 @@ void ThunderstoreDialog::handleFailure(const QString &context, const QString &me
         m_installing = false;
         setBusy(false);
         clearInstallQueue();
-        setStatus(message + QLatin1Char(' ') + QStringLiteral("No files were written."), true);
+        setStatus(message + QLatin1Char(' ') + Vanta::tr("No files were written."), true);
     }
 }
 
@@ -623,7 +623,7 @@ void ThunderstoreDialog::populateTable()
         const ThunderstoreVersion latest = package.latest();
 
         auto *nameItem = new QTableWidgetItem(
-            package.deprecated ? QStringLiteral("%1 (deprecated)").arg(package.name) : package.name);
+            package.deprecated ? Vanta::tr("%1 (deprecated)").arg(package.name) : package.name);
         nameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         nameItem->setData(Qt::UserRole, package.fullName);
         nameItem->setData(kSearchRole, packageSearchText(package));
@@ -694,11 +694,10 @@ void ThunderstoreDialog::filterTable(const QString &text)
 
     if (needle.isEmpty()) {
         m_summaryLabel->setText(m_packages.isEmpty() ? QString()
-            : QStringLiteral("%1 package%2 in %3.")
-                  .arg(m_packages.size())
-                  .arg(m_packages.size() == 1 ? QString() : QStringLiteral("s"), m_community));
+            : Vanta::tr("%n package(s) in %1.", nullptr, m_packages.size())
+                  .arg(m_community));
     } else {
-        m_summaryLabel->setText(QStringLiteral("%1 of %2 packages match “%3”.")
+        m_summaryLabel->setText(Vanta::tr("%1 of %2 packages match “%3”.")
                                     .arg(visible)
                                     .arg(m_packages.size())
                                     .arg(text.trimmed()));
@@ -738,7 +737,7 @@ void ThunderstoreDialog::updateDetails()
     const ThunderstorePackage *package = selectedPackage();
     if (!package) {
         m_detailsFullName.clear();
-        m_nameLabel->setText(QStringLiteral("No package selected"));
+        m_nameLabel->setText(Vanta::tr("No package selected"));
         m_nameLabel->setToolTip(QString());
         m_authorLabel->clear();
         m_categoryLabel->clear();
@@ -760,11 +759,11 @@ void ThunderstoreDialog::updateDetails()
 
     m_detailsFullName = package->fullName;
     m_nameLabel->setText(package->deprecated
-                             ? QStringLiteral("%1 (deprecated)").arg(package->name)
+                             ? Vanta::tr("%1 (deprecated)").arg(package->name)
                              : package->name);
     m_nameLabel->setToolTip(package->fullName);
     m_categoryLabel->setText(package->categories.isEmpty()
-                                 ? QStringLiteral("Uncategorized")
+                                 ? Vanta::tr("Uncategorized")
                                  : package->categories.join(QStringLiteral(", ")));
 
     m_versionCombo->blockSignals(true);
@@ -794,13 +793,13 @@ void ThunderstoreDialog::updateVersionDetails()
 
     const ThunderstoreVersion &version = package->versions.at(index);
     const QLocale locale;
-    m_authorLabel->setText(QStringLiteral("by %1 · %2 downloads")
+    m_authorLabel->setText(Vanta::tr("by %1 · %2 downloads")
                                .arg(package->owner, locale.toString(version.downloads)));
     m_descriptionLabel->setText(version.description.isEmpty()
-                                    ? QStringLiteral("This release has no description.")
+                                    ? Vanta::tr("This release has no description.")
                                     : version.description);
     if (version.dependencies.isEmpty()) {
-        m_dependencyLabel->setText(QStringLiteral("No dependencies are declared."));
+        m_dependencyLabel->setText(Vanta::tr("No dependencies are declared."));
     } else {
         QStringList lines;
         for (const QString &dependency : version.dependencies)
@@ -808,9 +807,9 @@ void ThunderstoreDialog::updateVersionDetails()
         m_dependencyLabel->setText(lines.join(QLatin1Char('\n')));
     }
     m_compatibilityLabel->setText(
-        QStringLiteral("Vanta cannot tell which game version a Thunderstore release was built for. "
+        Vanta::tr("Vanta cannot tell which game version a Thunderstore release was built for. "
                        "Check the mod page when the game has received an update."));
-    m_installButton->setText(QStringLiteral("Install %1").arg(version.versionNumber));
+    m_installButton->setText(Vanta::tr("Install %1").arg(version.versionNumber));
     m_installButton->setEnabled(!m_busy);
     m_versionCombo->setEnabled(!m_busy);
 }
@@ -821,12 +820,12 @@ void ThunderstoreDialog::installSelected()
         return;
     const ThunderstorePackage *package = selectedPackage();
     if (!package) {
-        setStatus(QStringLiteral("Select a package first."), true);
+        setStatus(Vanta::tr("Select a package first."), true);
         return;
     }
     const int index = m_versionCombo->currentData().toInt();
     if (index < 0 || index >= package->versions.size()) {
-        setStatus(QStringLiteral("Select a release first."), true);
+        setStatus(Vanta::tr("Select a release first."), true);
         return;
     }
     beginInstall(*package, package->versions.at(index));
@@ -838,15 +837,15 @@ void ThunderstoreDialog::beginInstall(const ThunderstorePackage &package,
     if (m_busy || m_installing)
         return;
     if (!m_target.isValid() || !QFileInfo(m_game.effectiveDirectory()).isDir()) {
-        setStatus(QStringLiteral("The game folder is not available, so the package cannot be installed."), true);
+        setStatus(Vanta::tr("The game folder is not available, so the package cannot be installed."), true);
         return;
     }
     if (!version.isValid() || version.downloadUrl.trimmed().isEmpty()) {
-        setStatus(QStringLiteral("This release has no download address."), true);
+        setStatus(Vanta::tr("This release has no download address."), true);
         return;
     }
     if (package.name.compare(QStringLiteral("r2modman"), Qt::CaseInsensitive) == 0) {
-        setStatus(QStringLiteral("r2modman is a mod manager application, not a BepInEx plugin, "
+        setStatus(Vanta::tr("r2modman is a mod manager application, not a BepInEx plugin, "
                                  "so Vanta does not install it into a game."), true);
         return;
     }
@@ -867,7 +866,7 @@ void ThunderstoreDialog::beginInstall(const ThunderstorePackage &package,
         required.append(reference);
     }
     if (!required.isEmpty()) {
-        setStatus(QStringLiteral("This package needs %1, which is not listed in this community. "
+        setStatus(Vanta::tr("This package needs %1, which is not listed in this community. "
                                  "Install it separately or choose another package.")
                       .arg(required.join(QStringLiteral(", "))),
                   true);
@@ -880,11 +879,11 @@ void ThunderstoreDialog::beginInstall(const ThunderstorePackage &package,
     // so an explicit request for the pack is confirmed on its own.
     if (isBepInExPack(version)) {
         if (!m_install.isValid()) {
-            setStatus(QStringLiteral("Installing %1 %2…").arg(package.name, version.versionNumber), false);
+            setStatus(Vanta::tr("Installing %1 %2…").arg(package.name, version.versionNumber), false);
         } else {
             const auto reply = QMessageBox::question(
-                this, QStringLiteral("Replace the BepInEx loader?"),
-                QStringLiteral("BepInEx is already installed.\n\n"
+                this, Vanta::tr("Replace the BepInEx loader?"),
+                Vanta::tr("BepInEx is already installed.\n\n"
                                "%1 %2 copies its own core DLLs, winhttp proxy and doorstop files over the "
                                "installed loader. Plugins and their config are left alone, and every replaced "
                                "file is backed up under BepInEx/.vanta-backups first.\n\n"
@@ -892,7 +891,7 @@ void ThunderstoreDialog::beginInstall(const ThunderstorePackage &package,
                     .arg(package.name, version.versionNumber),
                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
             if (reply != QMessageBox::Yes) {
-                setStatus(QStringLiteral("Nothing was changed. The installed BepInEx loader was kept."), false);
+                setStatus(Vanta::tr("Nothing was changed. The installed BepInEx loader was kept."), false);
                 return;
             }
         }
@@ -911,7 +910,7 @@ void ThunderstoreDialog::beginInstall(const ThunderstorePackage &package,
     m_installIndex = 0;
     m_installing = true;
     setBusy(true);
-    setStatus(QStringLiteral("Installing %1 %2…").arg(package.name, version.versionNumber), false);
+    setStatus(Vanta::tr("Installing %1 %2…").arg(package.name, version.versionNumber), false);
     startNextDownload();
 }
 
@@ -926,7 +925,7 @@ void ThunderstoreDialog::startNextDownload()
 
     const ThunderstoreVersion version = m_installQueue.at(m_installIndex);
     m_progress->setRange(0, 0);
-    setStatus(QStringLiteral("Downloading %1 of %2: %3 %4…")
+    setStatus(Vanta::tr("Downloading %1 of %2: %3 %4…")
                   .arg(m_installIndex + 1)
                   .arg(m_installQueue.size())
                   .arg(version.name, version.versionNumber),
@@ -940,7 +939,7 @@ void ThunderstoreDialog::finishInstall()
         m_installing = false;
         setBusy(false);
         clearInstallQueue();
-        setStatus(QStringLiteral("The package produced no installable files. No files were written."), true);
+        setStatus(Vanta::tr("The package produced no installable files. No files were written."), true);
         return;
     }
 
@@ -950,7 +949,7 @@ void ThunderstoreDialog::finishInstall()
         m_installing = false;
         setBusy(false);
         clearInstallQueue();
-        setStatus(QStringLiteral("%1 No files were written.").arg(error), true);
+        setStatus(Vanta::tr("%1 No files were written.").arg(error), true);
         return;
     }
 
@@ -964,10 +963,10 @@ void ThunderstoreDialog::finishInstall()
         QStringList sample = merged.conflicts.mid(0, 8);
         QString detail = sample.join(QLatin1Char('\n'));
         if (merged.conflicts.size() > sample.size())
-            detail += QStringLiteral("\nand %1 more").arg(merged.conflicts.size() - sample.size());
+            detail += Vanta::tr("\nand %1 more").arg(merged.conflicts.size() - sample.size());
         const auto reply = QMessageBox::question(
-            this, QStringLiteral("Replace existing files?"),
-            QStringLiteral("%1 file(s) already exist with different contents:\n\n%2\n\n"
+            this, Vanta::tr("Replace existing files?"),
+            Vanta::tr("%1 file(s) already exist with different contents:\n\n%2\n\n"
                            "Vanta copies each replaced file under BepInEx/.vanta-backups before writing. "
                            "Nothing is deleted. Continue?")
                 .arg(merged.conflicts.size())
@@ -975,7 +974,7 @@ void ThunderstoreDialog::finishInstall()
             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         if (reply != QMessageBox::Yes) {
             clearInstallQueue();
-            setStatus(QStringLiteral("Installation cancelled. No files were written."), false);
+            setStatus(Vanta::tr("Installation cancelled. No files were written."), false);
             return;
         }
         overwrite = true;
@@ -992,7 +991,7 @@ void ThunderstoreDialog::finishInstall()
         refreshInstallation();
         QString message = error;
         if (!written.isEmpty())
-            message += QStringLiteral(" %1 file(s) were written before the failure.").arg(written.size());
+            message += Vanta::tr(" %1 file(s) were written before the failure.").arg(written.size());
         clearInstallQueue();
         setStatus(message, true);
         if (!written.isEmpty())
@@ -1003,27 +1002,25 @@ void ThunderstoreDialog::finishInstall()
     refreshInstallation();
     QString message;
     if (written.isEmpty()) {
-        message = QStringLiteral("%1 is already installed and every file matches. Nothing changed.")
+        message = Vanta::tr("%1 is already installed and every file matches. Nothing changed.")
                       .arg(rootName);
     } else if (packageCount > 1) {
-        message = QStringLiteral("Installed %1 file(s) for %2 and %3 dependenc%4.")
+        message = Vanta::tr("Installed %1 file(s) for %2 and %n dependenc(y/ies).", nullptr, packageCount - 1)
                       .arg(written.size())
-                      .arg(rootName)
-                      .arg(packageCount - 1)
-                      .arg(packageCount - 1 == 1 ? QStringLiteral("y") : QStringLiteral("ies"));
+                      .arg(rootName);
     } else {
-        message = QStringLiteral("Installed %1 file(s) for %2.").arg(written.size()).arg(rootName);
+        message = Vanta::tr("Installed %1 file(s) for %2.").arg(written.size()).arg(rootName);
     }
     if (skippedBepInEx && !written.isEmpty())
-        message += QStringLiteral(" BepInEx was already present, so its pack was not reinstalled.");
+        message += Vanta::tr(" BepInEx was already present, so its pack was not reinstalled.");
     if (!m_install.isValid())
-        message += QStringLiteral(" BepInEx is still not installed, so these files will not load until it is.");
+        message += Vanta::tr(" BepInEx is still not installed, so these files will not load until it is.");
     if (!m_dependencyNotes.isEmpty()) {
         message += QLatin1Char(' ');
         message += m_dependencyNotes.join(QLatin1Char(' '));
     }
     if (!backupRoot.isEmpty())
-        message += QStringLiteral(" Replaced files were backed up under %1.")
+        message += Vanta::tr(" Replaced files were backed up under %1.")
                        .arg(QDir::toNativeSeparators(backupRoot));
     clearInstallQueue();
     setStatus(message, false);
@@ -1049,7 +1046,7 @@ void ThunderstoreDialog::cancelOperation()
     m_pendingLinkName.clear();
     clearInstallQueue();
     setBusy(false);
-    setStatus(QStringLiteral("The operation was cancelled. No files were written."), false);
+    setStatus(Vanta::tr("The operation was cancelled. No files were written."), false);
 }
 
 void ThunderstoreDialog::clearInstallQueue()

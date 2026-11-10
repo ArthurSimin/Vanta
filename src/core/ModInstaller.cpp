@@ -1,5 +1,7 @@
 #include "ModInstaller.h"
 
+#include "I18n.h"
+
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
@@ -59,9 +61,9 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
     };
 
     if (archive.size() < 22)
-        return fail(QStringLiteral("The archive is too small to be a ZIP file."));
+        return fail(Vanta::tr("The archive is too small to be a ZIP file."));
     if (archive.size() > kMaximumArchiveBytes)
-        return fail(QStringLiteral("The archive is larger than the 512 MiB import limit."));
+        return fail(Vanta::tr("The archive is larger than the 512 MiB import limit."));
 
     int endOffset = -1;
     const int minimumOffset = qMax(0, archive.size() - 22 - 65535);
@@ -72,24 +74,24 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
         }
     }
     if (endOffset < 0)
-        return fail(QStringLiteral("The ZIP end-of-directory record was not found."));
+        return fail(Vanta::tr("The ZIP end-of-directory record was not found."));
 
     const quint16 entryCount = read16(archive, endOffset + 10);
     const quint32 centralSize = read32(archive, endOffset + 12);
     const quint32 centralOffset = read32(archive, endOffset + 16);
     if (entryCount == 0xffff || centralSize == 0xffffffff || centralOffset == 0xffffffff) {
-        return fail(QStringLiteral("This ZIP uses ZIP64, which Vanta does not support. Use a package under 4 GiB."));
+        return fail(Vanta::tr("This ZIP uses ZIP64, which Vanta does not support. Use a package under 4 GiB."));
     }
     if (entryCount > kMaximumArchiveEntries)
-        return fail(QStringLiteral("The archive contains more than %1 entries.").arg(kMaximumArchiveEntries));
+        return fail(Vanta::tr("The archive contains more than %1 entries.").arg(kMaximumArchiveEntries));
     if (static_cast<qint64>(centralOffset) + static_cast<qint64>(centralSize) > archive.size())
-        return fail(QStringLiteral("The ZIP central directory points outside the archive."));
+        return fail(Vanta::tr("The ZIP central directory points outside the archive."));
 
     qint64 totalExtracted = 0;
     int offset = static_cast<int>(centralOffset);
     for (int index = 0; index < entryCount; ++index) {
         if (offset < 0 || offset + 46 > archive.size() || read32(archive, offset) != kCentralHeader)
-            return fail(QStringLiteral("The ZIP central directory is damaged."));
+            return fail(Vanta::tr("The ZIP central directory is damaged."));
 
         const quint16 madeBy = read16(archive, offset + 4);
         const quint16 flags = read16(archive, offset + 8);
@@ -103,13 +105,13 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
         const quint32 localOffset = read32(archive, offset + 42);
 
         if (compressedSize == 0xffffffff || uncompressedSize == 0xffffffff)
-            return fail(QStringLiteral("This ZIP uses ZIP64, which Vanta does not support."));
+            return fail(Vanta::tr("This ZIP uses ZIP64, which Vanta does not support."));
         if (flags & 0x0001)
-            return fail(QStringLiteral("The archive contains an encrypted entry."));
+            return fail(Vanta::tr("The archive contains an encrypted entry."));
 
         const int nameStart = offset + 46;
         if (nameStart + nameLength > archive.size())
-            return fail(QStringLiteral("The ZIP central directory is damaged."));
+            return fail(Vanta::tr("The ZIP central directory is damaged."));
         const QByteArray nameBytes = archive.mid(nameStart, nameLength);
         QString name = (flags & 0x0800) ? QString::fromUtf8(nameBytes) : QString::fromLatin1(nameBytes);
         offset = nameStart + nameLength + extraLength + commentLength;
@@ -129,7 +131,7 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
             }
         }
         if (unsafe)
-            return fail(QStringLiteral("The archive contains an unsafe path: %1").arg(name));
+            return fail(Vanta::tr("The archive contains an unsafe path: %1").arg(name));
         name = parts.join(QLatin1Char('/'));
 
         const QString lowerName = name.toLower();
@@ -137,7 +139,7 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
             ? static_cast<int>(externalAttributes >> 16) : 0;
         const bool symlink = (unixMode & 0170000) == 0120000;
         if (symlink)
-            return fail(QStringLiteral("The archive contains a symbolic link, which Vanta refuses to create: %1")
+            return fail(Vanta::tr("The archive contains a symbolic link, which Vanta refuses to create: %1")
                             .arg(name));
         // Some writers store a folder without the trailing slash. Its mode
         // still marks it as a directory, and treating it as a file would both
@@ -146,23 +148,23 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
             continue;
 
         if (static_cast<qint64>(uncompressedSize) > kMaximumEntryBytes)
-            return fail(QStringLiteral("The archive entry %1 is larger than the 512 MiB limit.").arg(name));
+            return fail(Vanta::tr("The archive entry %1 is larger than the 512 MiB limit.").arg(name));
         totalExtracted += static_cast<qint64>(uncompressedSize);
         if (totalExtracted > kMaximumExtractedBytes)
-            return fail(QStringLiteral("The archive expands to more than 1 GiB."));
+            return fail(Vanta::tr("The archive expands to more than 1 GiB."));
 
         // Compare as 64-bit: a corrupt 32-bit offset near 4 GiB would otherwise
         // wrap when 30 is added and slip past the bounds check.
         const qint64 localStart = static_cast<qint64>(localOffset);
         if (localStart + 30 > static_cast<qint64>(archive.size())
             || read32(archive, static_cast<int>(localStart)) != kLocalHeader) {
-            return fail(QStringLiteral("The archive entry %1 has a damaged local header.").arg(name));
+            return fail(Vanta::tr("The archive entry %1 has a damaged local header.").arg(name));
         }
         const quint16 localNameLength = read16(archive, static_cast<int>(localStart) + 26);
         const quint16 localExtraLength = read16(archive, static_cast<int>(localStart) + 28);
         const qint64 dataStart = localStart + 30 + localNameLength + localExtraLength;
         if (dataStart < 0 || dataStart + compressedSize > archive.size())
-            return fail(QStringLiteral("The archive entry %1 points outside the archive.").arg(name));
+            return fail(Vanta::tr("The archive entry %1 points outside the archive.").arg(name));
 
         QByteArray payload;
         if (method == 0) {
@@ -175,22 +177,22 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
             stream.next_out = reinterpret_cast<Bytef *>(payload.data());
             stream.avail_out = static_cast<uInt>(payload.size());
             if (inflateInit2(&stream, -MAX_WBITS) != Z_OK)
-                return fail(QStringLiteral("The bundled decompressor could not start."));
+                return fail(Vanta::tr("The bundled decompressor could not start."));
             const int result = inflate(&stream, Z_FINISH);
             const qint64 produced = static_cast<qint64>(stream.total_out);
             inflateEnd(&stream);
             if (result != Z_STREAM_END || produced != static_cast<qint64>(uncompressedSize))
-                return fail(QStringLiteral("The archive entry %1 could not be decompressed.").arg(name));
+                return fail(Vanta::tr("The archive entry %1 could not be decompressed.").arg(name));
             payload.resize(static_cast<int>(produced));
         } else {
-            return fail(QStringLiteral("The archive entry %1 uses an unsupported compression method (%2).")
+            return fail(Vanta::tr("The archive entry %1 uses an unsupported compression method (%2).")
                             .arg(name).arg(method));
         }
         // A stored entry carries its real length as compressedSize. If the
         // central directory claims another uncompressed length, the archive is
         // inconsistent and the payload would be installed truncated or padded.
         if (payload.size() != static_cast<int>(uncompressedSize))
-            return fail(QStringLiteral("The archive entry %1 has inconsistent stored sizes.").arg(name));
+            return fail(Vanta::tr("The archive entry %1 has inconsistent stored sizes.").arg(name));
 
         ZipEntry entry;
         entry.name = name;
@@ -200,7 +202,7 @@ bool readZip(const QByteArray &archive, QList<ZipEntry> *entries, QString *error
     }
 
     if (entries->isEmpty())
-        return fail(QStringLiteral("The archive contains no files."));
+        return fail(Vanta::tr("The archive contains no files."));
     return true;
 }
 
@@ -342,7 +344,7 @@ bool parseManifest(const QList<ZipEntry> &entries, QString *name, QString *versi
         const QJsonDocument document = QJsonDocument::fromJson(entry.data, &parseError);
         if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
             if (warning)
-                *warning = QStringLiteral("manifest.json could not be parsed: %1").arg(parseError.errorString());
+                *warning = Vanta::tr("manifest.json could not be parsed: %1").arg(parseError.errorString());
             return false;
         }
         const QJsonObject object = document.object();
@@ -370,7 +372,7 @@ bool unsafePathMessage(const QString &path, QString *error)
         || clean == QStringLiteral("..") || clean.startsWith(QStringLiteral("../"))
         || clean.contains(QStringLiteral("/../")) || clean.contains(QLatin1Char(':'))) {
         if (error)
-            *error = QStringLiteral("Refusing the unsafe install path: %1").arg(path);
+            *error = Vanta::tr("Refusing the unsafe install path: %1").arg(path);
         return true;
     }
     return false;
@@ -399,7 +401,7 @@ bool existingParentIsInside(const QString &targetPath, const QString &basePath, 
     const QFileInfo targetInfo(targetPath);
     if (targetInfo.isSymLink()) {
         if (error)
-            *error = QStringLiteral("Refusing to replace the symbolic link %1.")
+            *error = Vanta::tr("Refusing to replace the symbolic link %1.")
                          .arg(QDir::toNativeSeparators(targetPath));
         return false;
     }
@@ -407,7 +409,7 @@ bool existingParentIsInside(const QString &targetPath, const QString &basePath, 
     const QFileInfo baseInfo(basePath);
     if (baseInfo.exists() && baseInfo.isSymLink()) {
         if (error)
-            *error = QStringLiteral("Refusing to write through the symbolic link %1.")
+            *error = Vanta::tr("Refusing to write through the symbolic link %1.")
                          .arg(QDir::toNativeSeparators(basePath));
         return false;
     }
@@ -430,7 +432,7 @@ bool existingParentIsInside(const QString &targetPath, const QString &basePath, 
 
     if (parentCanonical != baseCanonical && !parentCanonical.startsWith(baseCanonical + QLatin1Char('/'))) {
         if (error)
-            *error = QStringLiteral("Refusing to write %1 because its folder resolves outside %2.")
+            *error = Vanta::tr("Refusing to write %1 because its folder resolves outside %2.")
                          .arg(QDir::toNativeSeparators(targetPath), QDir::toNativeSeparators(basePath));
         return false;
     }
@@ -457,17 +459,17 @@ bool finalizePlan(ModInstallPlan *plan, const ModTarget &target, QString *error)
     };
 
     if (!target.isValid())
-        return fail(QStringLiteral("The game folder is not available."));
+        return fail(Vanta::tr("The game folder is not available."));
     if (plan->files.isEmpty())
-        return fail(QStringLiteral("The package does not contain any installable files."));
+        return fail(Vanta::tr("The package does not contain any installable files."));
 
     const QString rootRelative = relativePathFrom(target.gameRoot, target.bepInExRoot);
     if (rootRelative.isEmpty())
-        return fail(QStringLiteral("The BepInEx folder is not inside the game folder."));
+        return fail(Vanta::tr("The BepInEx folder is not inside the game folder."));
     const QString pluginsRelative = relativePathFrom(target.gameRoot, target.pluginsPath);
     const QString patchersRelative = relativePathFrom(target.gameRoot, target.patchersPath);
     if (pluginsRelative.isEmpty() || patchersRelative.isEmpty())
-        return fail(QStringLiteral("The BepInEx plugins or patchers folder is not inside the game folder."));
+        return fail(Vanta::tr("The BepInEx plugins or patchers folder is not inside the game folder."));
 
     QHash<QString, int> seen;
     for (int index = 0; index < plan->files.size();) {
@@ -482,7 +484,7 @@ bool finalizePlan(ModInstallPlan *plan, const ModTarget &target, QString *error)
                 plan->files.removeAt(index);
                 continue;
             }
-            return fail(QStringLiteral("Two files in this package target the same path: %1")
+            return fail(Vanta::tr("Two files in this package target the same path: %1")
                             .arg(file.relativePath));
         }
         seen.insert(folded, index);
@@ -505,21 +507,21 @@ bool finalizePlan(ModInstallPlan *plan, const ModTarget &target, QString *error)
         if (!info.exists())
             continue;
         if (info.isSymLink()) {
-            return fail(QStringLiteral("Refusing to replace the symbolic link %1.")
+            return fail(Vanta::tr("Refusing to replace the symbolic link %1.")
                             .arg(QDir::toNativeSeparators(targetPath)));
         }
         if (info.isDir()) {
-            return fail(QStringLiteral("A folder already exists where the package wants to write a file: %1")
+            return fail(Vanta::tr("A folder already exists where the package wants to write a file: %1")
                             .arg(QDir::toNativeSeparators(targetPath)));
         }
         if (!info.isFile()) {
-            return fail(QStringLiteral("The package target is not a regular file: %1")
+            return fail(Vanta::tr("The package target is not a regular file: %1")
                             .arg(QDir::toNativeSeparators(targetPath)));
         }
 
         QFile existing(targetPath);
         if (!existing.open(QIODevice::ReadOnly)) {
-            return fail(QStringLiteral("Could not read the existing file %1: %2")
+            return fail(Vanta::tr("Could not read the existing file %1: %2")
                             .arg(QDir::toNativeSeparators(targetPath), existing.errorString()));
         }
         if (existing.readAll() != file.data)
@@ -566,20 +568,20 @@ bool ModInstaller::planFromFile(const QString &path, const ModTarget &target,
     };
 
     if (!plan || !target.isValid())
-        return fail(QStringLiteral("The game folder is not available."));
+        return fail(Vanta::tr("The game folder is not available."));
     const QFileInfo info(path);
     if (!info.exists() || !info.isFile())
-        return fail(QStringLiteral("The selected mod file does not exist."));
+        return fail(Vanta::tr("The selected mod file does not exist."));
     if (info.size() > kMaximumArchiveBytes)
-        return fail(QStringLiteral("The selected file is larger than the 512 MiB import limit."));
+        return fail(Vanta::tr("The selected file is larger than the 512 MiB import limit."));
 
     const QString suffix = info.suffix().toLower();
     if (suffix != QStringLiteral("dll") && suffix != QStringLiteral("zip") && suffix != QStringLiteral("disabled"))
-        return fail(QStringLiteral("Choose a .dll or .zip mod file."));
+        return fail(Vanta::tr("Choose a .dll or .zip mod file."));
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
-        return fail(QStringLiteral("Could not read %1: %2")
+        return fail(Vanta::tr("Could not read %1: %2")
                         .arg(QDir::toNativeSeparators(path), file.errorString()));
     const QByteArray payload = file.readAll();
     file.close();
@@ -601,7 +603,7 @@ bool ModInstaller::planFromFile(const QString &path, const ModTarget &target,
         local.files.append(installFile);
         if (!QFileInfo::exists(target.bepInExRoot)) {
             local.warnings.append(
-                QStringLiteral("BepInEx is not installed yet. The DLL will be placed in a new plugins folder, "
+                Vanta::tr("BepInEx is not installed yet. The DLL will be placed in a new plugins folder, "
                                "but it will not load until BepInEx is installed."));
         }
         if (!finalizePlan(&local, target, error))
@@ -624,7 +626,7 @@ bool ModInstaller::planFromArchive(const QByteArray &archive, const QString &arc
     };
 
     if (!plan || !target.isValid())
-        return fail(QStringLiteral("The game folder is not available."));
+        return fail(Vanta::tr("The game folder is not available."));
 
     QList<ZipEntry> entries;
     if (!readZip(archive, &entries, error))
@@ -641,7 +643,7 @@ bool ModInstaller::planFromArchive(const QByteArray &archive, const QString &arc
     const QString pluginsRelative = relativePathFrom(target.gameRoot, target.pluginsPath);
     const QString patchersRelative = relativePathFrom(target.gameRoot, target.patchersPath);
     if (rootRelative.isEmpty() || pluginsRelative.isEmpty() || patchersRelative.isEmpty())
-        return fail(QStringLiteral("The BepInEx folder is not inside the game folder."));
+        return fail(Vanta::tr("The BepInEx folder is not inside the game folder."));
 
     const QString archiveBase = QFileInfo(archiveName).completeBaseName();
     const QString folderName = sanitizeComponent(packageName.isEmpty() ? archiveBase : packageName);
@@ -691,24 +693,24 @@ bool ModInstaller::planFromArchive(const QByteArray &archive, const QString &arc
     }
 
     if (result.files.isEmpty())
-        return fail(QStringLiteral("The archive does not contain any installable files."));
+        return fail(Vanta::tr("The archive does not contain any installable files."));
     if (!hasDll) {
         result.warnings.append(
-            QStringLiteral("The package does not contain a DLL. It may be an asset-only package."));
+            Vanta::tr("The package does not contain a DLL. It may be an asset-only package."));
     }
     if (hasCore && QFileInfo::exists(target.bepInExRoot)) {
         result.warnings.append(
-            QStringLiteral("This package includes BepInEx core files. Existing files will be backed up before "
+            Vanta::tr("This package includes BepInEx core files. Existing files will be backed up before "
                            "they are replaced."));
     }
     if (!hasCore && !QFileInfo::exists(target.bepInExRoot)) {
         result.warnings.append(
-            QStringLiteral("BepInEx is not installed yet. A package that only contains a plugin will not work "
+            Vanta::tr("BepInEx is not installed yet. A package that only contains a plugin will not work "
                            "until BepInEx is installed."));
     }
     if (!hasManifest) {
         result.warnings.append(
-            QStringLiteral("The package has no manifest.json. Its declared dependencies cannot be read."));
+            Vanta::tr("The package has no manifest.json. Its declared dependencies cannot be read."));
     }
 
     if (!finalizePlan(&result, target, error))
@@ -722,7 +724,7 @@ bool ModInstaller::mergePlans(const QList<ModInstallPlan> &plans, const ModTarge
 {
     if (!merged || plans.isEmpty()) {
         if (error)
-            *error = QStringLiteral("No package plans were produced.");
+            *error = Vanta::tr("No package plans were produced.");
         return false;
     }
 
@@ -762,13 +764,13 @@ bool ModInstaller::execute(const ModInstallPlan &plan, const ModTarget &target, 
     if (backupRoot)
         backupRoot->clear();
     if (!target.isValid())
-        return fail(QStringLiteral("The game folder is not available."));
+        return fail(Vanta::tr("The game folder is not available."));
     if (plan.files.isEmpty())
-        return fail(QStringLiteral("The package does not contain any installable files."));
+        return fail(Vanta::tr("The package does not contain any installable files."));
 
     const QString rootRelative = relativePathFrom(target.gameRoot, target.bepInExRoot);
     if (rootRelative.isEmpty())
-        return fail(QStringLiteral("The BepInEx folder is not inside the game folder."));
+        return fail(Vanta::tr("The BepInEx folder is not inside the game folder."));
 
     QString backups;
     for (const ModInstallFile &file : plan.files) {
@@ -783,17 +785,17 @@ bool ModInstaller::execute(const ModInstallPlan &plan, const ModTarget &target, 
         const QFileInfo info(targetPath);
         if (info.exists()) {
             if (info.isSymLink()) {
-                return fail(QStringLiteral("Refusing to replace the symbolic link %1.")
+                return fail(Vanta::tr("Refusing to replace the symbolic link %1.")
                                 .arg(QDir::toNativeSeparators(targetPath)));
             }
             if (info.isDir()) {
-                return fail(QStringLiteral("A folder already exists where the package wants to write a file: %1")
+                return fail(Vanta::tr("A folder already exists where the package wants to write a file: %1")
                                 .arg(QDir::toNativeSeparators(targetPath)));
             }
 
             QFile existing(targetPath);
             if (!existing.open(QIODevice::ReadOnly)) {
-                return fail(QStringLiteral("Could not read the existing file %1: %2")
+                return fail(Vanta::tr("Could not read the existing file %1: %2")
                                 .arg(QDir::toNativeSeparators(targetPath), existing.errorString()));
             }
             if (existing.readAll() == file.data) {
@@ -803,40 +805,40 @@ bool ModInstaller::execute(const ModInstallPlan &plan, const ModTarget &target, 
             existing.close();
 
             if (!overwrite) {
-                return fail(QStringLiteral("Refusing to overwrite the existing file %1 without confirmation.")
+                return fail(Vanta::tr("Refusing to overwrite the existing file %1 without confirmation.")
                                 .arg(QDir::toNativeSeparators(targetPath)));
             }
             if (backups.isEmpty())
                 backups = backupDirectoryFor(target.bepInExRoot);
             const QString backupPath = QDir(backups).filePath(file.relativePath);
             if (!QDir().mkpath(QFileInfo(backupPath).absolutePath())) {
-                return fail(QStringLiteral("Could not create the backup folder %1.")
+                return fail(Vanta::tr("Could not create the backup folder %1.")
                                 .arg(QDir::toNativeSeparators(QFileInfo(backupPath).absolutePath())));
             }
             if (QFileInfo::exists(backupPath) || !QFile::copy(targetPath, backupPath)) {
-                return fail(QStringLiteral("Could not back up %1 before replacing it.")
+                return fail(Vanta::tr("Could not back up %1 before replacing it.")
                                 .arg(QDir::toNativeSeparators(targetPath)));
             }
         }
 
         const QString parent = QFileInfo(targetPath).absolutePath();
         if (!QDir().mkpath(parent)) {
-            return fail(QStringLiteral("Could not create the folder %1.")
+            return fail(Vanta::tr("Could not create the folder %1.")
                             .arg(QDir::toNativeSeparators(parent)));
         }
 
         QSaveFile output(targetPath);
         if (!output.open(QIODevice::WriteOnly)) {
-            return fail(QStringLiteral("Could not create %1: %2")
+            return fail(Vanta::tr("Could not create %1: %2")
                             .arg(QDir::toNativeSeparators(targetPath), output.errorString()));
         }
         if (output.write(file.data) != file.data.size()) {
             output.cancelWriting();
-            return fail(QStringLiteral("Could not write %1: %2")
+            return fail(Vanta::tr("Could not write %1: %2")
                             .arg(QDir::toNativeSeparators(targetPath), output.errorString()));
         }
         if (!output.commit()) {
-            return fail(QStringLiteral("Could not finish writing %1: %2")
+            return fail(Vanta::tr("Could not finish writing %1: %2")
                             .arg(QDir::toNativeSeparators(targetPath), output.errorString()));
         }
         if (file.executable) {

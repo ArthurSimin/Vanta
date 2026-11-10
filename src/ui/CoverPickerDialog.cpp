@@ -1,4 +1,5 @@
 #include "CoverPickerDialog.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -35,7 +36,7 @@ QPixmap placeholderTile(const QSize &size, const ThemeColors &colors, int index)
 CoverPickerDialog::CoverPickerDialog(const QString &gameName, const QString &matchedName,
                                      const QList<CoverArt> &artworks, ThemeManager *theme,
                                      QWidget *parent)
-    : VantaDialog(QStringLiteral("Choose cover art"), theme, parent)
+    : VantaDialog(Vanta::tr("Choose cover art"), theme, parent)
     , m_theme(theme)
     , m_artworks(artworks)
 {
@@ -49,7 +50,7 @@ CoverPickerDialog::CoverPickerDialog(const QString &gameName, const QString &mat
     layout->setSpacing(12);
 
     auto *headline = new QLabel(
-        QStringLiteral("%1 artwork(s) for “%2”").arg(artworks.size()).arg(matchedName), content);
+        Vanta::tr("%1 artwork(s) for “%2”").arg(artworks.size()).arg(matchedName), content);
     QFont headlineFont = headline->font();
     headlineFont.setPixelSize(16);
     headlineFont.setWeight(QFont::DemiBold);
@@ -58,8 +59,8 @@ CoverPickerDialog::CoverPickerDialog(const QString &gameName, const QString &mat
     layout->addWidget(headline);
 
     layout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("You asked for “%1”. Pick the artwork Vanta should use; the preview on the right "
-                       "shows the full-size image before you commit.").arg(gameName),
+        Vanta::tr("You asked for “%1”. Pick the artwork Vanta should use; the preview on the right "
+                  "shows the full-size image before you commit.").arg(gameName),
         content));
 
     auto *columns = new QHBoxLayout;
@@ -89,14 +90,14 @@ CoverPickerDialog::CoverPickerDialog(const QString &gameName, const QString &mat
         item->setData(Qt::UserRole, art.gridId);
         QString label = art.width > 0 && art.height > 0
             ? QStringLiteral("%1×%2").arg(art.width).arg(art.height)
-            : QStringLiteral("Artwork %1").arg(index + 1);
+            : Vanta::tr("Artwork %1").arg(index + 1);
         if (!art.author.isEmpty())
             label += QStringLiteral(" · %1").arg(art.author);
         item->setText(label);
         item->setTextAlignment(Qt::AlignHCenter);
         item->setToolTip(art.author.isEmpty()
-                             ? QStringLiteral("Artwork %1").arg(index + 1)
-                             : QStringLiteral("Artwork %1 by %2").arg(index + 1).arg(art.author));
+                             ? Vanta::tr("Artwork %1").arg(index + 1)
+                             : Vanta::tr("Artwork %1 by %2").arg(index + 1).arg(art.author));
     }
 
     auto *previewPanel = new QFrame(content);
@@ -122,12 +123,12 @@ CoverPickerDialog::CoverPickerDialog(const QString &gameName, const QString &mat
 
     auto *footer = new QHBoxLayout;
     footer->setSpacing(9);
-    auto *cancel = new QPushButton(QStringLiteral("Cancel"), this);
+    auto *cancel = new QPushButton(Vanta::tr("Cancel"), this);
     cancel->setCursor(Qt::PointingHandCursor);
     connect(cancel, &QPushButton::clicked, this, &QDialog::reject);
     footer->addWidget(cancel);
     footer->addStretch(1);
-    m_useButton = new QPushButton(QStringLiteral("Use this artwork"), this);
+    m_useButton = new QPushButton(Vanta::tr("Use this artwork"), this);
     m_useButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_useButton);
     connect(m_useButton, &QPushButton::clicked, this, &QDialog::accept);
@@ -164,9 +165,9 @@ void CoverPickerDialog::updateSelection()
     if (art.width > 0 && art.height > 0)
         details.append(QStringLiteral("%1×%2").arg(art.width).arg(art.height));
     if (!art.author.isEmpty())
-        details.append(QStringLiteral("by %1").arg(art.author));
+        details.append(Vanta::tr("by %1").arg(art.author));
     if (art.upvotes > 0)
-        details.append(QStringLiteral("%1 upvote(s)").arg(art.upvotes));
+        details.append(Vanta::tr("%1 upvote(s)").arg(art.upvotes));
     m_details->setText(details.join(QStringLiteral(" · ")));
 }
 

@@ -45,6 +45,24 @@ QString installFilterName(InstallFilter filter);
 QString wineLogLevelName(WineLogLevel level);
 QString wineDebugValue(WineLogLevel level);
 
+// Translated names for the interface. The *Name functions above stay English on
+// purpose: settings.json, the library file, launch-log file names and sidebar
+// filter ids are built from them, so translating those would break saved data.
+QString runnerDisplayName(RunnerType type);
+QString platformDisplayName(Platform platform);
+QString onlineFixModeDisplayName(OnlineFixMode mode);
+QString fixKindDisplayName(FixKind kind);
+QString viewModeDisplayName(ViewMode mode);
+QString sortModeDisplayName(SortMode mode);
+QString themeChoiceDisplayName(ThemeChoice choice);
+QString coverSizeDisplayName(CoverSize size);
+QString wineLogLevelDisplayName(WineLogLevel level);
+// `source` is a stored token ("Manual", "Steam", …). Only the generic values are
+// translated; store and brand names stay as they are.
+QString sourceDisplayName(const QString &source);
+QString compatibilityFilterDisplayName(CompatibilityFilter filter);
+QString installFilterDisplayName(InstallFilter filter);
+
 RunnerType runnerFromName(const QString &name);
 Platform platformFromName(const QString &name);
 OnlineFixMode onlineFixModeFromName(const QString &name);

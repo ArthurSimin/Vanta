@@ -4,6 +4,7 @@
 #include "BepInEx.h"
 #include "Common.h"
 #include "GameDetailsDialog.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "LaunchLogs.h"
 #include "LaunchPlan.h"
@@ -73,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
             [this](const QString &gameId, const QString &matchedName, int score) {
                 const Game game = m_library.gameById(gameId);
                 if (!game.id.isEmpty()) {
-                    setStatusMessage(QStringLiteral("SteamGridDB matched “%1” to “%2” (%3%).")
+                    setStatusMessage(Vanta::tr("SteamGridDB matched “%1” to “%2” (%3%).")
                                          .arg(game.name, matchedName)
                                          .arg(score),
                                      9000);
@@ -89,14 +90,14 @@ MainWindow::MainWindow(QWidget *parent)
                 game.modifiedAt = QDateTime::currentDateTime();
                 if (m_library.updateGame(game)) {
                     refreshLibrary();
-                    setStatusMessage(QStringLiteral("Fetched cover art for %1.").arg(game.name));
+                    setStatusMessage(Vanta::tr("Fetched cover art for %1.").arg(game.name));
                 }
             });
     connect(m_coverFetcher, &CoverFetcher::failed, this,
             [this](const QString &gameId, const QString &message) {
                 const Game game = m_library.gameById(gameId);
                 if (!game.id.isEmpty())
-                    setStatusMessage(QStringLiteral("No cover art for %1: %2").arg(game.name, message), 9000);
+                    setStatusMessage(Vanta::tr("No cover art for %1: %2").arg(game.name, message), 9000);
             });
     connect(m_coverFetcher, &CoverFetcher::artworksListed, this,
             [this](const QString &gameId, const QString &matchedName, const QList<CoverArt> &artworks) {
@@ -123,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent)
                 const CoverArt chosen = picker.selectedArt();
                 if (chosen.fullUrl.isEmpty())
                     return;
-                setStatusMessage(QStringLiteral("Downloading the selected artwork…"));
+                setStatusMessage(Vanta::tr("Downloading the selected artwork…"));
                 m_coverFetcher->downloadCoverArt(gameId, chosen);
             });
 
@@ -206,7 +207,7 @@ void MainWindow::buildUi()
     statusLayout->setSpacing(10);
     m_statusLabel = new QLabel(statusBarArea);
     m_statusLabel->setProperty("class", QStringLiteral("muted"));
-    m_statusLabel->setText(QStringLiteral("Ready."));
+    m_statusLabel->setText(Vanta::tr("Ready."));
     statusLayout->addWidget(m_statusLabel, 1);
     m_runningLabel = new QLabel(statusBarArea);
     m_runningLabel->setProperty("class", QStringLiteral("muted"));
@@ -244,7 +245,7 @@ void MainWindow::buildHeader()
 
     auto *titles = new QVBoxLayout;
     titles->setSpacing(1);
-    m_titleLabel = new QLabel(QStringLiteral("All games"), m_header);
+    m_titleLabel = new QLabel(Vanta::tr("All games"), m_header);
     QFont titleFont = m_titleLabel->font();
     titleFont.setPixelSize(22);
     titleFont.setWeight(QFont::Black);
@@ -271,13 +272,13 @@ void MainWindow::buildHeader()
 
     m_searchField = new QLineEdit(m_searchContainer);
     m_searchField->setObjectName(QStringLiteral("searchField"));
-    m_searchField->setPlaceholderText(QStringLiteral("Search your library…"));
+    m_searchField->setPlaceholderText(Vanta::tr("Search your library…"));
     searchLayout->addWidget(m_searchField, 1);
 
     m_searchClearButton = new QToolButton(m_searchContainer);
     m_searchClearButton->setObjectName(QStringLiteral("searchClearButton"));
     m_searchClearButton->setCursor(Qt::PointingHandCursor);
-    m_searchClearButton->setToolTip(QStringLiteral("Clear the search"));
+    m_searchClearButton->setToolTip(Vanta::tr("Clear the search"));
     m_searchClearButton->setIconSize(QSize(13, 13));
     m_searchClearButton->setAutoRaise(true);
     m_searchClearButton->setVisible(false);
@@ -291,7 +292,7 @@ void MainWindow::buildHeader()
     m_filterButton->setObjectName(QStringLiteral("filterButton"));
     m_filterButton->setPopupMode(QToolButton::InstantPopup);
     m_filterButton->setCursor(Qt::PointingHandCursor);
-    m_filterButton->setToolTip(QStringLiteral("Filters"));
+    m_filterButton->setToolTip(Vanta::tr("Filters"));
     m_filterButton->setIconSize(QSize(17, 17));
     searchLayout->addWidget(m_filterButton);
     topRow->addWidget(m_searchContainer, 0, Qt::AlignVCenter);
@@ -299,7 +300,7 @@ void MainWindow::buildHeader()
     m_addButton = new QToolButton(m_header);
     m_addButton->setObjectName(QStringLiteral("addGameButton"));
     m_addButton->setCursor(Qt::PointingHandCursor);
-    m_addButton->setToolTip(QStringLiteral("Add game (Ctrl+N)"));
+    m_addButton->setToolTip(Vanta::tr("Add game (Ctrl+N)"));
     topRow->addWidget(m_addButton, 0, Qt::AlignVCenter);
 
     auto *viewGroup = new QWidget(m_header);
@@ -309,7 +310,7 @@ void MainWindow::buildHeader()
     m_viewOptionsButton = new QToolButton(viewGroup);
     m_viewOptionsButton->setObjectName(QStringLiteral("viewOptionsButton"));
     m_viewOptionsButton->setCursor(Qt::PointingHandCursor);
-    m_viewOptionsButton->setToolTip(QStringLiteral("Change view"));
+    m_viewOptionsButton->setToolTip(Vanta::tr("Change view"));
     m_viewOptionsButton->setIconSize(QSize(17, 17));
     viewLayout->addWidget(m_viewOptionsButton);
     m_viewMenuButton = new QToolButton(viewGroup);
@@ -325,7 +326,7 @@ void MainWindow::buildHeader()
     m_mainMenuButton->setCursor(Qt::PointingHandCursor);
     m_mainMenuButton->setPopupMode(QToolButton::InstantPopup);
     m_mainMenuButton->setIconSize(QSize(17, 17));
-    m_mainMenuButton->setToolTip(QStringLiteral("More actions"));
+    m_mainMenuButton->setToolTip(Vanta::tr("More actions"));
     topRow->addWidget(m_mainMenuButton, 0, Qt::AlignVCenter);
 
     layout->addLayout(topRow);
@@ -449,7 +450,7 @@ void MainWindow::connectSignals()
         Q_UNUSED(gameId);
         closeLaunchDialog();
         updateRunningState();
-        setStatusMessage(QStringLiteral("Game started."));
+        setStatusMessage(Vanta::tr("Game started."));
     });
     // The process exited but the prefix may still be shutting down. Clearing the
     // running state here is what makes a game the user closed themselves stop
@@ -468,14 +469,14 @@ void MainWindow::connectSignals()
             return;
         }
         if (logPath.isEmpty()) {
-            showDiagnostics(QStringLiteral("Launch failed"), message, diagnostic);
+            showDiagnostics(Vanta::tr("Launch failed"), message, diagnostic);
             return;
         }
         // The launch dialog is already gone, so offer the log directly instead
         // of a diagnostic box that duplicates what the log records.
         const auto reply = QMessageBox::question(
-            this, QStringLiteral("Launch failed"),
-            QStringLiteral("%1\n\nThe launch log has the full command and any output from the process. "
+            this, Vanta::tr("Launch failed"),
+            Vanta::tr("%1\n\nThe launch log has the full command and any output from the process. "
                            "Open it now?").arg(message),
             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
         if (reply == QMessageBox::Yes)
@@ -483,7 +484,7 @@ void MainWindow::connectSignals()
     });
     connect(&m_launcher, &GameLauncher::gameStopping, this, [this](const QString &gameId) {
         Q_UNUSED(gameId);
-        setStatusMessage(QStringLiteral("Stopping the game…"), 15000);
+        setStatusMessage(Vanta::tr("Stopping the game…"), 15000);
         updateRunningState();
     });
     connect(&m_launcher, &GameLauncher::gameFinished, this, &MainWindow::handleGameFinished);
@@ -491,19 +492,19 @@ void MainWindow::connectSignals()
     connect(&m_updateChecker, &UpdateChecker::updateAvailable, this, &MainWindow::handleUpdateAvailable);
     connect(&m_updateChecker, &UpdateChecker::upToDate, this, [this](const QString &) {
         if (m_updateCheckManual)
-            setStatusMessage(QStringLiteral("Vanta is up to date."));
+            setStatusMessage(Vanta::tr("Vanta is up to date."));
     });
     connect(&m_updateChecker, &UpdateChecker::checkSkipped, this, [this](const QString &) {
         // No request was made, so saying "up to date" would be a claim Vanta
         // cannot support. A development build has no release to compare against.
         if (m_updateCheckManual)
-            setStatusMessage(QStringLiteral("This build has no release version, so updates cannot be checked."));
+            setStatusMessage(Vanta::tr("This build has no release version, so updates cannot be checked."));
     });
     connect(&m_updateChecker, &UpdateChecker::checkFailed, this, [this](const QString &message) {
         // A failed check is not something the user has to fix, so it stays a
         // status line instead of a dialog, and only when the check was asked for.
         if (m_updateCheckManual)
-            setStatusMessage(QStringLiteral("The update check failed. %1").arg(message), 9000);
+            setStatusMessage(Vanta::tr("The update check failed. %1").arg(message), 9000);
     });
     connect(m_updateBanner, &UpdateBanner::openReleaseRequested, this, &MainWindow::openUpdatePage);
     connect(m_updateBanner, &UpdateBanner::dismissed, this, [this] { m_updateDismissed = true; });
@@ -599,19 +600,17 @@ void MainWindow::refreshStatus()
         return;
     const int scanning = m_scanner.activeScanCount();
     if (scanning > 0) {
-        m_statusLabel->setText(QStringLiteral("Scanning %1 game%2…")
-                                   .arg(scanning)
-                                   .arg(scanning == 1 ? QString() : QStringLiteral("s")));
+        m_statusLabel->setText(Vanta::tr("Scanning %n game(s)…", nullptr, scanning));
     } else if (!m_statusMessage.isEmpty()) {
         m_statusLabel->setText(m_statusMessage);
     } else {
-        m_statusLabel->setText(QStringLiteral("Ready."));
+        m_statusLabel->setText(Vanta::tr("Ready."));
     }
     if (!m_runningLabel)
         return;
     const int running = m_running.size();
     m_runningLabel->setText(running == 0 ? QString()
-                                         : QStringLiteral("%1 running").arg(running));
+                                         : Vanta::tr("%1 running").arg(running));
 }
 
 void MainWindow::setStatusMessage(const QString &message, int timeoutMs)
@@ -657,7 +656,7 @@ void MainWindow::refreshIcons()
         m_selectionBar->refreshTheme();
 
     m_viewMenu->clear();
-    auto *gridAction = m_viewMenu->addAction(QStringLiteral("Grid view"));
+    auto *gridAction = m_viewMenu->addAction(Vanta::tr("Grid view"));
     gridAction->setCheckable(true);
     gridAction->setChecked(m_library.settings().viewMode == ViewMode::Grid);
     connect(gridAction, &QAction::triggered, this, [this] {
@@ -667,7 +666,7 @@ void MainWindow::refreshIcons()
         m_libraryView->setViewMode(ViewMode::Grid);
         refreshIcons();
     });
-    auto *listAction = m_viewMenu->addAction(QStringLiteral("List view"));
+    auto *listAction = m_viewMenu->addAction(Vanta::tr("List view"));
     listAction->setCheckable(true);
     listAction->setChecked(m_library.settings().viewMode == ViewMode::List);
     connect(listAction, &QAction::triggered, this, [this] {
@@ -678,7 +677,7 @@ void MainWindow::refreshIcons()
         refreshIcons();
     });
     m_viewMenu->addSeparator();
-    auto *badges = m_viewMenu->addAction(QStringLiteral("Show badges"));
+    auto *badges = m_viewMenu->addAction(Vanta::tr("Show badges"));
     badges->setCheckable(true);
     badges->setChecked(m_library.settings().showBadges);
     connect(badges, &QAction::triggered, this, [this](bool checked) {
@@ -686,7 +685,7 @@ void MainWindow::refreshIcons()
         settings.showBadges = checked;
         m_library.updateSettings(settings);
     });
-    auto *animations = m_viewMenu->addAction(QStringLiteral("Subtle animations"));
+    auto *animations = m_viewMenu->addAction(Vanta::tr("Subtle animations"));
     animations->setCheckable(true);
     animations->setChecked(m_library.settings().animations);
     connect(animations, &QAction::triggered, this, [this](bool checked) {
@@ -696,9 +695,9 @@ void MainWindow::refreshIcons()
         m_theme.setAnimationsEnabled(checked);
     });
     m_viewMenu->addSeparator();
-    auto *sizes = m_viewMenu->addMenu(QStringLiteral("Cover size"));
+    auto *sizes = m_viewMenu->addMenu(Vanta::tr("Cover size"));
     for (CoverSize size : {CoverSize::Small, CoverSize::Medium, CoverSize::Large}) {
-        auto *action = sizes->addAction(coverSizeName(size));
+        auto *action = sizes->addAction(coverSizeDisplayName(size));
         action->setCheckable(true);
         action->setChecked(m_library.settings().coverSize == size);
         connect(action, &QAction::triggered, this, [this, size] {
@@ -710,32 +709,32 @@ void MainWindow::refreshIcons()
     }
 
     m_mainMenu->clear();
-    auto *addAction = m_mainMenu->addAction(QStringLiteral("Add game…"));
+    auto *addAction = m_mainMenu->addAction(Vanta::tr("Add game…"));
     addAction->setShortcut(QKeySequence::New);
     connect(addAction, &QAction::triggered, this, &MainWindow::openAddDialog);
-    auto *scanAction = m_mainMenu->addAction(QStringLiteral("Scan library"));
+    auto *scanAction = m_mainMenu->addAction(Vanta::tr("Scan library"));
     connect(scanAction, &QAction::triggered, this, [this] { scanLibrary(false); });
-    auto *rescanAction = m_mainMenu->addAction(QStringLiteral("Rescan all games"));
+    auto *rescanAction = m_mainMenu->addAction(Vanta::tr("Rescan all games"));
     connect(rescanAction, &QAction::triggered, this, [this] { scanLibrary(true); });
-    auto *coversAction = m_mainMenu->addAction(QStringLiteral("Fetch missing covers"));
+    auto *coversAction = m_mainMenu->addAction(Vanta::tr("Fetch missing covers"));
     connect(coversAction, &QAction::triggered, this, &MainWindow::fetchMissingCovers);
-    auto *logsAction = m_mainMenu->addAction(QStringLiteral("Logs…"));
+    auto *logsAction = m_mainMenu->addAction(Vanta::tr("Logs…"));
     connect(logsAction, &QAction::triggered, this, &MainWindow::openLogsForSelection);
     m_mainMenu->addSeparator();
-    auto *runnersAction = m_mainMenu->addAction(QStringLiteral("Download runners…"));
+    auto *runnersAction = m_mainMenu->addAction(Vanta::tr("Download runners…"));
     connect(runnersAction, &QAction::triggered, this, &MainWindow::openRunnerInstallDialog);
-    auto *portAction = m_mainMenu->addAction(QStringLiteral("Port external libraries…"));
+    auto *portAction = m_mainMenu->addAction(Vanta::tr("Port external libraries…"));
     connect(portAction, &QAction::triggered, this, &MainWindow::openLibraryImportDialog);
-    auto *settingsAction = m_mainMenu->addAction(QStringLiteral("Settings…"));
+    auto *settingsAction = m_mainMenu->addAction(Vanta::tr("Settings…"));
     connect(settingsAction, &QAction::triggered, this, &MainWindow::openSettingsDialog);
-    auto *tutorialAction = m_mainMenu->addAction(QStringLiteral("Show tutorial"));
+    auto *tutorialAction = m_mainMenu->addAction(Vanta::tr("Show tutorial"));
     connect(tutorialAction, &QAction::triggered, this, [this] { showTutorial(0); });
     m_mainMenu->addSeparator();
-    auto *updateAction = m_mainMenu->addAction(QStringLiteral("Check for updates…"));
+    auto *updateAction = m_mainMenu->addAction(Vanta::tr("Check for updates…"));
     connect(updateAction, &QAction::triggered, this, [this] { checkForUpdates(true); });
-    auto *aboutAction = m_mainMenu->addAction(QStringLiteral("About Vanta"));
+    auto *aboutAction = m_mainMenu->addAction(Vanta::tr("About Vanta"));
     connect(aboutAction, &QAction::triggered, this, &MainWindow::openAboutDialog);
-    auto *quitAction = m_mainMenu->addAction(QStringLiteral("Quit"));
+    auto *quitAction = m_mainMenu->addAction(Vanta::tr("Quit"));
     quitAction->setShortcut(QKeySequence::Quit);
     connect(quitAction, &QAction::triggered, this, &QWidget::close);
 
@@ -748,12 +747,12 @@ void MainWindow::buildFilterMenu()
         return;
     m_filterMenu->clear();
 
-    auto *compatMenu = m_filterMenu->addMenu(QStringLiteral("Compatibility"));
+    auto *compatMenu = m_filterMenu->addMenu(Vanta::tr("Compatibility"));
     const QList<QPair<CompatibilityFilter, QString>> compatOptions = {
-        {CompatibilityFilter::All, compatibilityFilterName(CompatibilityFilter::All)},
-        {CompatibilityFilter::Detected, compatibilityFilterName(CompatibilityFilter::Detected)},
-        {CompatibilityFilter::NeedsAttention, compatibilityFilterName(CompatibilityFilter::NeedsAttention)},
-        {CompatibilityFilter::NotDetected, compatibilityFilterName(CompatibilityFilter::NotDetected)}
+        {CompatibilityFilter::All, compatibilityFilterDisplayName(CompatibilityFilter::All)},
+        {CompatibilityFilter::Detected, compatibilityFilterDisplayName(CompatibilityFilter::Detected)},
+        {CompatibilityFilter::NeedsAttention, compatibilityFilterDisplayName(CompatibilityFilter::NeedsAttention)},
+        {CompatibilityFilter::NotDetected, compatibilityFilterDisplayName(CompatibilityFilter::NotDetected)}
     };
     for (const auto &option : compatOptions) {
         auto *action = compatMenu->addAction(option.second);
@@ -766,11 +765,11 @@ void MainWindow::buildFilterMenu()
         });
     }
 
-    auto *installMenu = m_filterMenu->addMenu(QStringLiteral("Installation"));
+    auto *installMenu = m_filterMenu->addMenu(Vanta::tr("Installation"));
     const QList<QPair<InstallFilter, QString>> installOptions = {
-        {InstallFilter::All, installFilterName(InstallFilter::All)},
-        {InstallFilter::Installed, installFilterName(InstallFilter::Installed)},
-        {InstallFilter::Missing, installFilterName(InstallFilter::Missing)}
+        {InstallFilter::All, installFilterDisplayName(InstallFilter::All)},
+        {InstallFilter::Installed, installFilterDisplayName(InstallFilter::Installed)},
+        {InstallFilter::Missing, installFilterDisplayName(InstallFilter::Missing)}
     };
     for (const auto &option : installOptions) {
         auto *action = installMenu->addAction(option.second);
@@ -783,7 +782,7 @@ void MainWindow::buildFilterMenu()
         });
     }
 
-    auto *favorites = m_filterMenu->addAction(QStringLiteral("Favorites only"));
+    auto *favorites = m_filterMenu->addAction(Vanta::tr("Favorites only"));
     favorites->setCheckable(true);
     favorites->setChecked(m_favoritesOnly);
     connect(favorites, &QAction::triggered, this, [this](bool checked) {
@@ -794,9 +793,9 @@ void MainWindow::buildFilterMenu()
 
     // The hide list is the part that persists: the same games a player never
     // wants to see stay hidden across restarts.
-    auto *hideMenu = m_filterMenu->addMenu(QStringLiteral("Hide"));
+    auto *hideMenu = m_filterMenu->addMenu(Vanta::tr("Hide"));
 
-    auto *hideAttention = hideMenu->addAction(QStringLiteral("Games that need attention"));
+    auto *hideAttention = hideMenu->addAction(Vanta::tr("Games that need attention"));
     hideAttention->setCheckable(true);
     hideAttention->setChecked(m_hideNeedsAttention);
     connect(hideAttention, &QAction::triggered, this, [this](bool checked) {
@@ -811,16 +810,18 @@ void MainWindow::buildFilterMenu()
         RunnerType::Native, RunnerType::Wine, RunnerType::Proton, RunnerType::Flatpak, RunnerType::Custom
     };
     for (RunnerType runner : runners) {
-        const QString name = runnerName(runner);
-        auto *action = hideMenu->addAction(QStringLiteral("%1 games").arg(name));
+        // The action text is translated, but the hide list is keyed by the
+        // stable English runner token so a saved filter survives a language change.
+        const QString token = runnerName(runner);
+        auto *action = hideMenu->addAction(Vanta::tr("%1 games").arg(runnerDisplayName(runner)));
         action->setCheckable(true);
-        action->setChecked(m_hiddenRunners.contains(name));
-        connect(action, &QAction::triggered, this, [this, name](bool checked) {
+        action->setChecked(m_hiddenRunners.contains(token));
+        connect(action, &QAction::triggered, this, [this, token](bool checked) {
             if (checked) {
-                if (!m_hiddenRunners.contains(name))
-                    m_hiddenRunners.append(name);
+                if (!m_hiddenRunners.contains(token))
+                    m_hiddenRunners.append(token);
             } else {
-                m_hiddenRunners.removeAll(name);
+                m_hiddenRunners.removeAll(token);
             }
             buildFilterMenu();
             persistFilterList();
@@ -829,7 +830,7 @@ void MainWindow::buildFilterMenu()
     }
 
     m_filterMenu->addSeparator();
-    auto *clear = m_filterMenu->addAction(QStringLiteral("Clear filters"));
+    auto *clear = m_filterMenu->addAction(Vanta::tr("Clear filters"));
     connect(clear, &QAction::triggered, this, [this] {
         m_compatibilityFilter = CompatibilityFilter::All;
         m_installFilter = InstallFilter::All;
@@ -887,7 +888,7 @@ bool MainWindow::matchesSearch(const Game &game) const
         || game.source.contains(needle, Qt::CaseInsensitive)
         || game.gameDirectory.contains(needle, Qt::CaseInsensitive)
         || game.executable.contains(needle, Qt::CaseInsensitive)
-        || runnerName(game.runner).contains(needle, Qt::CaseInsensitive);
+        || runnerDisplayName(game.runner).contains(needle, Qt::CaseInsensitive);
 }
 
 bool MainWindow::matchesFilter(const Game &game) const
@@ -1008,22 +1009,22 @@ void MainWindow::applyFilter()
     const int total = m_library.games().size();
     if (total == 0) {
         m_libraryView->showEmptyState(
-            QStringLiteral("No games yet"),
-            QStringLiteral("Add a game folder or executable to start building your Vanta library. "
+            Vanta::tr("No games yet"),
+            Vanta::tr("Add a game folder or executable to start building your Vanta library. "
                            "Vanta never downloads games."),
             true);
     } else if (games.isEmpty()) {
         m_libraryView->showEmptyState(
-            QStringLiteral("No games match your filters"),
-            QStringLiteral("Try a different search term, choose another sidebar filter, or clear the active filters."),
+            Vanta::tr("No games match your filters"),
+            Vanta::tr("Try a different search term, choose another sidebar filter, or clear the active filters."),
             false);
     } else {
         m_libraryView->showResults();
     }
 
     if (m_subtitleLabel) {
-        const QString suffix = games.size() == 1 ? QStringLiteral("game") : QStringLiteral("games");
-        m_subtitleLabel->setText(QStringLiteral("%1 %2").arg(games.size()).arg(suffix));
+        const QString suffix = games.size() == 1 ? Vanta::tr("game") : Vanta::tr("games");
+        m_subtitleLabel->setText(Vanta::tr("%1 %2").arg(games.size()).arg(suffix));
     }
     refreshSelectionBar();
 }
@@ -1040,7 +1041,7 @@ void MainWindow::scanGame(const QString &gameId, bool force)
 {
     const bool found = m_library.hasGame(gameId);
     if (!found) {
-        setStatusMessage(QStringLiteral("The selected game is no longer in the library."));
+        setStatusMessage(Vanta::tr("The selected game is no longer in the library."));
         return;
     }
     m_scanner.scanGame(gameId, force);
@@ -1050,7 +1051,7 @@ void MainWindow::scanGame(const QString &gameId, bool force)
 void MainWindow::scanLibrary(bool force)
 {
     if (m_library.games().isEmpty()) {
-        setStatusMessage(QStringLiteral("Add a game before scanning."));
+        setStatusMessage(Vanta::tr("Add a game before scanning."));
         return;
     }
     m_scanner.scanLibrary(force);
@@ -1065,12 +1066,12 @@ void MainWindow::openAddDialog()
     Game game = dialog.resultGame();
     game.modifiedAt = QDateTime::currentDateTime();
     if (!m_library.addGame(game)) {
-        warn(QStringLiteral("The game could not be added. Check that the name and paths are valid."));
+        warn(Vanta::tr("The game could not be added. Check that the name and paths are valid."));
         return;
     }
     m_selectedGameId = game.id;
     m_libraryView->setSelectedGame(game.id);
-    setStatusMessage(QStringLiteral("Added %1.").arg(game.name));
+    setStatusMessage(Vanta::tr("Added %1.").arg(game.name));
     if (m_library.settings().automaticScanning)
         scanGame(game.id, false);
     if (m_library.settings().fetchCoversAutomatically && game.coverPath.trimmed().isEmpty())
@@ -1096,14 +1097,14 @@ void MainWindow::chooseCoverArt(const QString &gameId)
     if (!found)
         return;
     if (!m_coverFetcher->hasApiKey()) {
-        warn(QStringLiteral("Add a SteamGridDB API key in Settings → Covers first."));
+        warn(Vanta::tr("Add a SteamGridDB API key in Settings → Covers first."));
         return;
     }
 
     m_pendingPickGameId = gameId;
     m_pendingPickName = game.name;
     m_coverFetcher->setApiKey(m_library.settings().steamGridDbApiKey);
-    setStatusMessage(QStringLiteral("Searching SteamGridDB for “%1”…").arg(game.name));
+    setStatusMessage(Vanta::tr("Searching SteamGridDB for “%1”…").arg(game.name));
     m_coverFetcher->listCoverArt(gameId, game.name);
 }
 
@@ -1119,11 +1120,11 @@ void MainWindow::openEditDialog(const QString &gameId)
     Game updated = dialog.resultGame();
     updated.modifiedAt = QDateTime::currentDateTime();
     if (!m_library.updateGame(updated)) {
-        warn(QStringLiteral("The game could not be saved."));
+        warn(Vanta::tr("The game could not be saved."));
         return;
     }
     m_scanner.invalidate(gameId);
-    setStatusMessage(QStringLiteral("Saved %1.").arg(updated.name));
+    setStatusMessage(Vanta::tr("Saved %1.").arg(updated.name));
     if (m_library.settings().automaticScanning)
         scanGame(gameId, false);
 }
@@ -1186,10 +1187,10 @@ void MainWindow::openOnlineFixDialog(const QString &gameId)
     Game updated = dialog.resultGame();
     updated.modifiedAt = QDateTime::currentDateTime();
     if (!m_library.updateGame(updated)) {
-        warn(QStringLiteral("The OnlineFix policy could not be saved."));
+        warn(Vanta::tr("The OnlineFix policy could not be saved."));
         return;
     }
-    setStatusMessage(QStringLiteral("Updated the OnlineFix policy for %1.").arg(updated.name));
+    setStatusMessage(Vanta::tr("Updated the OnlineFix policy for %1.").arg(updated.name));
 }
 
 void MainWindow::openModManager(const QString &gameId)
@@ -1270,8 +1271,8 @@ void MainWindow::openLogsForSelection()
 
     QMessageBox box(this);
     box.setIcon(QMessageBox::Information);
-    box.setWindowTitle(QStringLiteral("Logs"));
-    box.setText(QStringLiteral("No launch log has been recorded yet. Start a game once and Vanta will keep the "
+    box.setWindowTitle(Vanta::tr("Logs"));
+    box.setText(Vanta::tr("No launch log has been recorded yet. Start a game once and Vanta will keep the "
                                "runner output so you can inspect it here afterwards."));
     box.setStandardButtons(QMessageBox::Ok);
     box.exec();
@@ -1290,7 +1291,7 @@ void MainWindow::openSettingsDialog()
     settings.windowGeometry = saveGeometry();
     settings.windowMaximized = isMaximized();
     if (!m_library.updateSettings(settings)) {
-        warn(QStringLiteral("Settings could not be saved."));
+        warn(Vanta::tr("Settings could not be saved."));
         // The dialog previewed the theme live, so the screen shows a choice that
         // was not persisted. Re-apply the stored one instead of leaving a theme
         // that vanishes at the next start.
@@ -1311,7 +1312,7 @@ void MainWindow::openSettingsDialog()
     refreshSidebar();
     applyFilter();
     refreshIcons();
-    setStatusMessage(QStringLiteral("Settings saved."));
+    setStatusMessage(Vanta::tr("Settings saved."));
     if (dialog.replayTutorialRequested())
         showTutorial(0);
 }
@@ -1328,7 +1329,7 @@ void MainWindow::checkForUpdates(bool manual)
     // and the automatic one stays silent unless there is something to say.
     m_updateCheckManual = manual;
     if (manual) {
-        setStatusMessage(QStringLiteral("Checking for updates…"), 4000);
+        setStatusMessage(Vanta::tr("Checking for updates…"), 4000);
         m_updateDismissed = false;
         if (m_updateBanner)
             m_updateBanner->hideBanner();
@@ -1341,7 +1342,7 @@ void MainWindow::handleUpdateAvailable(const UpdateRelease &release, const QStri
     if (m_updateDismissed || !m_updateBanner)
         return;
     m_updateBanner->showRelease(release, currentVersion);
-    setStatusMessage(QStringLiteral("Vanta %1 is available.")
+    setStatusMessage(Vanta::tr("Vanta %1 is available.")
                          .arg(UpdateChecker::normaliseVersion(release.tagName)),
                      9000);
 }
@@ -1351,14 +1352,14 @@ void MainWindow::openUpdatePage(const QString &url)
     if (url.isEmpty())
         return;
     if (!QDesktopServices::openUrl(QUrl(url)))
-        warn(QStringLiteral("The release page could not be opened in a browser."));
+        warn(Vanta::tr("The release page could not be opened in a browser."));
 }
 
 void MainWindow::openRunnerInstallDialog()
 {
     RunnerInstallDialog dialog(&m_theme, this);
     connect(&dialog, &RunnerInstallDialog::runnersChanged, this, [this] {
-        setStatusMessage(QStringLiteral("Runner discovery refreshed."));
+        setStatusMessage(Vanta::tr("Runner discovery refreshed."));
     });
     dialog.exec();
 }
@@ -1376,9 +1377,7 @@ void MainWindow::handleGamesImported(const QList<Game> &imported)
         return;
 
     refreshLibrary();
-    setStatusMessage(QStringLiteral("Ported %1 game%2.")
-                         .arg(QString::number(imported.size()),
-                              imported.size() == 1 ? QString() : QStringLiteral("s")));
+    setStatusMessage(Vanta::tr("Ported %n game(s).", nullptr, static_cast<int>(imported.size())));
 
     for (const Game &game : imported) {
         if (m_library.settings().automaticScanning)
@@ -1400,11 +1399,9 @@ void MainWindow::fetchMissingCovers()
         }
     }
     if (count > 0) {
-        setStatusMessage(QStringLiteral("Queued cover lookups for %1 game%2.")
-                             .arg(QString::number(count),
-                                  count == 1 ? QString() : QStringLiteral("s")));
+        setStatusMessage(Vanta::tr("Queued cover lookups for %n game(s).", nullptr, count));
     } else {
-        setStatusMessage(QStringLiteral("All games in the library already have covers."));
+        setStatusMessage(Vanta::tr("All games in the library already have covers."));
     }
 }
 
@@ -1417,42 +1414,42 @@ void MainWindow::showContextMenu(const QString &gameId, const QPoint &globalPosi
     const bool running = m_launcher.isRunning(gameId);
 
     QMenu menu(this);
-    auto *playAction = menu.addAction(running ? QStringLiteral("Stop") : QStringLiteral("Play"));
+    auto *playAction = menu.addAction(running ? Vanta::tr("Stop") : Vanta::tr("Play"));
     connect(playAction, &QAction::triggered, this, [this, gameId, running] {
         if (running)
             requestStop(gameId);
         else
             requestLaunch(gameId);
     });
-    auto *detailsAction = menu.addAction(QStringLiteral("Details"));
+    auto *detailsAction = menu.addAction(Vanta::tr("Details"));
     connect(detailsAction, &QAction::triggered, this, [this, gameId] { openDetailsDialog(gameId); });
-    auto *editAction = menu.addAction(QStringLiteral("Edit…"));
+    auto *editAction = menu.addAction(Vanta::tr("Edit…"));
     connect(editAction, &QAction::triggered, this, [this, gameId] { openEditDialog(gameId); });
     menu.addSeparator();
-    auto *favoriteAction = menu.addAction(game.favorite ? QStringLiteral("Remove from favorites")
-                                                        : QStringLiteral("Add to favorites"));
+    auto *favoriteAction = menu.addAction(game.favorite ? Vanta::tr("Remove from favorites")
+                                                        : Vanta::tr("Add to favorites"));
     connect(favoriteAction, &QAction::triggered, this, [this, gameId] { toggleFavorite(gameId); });
-    auto *scanAction = menu.addAction(QStringLiteral("Scan now"));
+    auto *scanAction = menu.addAction(Vanta::tr("Scan now"));
     connect(scanAction, &QAction::triggered, this, [this, gameId] { scanGame(gameId, true); });
-    auto *onlineFixAction = menu.addAction(QStringLiteral("OnlineFix…"));
+    auto *onlineFixAction = menu.addAction(Vanta::tr("OnlineFix…"));
     connect(onlineFixAction, &QAction::triggered, this, [this, gameId] { openOnlineFixDialog(gameId); });
     if (game.platform == Platform::Windows || runnerSupportsBepInEx(game.runner)) {
-        auto *modsAction = menu.addAction(QStringLiteral("Mods…"));
+        auto *modsAction = menu.addAction(Vanta::tr("Mods…"));
         connect(modsAction, &QAction::triggered, this, [this, gameId] { openModManager(gameId); });
     }
-    auto *logsAction = menu.addAction(QStringLiteral("Logs…"));
+    auto *logsAction = menu.addAction(Vanta::tr("Logs…"));
     connect(logsAction, &QAction::triggered, this, [this, gameId] { openLogs(gameId); });
-    auto *coverAction = menu.addAction(QStringLiteral("Choose cover art…"));
+    auto *coverAction = menu.addAction(Vanta::tr("Choose cover art…"));
     connect(coverAction, &QAction::triggered, this, [this, gameId] { chooseCoverArt(gameId); });
     menu.addSeparator();
-    auto *folderAction = menu.addAction(QStringLiteral("Open game folder"));
+    auto *folderAction = menu.addAction(Vanta::tr("Open game folder"));
     connect(folderAction, &QAction::triggered, this, [this, gameId] { openGameFolder(gameId); });
     if (runnerIsWineLike(game.runner)) {
-        auto *prefixAction = menu.addAction(QStringLiteral("Open prefix folder"));
+        auto *prefixAction = menu.addAction(Vanta::tr("Open prefix folder"));
         connect(prefixAction, &QAction::triggered, this, [this, gameId] { openGamePrefix(gameId); });
     }
     menu.addSeparator();
-    auto *removeAction = menu.addAction(QStringLiteral("Remove from library"));
+    auto *removeAction = menu.addAction(Vanta::tr("Remove from library"));
     connect(removeAction, &QAction::triggered, this, [this, gameId] { removeGame(gameId); });
 
     menu.exec(globalPosition);
@@ -1469,8 +1466,8 @@ void MainWindow::showTutorialSteps()
     QList<TutorialOverlay::Step> steps;
 
     TutorialOverlay::Step welcome;
-    welcome.title = QStringLiteral("Welcome to Vanta");
-    welcome.body = QStringLiteral("Vanta keeps your local game library in one place and launches native, Wine, and "
+    welcome.title = Vanta::tr("Welcome to Vanta");
+    welcome.body = Vanta::tr("Vanta keeps your local game library in one place and launches native, Wine, and "
                                   "Proton games without hiding what it does. This short tour points out the main "
                                   "parts of the window. You can leave at any time and reopen it from the sidebar.");
     welcome.showLogo = true;
@@ -1478,43 +1475,43 @@ void MainWindow::showTutorialSteps()
 
     TutorialOverlay::Step sidebarStep;
     sidebarStep.target = m_sidebar;
-    sidebarStep.title = QStringLiteral("Library filters");
-    sidebarStep.body = QStringLiteral("The sidebar groups your games by source, runner, platform, and scan status. "
+    sidebarStep.title = Vanta::tr("Library filters");
+    sidebarStep.body = Vanta::tr("The sidebar groups your games by source, runner, platform, and scan status. "
                                       "Groups collapse when you click their header, and Vanta can remember that "
                                       "layout. Settings, this tutorial, and About live at the bottom.");
-    sidebarStep.targetHint = QStringLiteral("Click a filter to narrow the library instantly.");
+    sidebarStep.targetHint = Vanta::tr("Click a filter to narrow the library instantly.");
     steps.append(sidebarStep);
 
     TutorialOverlay::Step searchStep;
     searchStep.target = m_searchContainer;
-    searchStep.title = QStringLiteral("Search and filter");
-    searchStep.body = QStringLiteral("Search matches names, sources, runners, and paths. The filter button adds "
+    searchStep.title = Vanta::tr("Search and filter");
+    searchStep.body = Vanta::tr("Search matches names, sources, runners, and paths. The filter button adds "
                                      "compatibility and installation filters on top of the current sidebar "
                                      "selection.");
-    searchStep.targetHint = QStringLiteral("Filters combine with the active sidebar item.");
+    searchStep.targetHint = Vanta::tr("Filters combine with the active sidebar item.");
     steps.append(searchStep);
 
     TutorialOverlay::Step addStep;
     addStep.target = m_addButton;
-    addStep.title = QStringLiteral("Add a game");
-    addStep.body = QStringLiteral("Point Vanta at a folder or an executable you already have. Vanta never downloads "
+    addStep.title = Vanta::tr("Add a game");
+    addStep.body = Vanta::tr("Point Vanta at a folder or an executable you already have. Vanta never downloads "
                                   "games. Adding a game also runs a read-only scan when automatic scanning is "
                                   "enabled, so runner and fix detection is available immediately.");
-    addStep.targetHint = QStringLiteral("The editor has tabs for general details, the runner, OnlineFix, and environment variables.");
+    addStep.targetHint = Vanta::tr("The editor has tabs for general details, the runner, OnlineFix, and environment variables.");
     steps.append(addStep);
 
     TutorialOverlay::Step viewStep;
     viewStep.target = m_viewOptionsButton;
-    viewStep.title = QStringLiteral("Change the view");
-    viewStep.body = QStringLiteral("Switch between the cover grid and a compact table, resize covers, and toggle "
+    viewStep.title = Vanta::tr("Change the view");
+    viewStep.body = Vanta::tr("Switch between the cover grid and a compact table, resize covers, and toggle "
                                    "badges or subtle animations. Right-click any game for launch, edit, scan, and "
                                    "favourite actions.");
-    viewStep.targetHint = QStringLiteral("The small arrow opens more view options.");
+    viewStep.targetHint = Vanta::tr("The small arrow opens more view options.");
     steps.append(viewStep);
 
     TutorialOverlay::Step fixStep;
-    fixStep.title = QStringLiteral("OnlineFix is supported, not guaranteed");
-    fixStep.body = QStringLiteral("Vanta can detect OnlineFix signature files and apply the launcher-side behaviour "
+    fixStep.title = Vanta::tr("OnlineFix is supported, not guaranteed");
+    fixStep.body = Vanta::tr("Vanta can detect OnlineFix signature files and apply the launcher-side behaviour "
                                   "of OnlineFix Linux: INI updates with backups, the FreeTP app-id swap, "
                                   "ExtraProtection set to false, and launch-only Wine DLL overrides. Detection is "
                                   "not proof that a fix works, and Vanta never patches game binaries or downloads "
@@ -1523,17 +1520,17 @@ void MainWindow::showTutorialSteps()
     steps.append(fixStep);
 
     TutorialOverlay::Step runnerStep;
-    runnerStep.title = QStringLiteral("Runners are discovered automatically");
-    runnerStep.body = QStringLiteral("Vanta finds Wine and Proton builds from Steam, Lutris, Heroic, Bottles, and its "
+    runnerStep.title = Vanta::tr("Runners are discovered automatically");
+    runnerStep.body = Vanta::tr("Vanta finds Wine and Proton builds from Steam, Lutris, Heroic, Bottles, and its "
                                      "own runner folder. If you need a new runner, the runner dialog can install Wine "
                                      "through your package manager or download portable Wine and GE-Proton builds "
                                      "from their official GitHub releases.");
-    runnerStep.targetHint = QStringLiteral("Open Settings → Runners, or use the main menu, to install a runner.");
+    runnerStep.targetHint = Vanta::tr("Open Settings → Runners, or use the main menu, to install a runner.");
     steps.append(runnerStep);
 
     TutorialOverlay::Step doneStep;
-    doneStep.title = QStringLiteral("You are ready");
-    doneStep.body = QStringLiteral("Double-click a card to launch. Vanta tracks playtime and the last played time, "
+    doneStep.title = Vanta::tr("You are ready");
+    doneStep.body = Vanta::tr("Double-click a card to launch. Vanta tracks playtime and the last played time, "
                                    "keeps launch diagnostics for failures, and stops games cleanly, including the "
                                    "Wine prefix when needed. Reopen this tour from the sidebar whenever you want.");
     doneStep.showLogo = true;
@@ -1581,11 +1578,11 @@ OnlineFixInfo MainWindow::onlineFixInfoFor(const Game &game) const
 void MainWindow::requestLaunch(const QString &gameId, bool applyOnlineFix)
 {
     if (m_launcher.isRunning(gameId)) {
-        setStatusMessage(QStringLiteral("This game is already running."));
+        setStatusMessage(Vanta::tr("This game is already running."));
         return;
     }
     if (m_launcher.isShuttingDown(gameId)) {
-        setStatusMessage(QStringLiteral("The previous session is still shutting down. Try again in a moment."));
+        setStatusMessage(Vanta::tr("The previous session is still shutting down. Try again in a moment."));
         return;
     }
     bool found = false;
@@ -1593,7 +1590,7 @@ void MainWindow::requestLaunch(const QString &gameId, bool applyOnlineFix)
     if (!found)
         return;
     if (game.executable.trimmed().isEmpty() && !runnerIsWineLike(game.runner)) {
-        warn(QStringLiteral("Set an executable for this game before launching it."));
+        warn(Vanta::tr("Set an executable for this game before launching it."));
         return;
     }
 
@@ -1639,7 +1636,7 @@ void MainWindow::requestLaunch(const QString &gameId, bool applyOnlineFix)
     const OnlineFixDialog::LaunchChoice choice =
         OnlineFixDialog::promptForLaunch(game, m_pendingInfo, &m_theme, this);
     if (choice == OnlineFixDialog::LaunchChoice::Cancel) {
-        setStatusMessage(QStringLiteral("Launch cancelled."));
+        setStatusMessage(Vanta::tr("Launch cancelled."));
         return;
     }
     continueLaunchWithPolicy(gameId, m_pendingInfo,
@@ -1671,11 +1668,11 @@ void MainWindow::runSteamPrecondition()
     const SteamPromptDialog::Choice choice = SteamPromptDialog::prompt(game.name, &m_theme, this);
     switch (choice) {
     case SteamPromptDialog::Choice::Cancel:
-        setStatusMessage(QStringLiteral("Launch cancelled."));
+        setStatusMessage(Vanta::tr("Launch cancelled."));
         return;
     case SteamPromptDialog::Choice::PlayWithoutSteam:
         m_pendingSteamSkipped = true;
-        setStatusMessage(QStringLiteral("Launching without Steam. Online play will not work."), 9000);
+        setStatusMessage(Vanta::tr("Launching without Steam. Online play will not work."), 9000);
         applyPatchesAndLaunch();
         return;
     case SteamPromptDialog::Choice::OpenSteam:
@@ -1695,7 +1692,7 @@ void MainWindow::createLaunchDialog(const QString &gameId, const QString &gameNa
         if (m_steamPrecondition)
             m_steamPrecondition->cancel();
         closeLaunchDialog();
-        setStatusMessage(QStringLiteral("Launch cancelled."));
+        setStatusMessage(Vanta::tr("Launch cancelled."));
     });
     connect(m_launchDialog, &LaunchProgressDialog::logRequested, this, [this, gameId](const QString &path) {
         openLogs(gameId, path);
@@ -1707,9 +1704,9 @@ void MainWindow::startSteamAndWait()
 {
     closeLaunchDialog();
     createLaunchDialog(m_pendingGameId, m_library.gameById(m_pendingGameId).name);
-    m_launchDialog->setMessage(QStringLiteral("Starting Steam…"));
+    m_launchDialog->setMessage(Vanta::tr("Starting Steam…"));
     m_launchDialog->setIndeterminate();
-    m_launchDialog->setDetail(QStringLiteral("Vanta will launch the game once Steam is running and signed in."));
+    m_launchDialog->setDetail(Vanta::tr("Vanta will launch the game once Steam is running and signed in."));
 
     m_steamPrecondition = new SteamPrecondition(this);
     connect(m_steamPrecondition, &SteamPrecondition::progress, this, [this](const QString &message) {
@@ -1739,7 +1736,7 @@ void MainWindow::applyPatchesAndLaunch()
     bool found = false;
     const Game game = m_library.gameById(m_pendingGameId, &found);
     if (!found) {
-        abortLaunch(QStringLiteral("The game is no longer in the library."));
+        abortLaunch(Vanta::tr("The game is no longer in the library."));
         return;
     }
 
@@ -1747,25 +1744,25 @@ void MainWindow::applyPatchesAndLaunch()
     if (m_pendingApplyFix) {
         if (m_pendingSteamSkipped) {
             m_pendingDiagnostics.append(
-                QStringLiteral("Steam is not running. Online features will not work for this session."));
+                Vanta::tr("Steam is not running. Online features will not work for this session."));
         }
         const OnlineFixInfo info = onlineFixInfoFor(game);
         createLaunchDialog(game.id, game.name);
-        m_launchDialog->setMessage(QStringLiteral("Applying OnlineFix configuration…"));
+        m_launchDialog->setMessage(Vanta::tr("Applying OnlineFix configuration…"));
         m_launchDialog->setIndeterminate();
         const PatchResult patch = OnlineFixPatcher::apply(game, info);
         m_pendingDiagnostics.append(patch.diagnostics);
         for (const QString &file : patch.writtenFiles)
-            m_pendingDiagnostics.append(QStringLiteral("Wrote: %1").arg(file));
+            m_pendingDiagnostics.append(Vanta::tr("Wrote: %1").arg(file));
         for (const QString &file : patch.backedUpFiles)
-            m_pendingDiagnostics.append(QStringLiteral("Backup: %1").arg(file));
+            m_pendingDiagnostics.append(Vanta::tr("Backup: %1").arg(file));
         for (const QString &error : patch.errors)
-            m_pendingDiagnostics.append(QStringLiteral("Error: %1").arg(error));
+            m_pendingDiagnostics.append(Vanta::tr("Error: %1").arg(error));
         if (!patch.ok) {
             const QString detail = patch.errors.isEmpty()
-                ? QStringLiteral("The OnlineFix configuration could not be updated.")
+                ? Vanta::tr("The OnlineFix configuration could not be updated.")
                 : patch.errors.join(QLatin1Char('\n'));
-            abortLaunch(QStringLiteral("OnlineFix configuration failed. The launch was stopped before starting the game."),
+            abortLaunch(Vanta::tr("OnlineFix configuration failed. The launch was stopped before starting the game."),
                         detail);
             return;
         }
@@ -1781,7 +1778,7 @@ void MainWindow::performLaunch()
     bool found = false;
     const Game game = m_library.gameById(m_pendingGameId, &found);
     if (!found) {
-        abortLaunch(QStringLiteral("The game is no longer in the library."));
+        abortLaunch(Vanta::tr("The game is no longer in the library."));
         return;
     }
 
@@ -1796,12 +1793,12 @@ void MainWindow::performLaunch()
     const LaunchPlan plan = LaunchPlanBuilder::build(game, m_library.settings(), info, m_pendingApplyFix,
                                                      bepinexDetected, &error);
     if (!plan.isValid()) {
-        abortLaunch(error.isEmpty() ? QStringLiteral("The launch plan could not be built.") : error);
+        abortLaunch(error.isEmpty() ? Vanta::tr("The launch plan could not be built.") : error);
         return;
     }
 
     createLaunchDialog(game.id, game.name);
-    m_launchDialog->setMessage(QStringLiteral("Starting the game…"));
+    m_launchDialog->setMessage(Vanta::tr("Starting the game…"));
     m_launchDialog->setIndeterminate();
     QStringList detail = m_pendingDiagnostics;
     detail.append(plan.diagnostics);
@@ -1811,7 +1808,7 @@ void MainWindow::performLaunch()
 
     QString launchError;
     if (!m_launcher.launch(game, plan, &launchError)) {
-        abortLaunch(launchError.isEmpty() ? QStringLiteral("The game could not be started.") : launchError,
+        abortLaunch(launchError.isEmpty() ? Vanta::tr("The game could not be started.") : launchError,
                     plan.summary());
         return;
     }
@@ -1842,7 +1839,7 @@ void MainWindow::abortLaunch(const QString &message, const QString &detail)
             m_launchDialog->setDetail(detail);
         return;
     }
-    showDiagnostics(QStringLiteral("Launch failed"), message, detail);
+    showDiagnostics(Vanta::tr("Launch failed"), message, detail);
 }
 
 void MainWindow::closeLaunchDialog()
@@ -1880,22 +1877,22 @@ void MainWindow::handleGameFinished(const QString &gameId, qint64 elapsedSeconds
     }
     updateRunningState();
     if (stopped) {
-        setStatusMessage(QStringLiteral("Game stopped."));
+        setStatusMessage(Vanta::tr("Game stopped."));
         return;
     }
     if (crashed) {
-        const QString name = found ? game.name : QStringLiteral("The game");
-        setStatusMessage(QStringLiteral("The game exited unexpectedly (code %1).").arg(exitCode), 12000);
+        const QString name = found ? game.name : Vanta::tr("The game");
+        setStatusMessage(Vanta::tr("The game exited unexpectedly (code %1).").arg(exitCode), 12000);
         if (logPath.isEmpty()) {
-            showDiagnostics(QStringLiteral("Game exited unexpectedly"),
-                            QStringLiteral("%1 exited with code %2. Diagnostics from the launch are below.")
+            showDiagnostics(Vanta::tr("Game exited unexpectedly"),
+                            Vanta::tr("%1 exited with code %2. Diagnostics from the launch are below.")
                                 .arg(name).arg(exitCode),
                             diagnostic);
             return;
         }
         const auto reply = QMessageBox::question(
-            this, QStringLiteral("Game exited unexpectedly"),
-            QStringLiteral("%1 exited with code %2. Vanta saved the launch log, including everything the "
+            this, Vanta::tr("Game exited unexpectedly"),
+            Vanta::tr("%1 exited with code %2. Vanta saved the launch log, including everything the "
                            "runner printed, so you can see what happened.\n\nOpen the log now?")
                 .arg(name).arg(exitCode),
             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
@@ -1903,7 +1900,7 @@ void MainWindow::handleGameFinished(const QString &gameId, qint64 elapsedSeconds
             openLogs(gameId, logPath);
         return;
     }
-    setStatusMessage(QStringLiteral("Game closed."));
+    setStatusMessage(Vanta::tr("Game closed."));
 }
 
 void MainWindow::updateRunningState()
@@ -1930,7 +1927,7 @@ void MainWindow::toggleFavorite(const QString &gameId)
     game.favorite = !game.favorite;
     game.modifiedAt = QDateTime::currentDateTime();
     m_library.updateGame(game);
-    setStatusMessage(game.favorite ? QStringLiteral("Added to favorites.") : QStringLiteral("Removed from favorites."));
+    setStatusMessage(game.favorite ? Vanta::tr("Added to favorites.") : Vanta::tr("Removed from favorites."));
 }
 
 void MainWindow::removeGame(const QString &gameId)
@@ -1941,9 +1938,9 @@ void MainWindow::removeGame(const QString &gameId)
         return;
     QMessageBox box(this);
     box.setIcon(QMessageBox::Question);
-    box.setWindowTitle(QStringLiteral("Remove game"));
-    box.setText(QStringLiteral("Remove %1 from the library?").arg(game.name));
-    box.setInformativeText(QStringLiteral("Game files are not touched. Only the library entry and its cached scan "
+    box.setWindowTitle(Vanta::tr("Remove game"));
+    box.setText(Vanta::tr("Remove %1 from the library?").arg(game.name));
+    box.setInformativeText(Vanta::tr("Game files are not touched. Only the library entry and its cached scan "
                                           "result are removed."));
     box.setStandardButtons(QMessageBox::Cancel | QMessageBox::Yes);
     box.setDefaultButton(QMessageBox::Cancel);
@@ -1954,12 +1951,12 @@ void MainWindow::removeGame(const QString &gameId)
     if (m_launcher.isRunning(gameId))
         m_launcher.stopGame(gameId);
     if (!m_library.removeGame(gameId)) {
-        warn(QStringLiteral("The game could not be removed from the library."));
+        warn(Vanta::tr("The game could not be removed from the library."));
         return;
     }
     if (m_selectedGameId == gameId)
         m_selectedGameId.clear();
-    setStatusMessage(QStringLiteral("Removed %1.").arg(game.name));
+    setStatusMessage(Vanta::tr("Removed %1.").arg(game.name));
 }
 
 void MainWindow::openGameFolder(const QString &gameId)
@@ -1982,11 +1979,11 @@ void MainWindow::openGamePrefix(const QString &gameId)
         return;
     const QString prefix = LaunchPlanBuilder::effectiveWinePrefix(game);
     if (prefix.isEmpty()) {
-        warn(QStringLiteral("This game has no configured Wine prefix."));
+        warn(Vanta::tr("This game has no configured Wine prefix."));
         return;
     }
     if (!QDir().mkpath(prefix)) {
-        warn(QStringLiteral("The prefix folder does not exist yet and could not be created."));
+        warn(Vanta::tr("The prefix folder does not exist yet and could not be created."));
         return;
     }
     showGameInFileManager(prefix);
@@ -1995,7 +1992,7 @@ void MainWindow::openGamePrefix(const QString &gameId)
 void MainWindow::showGameInFileManager(const QString &path)
 {
     if (path.isEmpty() || !QFileInfo::exists(path)) {
-        warn(QStringLiteral("The folder no longer exists: %1").arg(path));
+        warn(Vanta::tr("The folder no longer exists: %1").arg(path));
         return;
     }
     QDesktopServices::openUrl(QUrl::fromLocalFile(path));
@@ -2006,11 +2003,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if (!m_running.isEmpty() && !m_shuttingDown) {
         QMessageBox box(this);
         box.setIcon(QMessageBox::Question);
-        box.setWindowTitle(QStringLiteral("Quit Vanta"));
-        box.setText(QStringLiteral("%1 game%2 still running. Quit anyway?")
-                        .arg(m_running.size())
-                        .arg(m_running.size() == 1 ? QString() : QStringLiteral("s are")));
-        box.setInformativeText(QStringLiteral("Running games will be stopped."));
+        box.setWindowTitle(Vanta::tr("Quit Vanta"));
+        box.setText(Vanta::tr("%n game(s) still running. Quit anyway?", nullptr, static_cast<int>(m_running.size())));
+        box.setInformativeText(Vanta::tr("Running games will be stopped."));
         box.setStandardButtons(QMessageBox::Cancel | QMessageBox::Yes);
         box.setDefaultButton(QMessageBox::Cancel);
         if (box.exec() != QMessageBox::Yes) {

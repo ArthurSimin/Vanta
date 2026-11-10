@@ -1,5 +1,6 @@
 #include "ModManagerDialog.h"
 
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ModInstaller.h"
 #include "ThemeManager.h"
@@ -57,7 +58,7 @@ QString warningText(const QStringList &warnings)
 }
 
 ModManagerDialog::ModManagerDialog(const Game &game, ThemeManager *theme, QWidget *parent)
-    : VantaDialog(QStringLiteral("Mods"), theme, parent)
+    : VantaDialog(Vanta::tr("Mods"), theme, parent)
     , m_game(game)
     , m_theme(theme)
 {
@@ -78,23 +79,23 @@ void ModManagerDialog::buildUi()
     layout->setContentsMargins(2, 2, 8, 2);
     layout->setSpacing(14);
 
-    auto *title = new QLabel(m_game.name.isEmpty() ? QStringLiteral("Mods") : m_game.name, content);
+    auto *title = new QLabel(m_game.name.isEmpty() ? Vanta::tr("Mods") : m_game.name, content);
     title->setProperty("class", QStringLiteral("pageTitle"));
     title->setWordWrap(true);
     layout->addWidget(title);
 
     layout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Vanta lists the plugin and patcher DLLs inside this game's BepInEx folder. "
+        Vanta::tr("Vanta lists the plugin and patcher DLLs inside this game's BepInEx folder. "
                        "Enabling or disabling a mod only renames its file between .dll and .dll.disabled; "
                        "the DLL contents are never changed or deleted."),
         content));
 
     auto *chips = new QHBoxLayout;
     chips->setSpacing(6);
-    m_generationChip = chipLabel(QStringLiteral("Detecting…"), content, true);
-    m_enabledChip = chipLabel(QStringLiteral("0 enabled"), content);
-    m_disabledChip = chipLabel(QStringLiteral("0 disabled"), content);
-    m_doorstopChip = chipLabel(QStringLiteral("Doorstop"), content);
+    m_generationChip = chipLabel(Vanta::tr("Detecting…"), content, true);
+    m_enabledChip = chipLabel(Vanta::tr("0 enabled"), content);
+    m_disabledChip = chipLabel(Vanta::tr("0 disabled"), content);
+    m_doorstopChip = chipLabel(Vanta::tr("Doorstop"), content);
     chips->addWidget(m_generationChip);
     chips->addWidget(m_enabledChip);
     chips->addWidget(m_disabledChip);
@@ -107,7 +108,7 @@ void ModManagerDialog::buildUi()
     auto *infoLayout = new QVBoxLayout(infoPanel);
     infoLayout->setContentsMargins(16, 14, 16, 14);
     infoLayout->setSpacing(10);
-    infoLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("BepInEx installation"), infoPanel));
+    infoLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("BepInEx installation"), infoPanel));
     auto *form = new QFormLayout;
     form->setHorizontalSpacing(14);
     form->setVerticalSpacing(8);
@@ -115,11 +116,11 @@ void ModManagerDialog::buildUi()
     m_rootField = new QLineEdit(infoPanel);
     m_rootField->setReadOnly(true);
     m_rootField->setCursorPosition(0);
-    form->addRow(QStringLiteral("Folder"), m_rootField);
+    form->addRow(Vanta::tr("Folder"), m_rootField);
     m_doorstopField = new QLineEdit(infoPanel);
     m_doorstopField->setReadOnly(true);
     m_doorstopField->setCursorPosition(0);
-    form->addRow(QStringLiteral("Doorstop"), m_doorstopField);
+    form->addRow(Vanta::tr("Doorstop"), m_doorstopField);
     infoLayout->addLayout(form);
     layout->addWidget(infoPanel);
 
@@ -137,8 +138,8 @@ void ModManagerDialog::buildUi()
     m_table = new QTableWidget(content);
     m_table->setObjectName(QStringLiteral("modTable"));
     m_table->setColumnCount(4);
-    m_table->setHorizontalHeaderLabels({QStringLiteral("Mod"), QStringLiteral("Kind"),
-                                        QStringLiteral("State"), QStringLiteral("File")});
+    m_table->setHorizontalHeaderLabels({Vanta::tr("Mod"), Vanta::tr("Kind"),
+                                        Vanta::tr("State"), Vanta::tr("File")});
     m_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -181,40 +182,40 @@ void ModManagerDialog::buildUi()
 
     auto *footer = new QHBoxLayout;
     footer->setSpacing(8);
-    m_addButton = new QPushButton(QStringLiteral("Add mod file…"), this);
+    m_addButton = new QPushButton(Vanta::tr("Add mod file…"), this);
     m_addButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_addButton);
     m_addButton->setAutoDefault(false);
     connect(m_addButton, &QPushButton::clicked, this, &ModManagerDialog::addLocalMod);
     footer->addWidget(m_addButton);
 
-    m_toggleButton = new QPushButton(QStringLiteral("Toggle"), this);
+    m_toggleButton = new QPushButton(Vanta::tr("Toggle"), this);
     m_toggleButton->setCursor(Qt::PointingHandCursor);
     m_toggleButton->setAutoDefault(false);
     m_toggleButton->setEnabled(false);
     connect(m_toggleButton, &QPushButton::clicked, this, &ModManagerDialog::toggleSelected);
     footer->addWidget(m_toggleButton);
 
-    m_thunderstoreButton = new QPushButton(QStringLiteral("Browse Thunderstore…"), this);
+    m_thunderstoreButton = new QPushButton(Vanta::tr("Browse Thunderstore…"), this);
     m_thunderstoreButton->setCursor(Qt::PointingHandCursor);
     m_thunderstoreButton->setAutoDefault(false);
     connect(m_thunderstoreButton, &QPushButton::clicked, this, &ModManagerDialog::openThunderstore);
     footer->addWidget(m_thunderstoreButton);
 
-    m_openFolderButton = new QPushButton(QStringLiteral("Open folder"), this);
+    m_openFolderButton = new QPushButton(Vanta::tr("Open folder"), this);
     m_openFolderButton->setCursor(Qt::PointingHandCursor);
     m_openFolderButton->setAutoDefault(false);
     connect(m_openFolderButton, &QPushButton::clicked, this, &ModManagerDialog::openModFolder);
     footer->addWidget(m_openFolderButton);
 
-    m_refreshButton = new QPushButton(QStringLiteral("Refresh"), this);
+    m_refreshButton = new QPushButton(Vanta::tr("Refresh"), this);
     m_refreshButton->setCursor(Qt::PointingHandCursor);
     m_refreshButton->setAutoDefault(false);
     connect(m_refreshButton, &QPushButton::clicked, this, &ModManagerDialog::refresh);
     footer->addWidget(m_refreshButton);
     footer->addStretch(1);
 
-    m_closeButton = new QPushButton(QStringLiteral("Close"), this);
+    m_closeButton = new QPushButton(Vanta::tr("Close"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
     // The mod list clears its selection after every refresh, so a stale Enter
     // could only ever fall through to Add mod file. Enter closes the dialog.
@@ -247,52 +248,52 @@ void ModManagerDialog::refreshIcons()
 void ModManagerDialog::updateDetection()
 {
     const bool detected = m_install.isValid();
-    m_generationChip->setText(detected ? m_install.generation : QStringLiteral("BepInEx not detected"));
+    m_generationChip->setText(detected ? m_install.generation : Vanta::tr("BepInEx not detected"));
     m_generationChip->setProperty("accent", detected);
     repolish(m_generationChip);
 
     m_enabledChip->setVisible(detected);
     m_disabledChip->setVisible(detected);
     m_doorstopChip->setVisible(detected);
-    m_enabledChip->setText(QStringLiteral("%1 enabled").arg(m_install.enabledModCount()));
-    m_disabledChip->setText(QStringLiteral("%1 disabled").arg(m_install.disabledModCount()));
+    m_enabledChip->setText(Vanta::tr("%1 enabled").arg(m_install.enabledModCount()));
+    m_disabledChip->setText(Vanta::tr("%1 disabled").arg(m_install.disabledModCount()));
 
     if (detected) {
         const bool doorstopReady = !m_install.doorstopMarkers.isEmpty();
-        m_doorstopChip->setText(doorstopReady ? QStringLiteral("Doorstop ready")
-                                              : QStringLiteral("Doorstop missing"));
+        m_doorstopChip->setText(doorstopReady ? Vanta::tr("Doorstop ready")
+                                              : Vanta::tr("Doorstop missing"));
         m_rootField->setText(QDir::toNativeSeparators(m_install.root));
         m_rootField->setToolTip(m_rootField->text());
         m_doorstopField->setText(m_install.doorstopMarkers.isEmpty()
-                                     ? QStringLiteral("No doorstop files were found in the game folder.")
+                                     ? Vanta::tr("No doorstop files were found in the game folder.")
                                      : m_install.doorstopMarkers.join(QStringLiteral(", ")));
         m_doorstopField->setToolTip(m_doorstopField->text());
         const QString warnings = warningText(m_install.warnings);
         m_warningLabel->setText(warnings);
         m_warningLabel->setVisible(!warnings.isEmpty());
-        m_thunderstoreButton->setText(QStringLiteral("Browse Thunderstore…"));
+        m_thunderstoreButton->setText(Vanta::tr("Browse Thunderstore…"));
     } else {
-        m_rootField->setText(QStringLiteral("Not detected"));
+        m_rootField->setText(Vanta::tr("Not detected"));
         m_rootField->setToolTip(QString());
         m_doorstopField->clear();
         m_doorstopField->setToolTip(QString());
         m_warningLabel->setText(
-            QStringLiteral("Vanta did not find a BepInEx folder for this game. You can still import a local "
+            Vanta::tr("Vanta did not find a BepInEx folder for this game. You can still import a local "
                            "package or install the BepInEx pack from Thunderstore; Vanta will create the "
                            "conventional BepInEx folder inside the game directory."));
         m_warningLabel->setVisible(true);
-        m_thunderstoreButton->setText(QStringLiteral("Get BepInEx and mods…"));
+        m_thunderstoreButton->setText(Vanta::tr("Get BepInEx and mods…"));
     }
 
     if (!detected) {
         m_emptyLabel->setText(
-            QStringLiteral("No BepInEx installation was detected. A Wine or Proton game usually needs the "
+            Vanta::tr("No BepInEx installation was detected. A Wine or Proton game usually needs the "
                            "BepInEx pack before plugin DLLs can load, and a native game needs the doorstop "
                            "launcher script. Use “Get BepInEx and mods…” or import a package that "
                            "contains BepInEx."));
     } else if (m_install.mods.isEmpty()) {
         m_emptyLabel->setText(
-            QStringLiteral("The BepInEx installation contains no plugin or patcher DLLs yet. Use “Add mod file…” "
+            Vanta::tr("The BepInEx installation contains no plugin or patcher DLLs yet. Use “Add mod file…” "
                            "to import a .dll or .zip package, or browse Thunderstore."));
     } else {
         m_emptyLabel->clear();
@@ -314,12 +315,12 @@ void ModManagerDialog::updateTable()
         nameItem->setToolTip(QDir::toNativeSeparators(mod.path));
         m_table->setItem(row, 0, nameItem);
 
-        auto *kindItem = new QTableWidgetItem(mod.patcher ? QStringLiteral("Patcher") : QStringLiteral("Plugin"));
+        auto *kindItem = new QTableWidgetItem(mod.patcher ? Vanta::tr("Patcher") : Vanta::tr("Plugin"));
         kindItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         m_table->setItem(row, 1, kindItem);
 
-        auto *stateItem = new QTableWidgetItem(mod.enabled ? QStringLiteral("Enabled")
-                                                           : QStringLiteral("Disabled"));
+        auto *stateItem = new QTableWidgetItem(mod.enabled ? Vanta::tr("Enabled")
+                                                           : Vanta::tr("Disabled"));
         stateItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         m_table->setItem(row, 2, stateItem);
 
@@ -356,12 +357,12 @@ void ModManagerDialog::updateSelectionActions()
         mod = &m_install.mods.at(row);
     m_toggleButton->setEnabled(mod != nullptr);
     if (!mod) {
-        m_toggleButton->setText(QStringLiteral("Toggle"));
+        m_toggleButton->setText(Vanta::tr("Toggle"));
         return;
     }
-    m_toggleButton->setText(mod->enabled ? QStringLiteral("Disable") : QStringLiteral("Enable"));
-    m_toggleButton->setToolTip(QStringLiteral("%1 %2")
-                                   .arg(mod->enabled ? QStringLiteral("Disable") : QStringLiteral("Enable"),
+    m_toggleButton->setText(mod->enabled ? Vanta::tr("Disable") : Vanta::tr("Enable"));
+    m_toggleButton->setToolTip(Vanta::tr("%1 %2")
+                                   .arg(mod->enabled ? Vanta::tr("Disable") : Vanta::tr("Enable"),
                                         mod->name));
 }
 
@@ -386,21 +387,21 @@ void ModManagerDialog::toggleMod(const QString &path, bool enabled)
 {
     const BepInExMod *mod = modForPath(path);
     if (!mod) {
-        setFeedback(QStringLiteral("The selected mod is no longer present. The list was refreshed."), true);
+        setFeedback(Vanta::tr("The selected mod is no longer present. The list was refreshed."), true);
         refresh();
         return;
     }
 
     QString error;
     if (!BepInEx::setModEnabled(m_install, *mod, enabled, &error)) {
-        setFeedback(error.isEmpty() ? QStringLiteral("The mod could not be changed.") : error, true);
+        setFeedback(error.isEmpty() ? Vanta::tr("The mod could not be changed.") : error, true);
         refresh();
         return;
     }
 
     const QString name = mod->name;
-    setFeedback(QStringLiteral("%1 is now %2.")
-                    .arg(name, enabled ? QStringLiteral("enabled") : QStringLiteral("disabled")),
+    setFeedback(Vanta::tr("%1 is now %2.")
+                    .arg(name, enabled ? Vanta::tr("enabled") : Vanta::tr("disabled")),
                 false);
     refresh();
     emit modsChanged();
@@ -410,14 +411,14 @@ void ModManagerDialog::addLocalMod()
 {
     const QString directory = m_game.effectiveDirectory();
     if (directory.isEmpty() || !QFileInfo(directory).isDir()) {
-        QMessageBox::warning(this, QStringLiteral("Game folder unavailable"),
-                             QStringLiteral("The game folder is not available, so Vanta cannot install a mod."));
+        QMessageBox::warning(this, Vanta::tr("Game folder unavailable"),
+                             Vanta::tr("The game folder is not available, so Vanta cannot install a mod."));
         return;
     }
 
     const QString start = m_install.isValid() ? m_install.pluginsPath : directory;
     const QString path = QFileDialog::getOpenFileName(
-        this, QStringLiteral("Add mod file"), start,
+        this, Vanta::tr("Add mod file"), start,
         QStringLiteral("Mod packages (*.zip *.dll *.dll.disabled);;ZIP archives (*.zip);;DLL files (*.dll *.dll.disabled)"));
     if (path.isEmpty())
         return;
@@ -427,7 +428,7 @@ void ModManagerDialog::addLocalMod()
     ModInstallPlan plan;
     QString error;
     if (!ModInstaller::planFromFile(path, target, &plan, &error)) {
-        QMessageBox::warning(this, QStringLiteral("Mod not installed"), error);
+        QMessageBox::warning(this, Vanta::tr("Mod not installed"), error);
         return;
     }
 
@@ -436,10 +437,10 @@ void ModManagerDialog::addLocalMod()
         QStringList sample = plan.conflicts.mid(0, 8);
         QString detail = sample.join(QLatin1Char('\n'));
         if (plan.conflicts.size() > sample.size())
-            detail += QStringLiteral("\nand %1 more").arg(plan.conflicts.size() - sample.size());
+            detail += Vanta::tr("\nand %1 more").arg(plan.conflicts.size() - sample.size());
         const auto reply = QMessageBox::question(
-            this, QStringLiteral("Replace existing files?"),
-            QStringLiteral("%1 file(s) already exist with different contents:\n\n%2\n\n"
+            this, Vanta::tr("Replace existing files?"),
+            Vanta::tr("%1 file(s) already exist with different contents:\n\n%2\n\n"
                            "Vanta copies each replaced file under BepInEx/.vanta-backups before writing. "
                            "Nothing is deleted. Continue?")
                 .arg(plan.conflicts.size())
@@ -455,11 +456,11 @@ void ModManagerDialog::addLocalMod()
     if (!ModInstaller::execute(plan, target, overwrite, &written, &backupRoot, &error)) {
         QString message = error;
         if (!written.isEmpty()) {
-            message += QStringLiteral(" %1 file(s) were written before the failure.").arg(written.size());
+            message += Vanta::tr(" %1 file(s) were written before the failure.").arg(written.size());
         }
         QMessageBox::critical(this,
-                              written.isEmpty() ? QStringLiteral("Mod not installed")
-                                                : QStringLiteral("Mod installation incomplete"),
+                              written.isEmpty() ? Vanta::tr("Mod not installed")
+                                                : Vanta::tr("Mod installation incomplete"),
                               message);
         refresh();
         if (!written.isEmpty())
@@ -470,11 +471,11 @@ void ModManagerDialog::addLocalMod()
     const QString name = plan.displayName.isEmpty() ? plan.packageName : plan.displayName;
     QString message;
     if (written.isEmpty()) {
-        message = QStringLiteral("%1 is already installed and every file matches. Nothing changed.").arg(name);
+        message = Vanta::tr("%1 is already installed and every file matches. Nothing changed.").arg(name);
     } else {
-        message = QStringLiteral("Installed %1 file(s) for %2.").arg(written.size()).arg(name);
+        message = Vanta::tr("Installed %1 file(s) for %2.").arg(written.size()).arg(name);
         if (!backupRoot.isEmpty())
-            message += QStringLiteral(" Backups: %1").arg(QDir::toNativeSeparators(backupRoot));
+            message += Vanta::tr(" Backups: %1").arg(QDir::toNativeSeparators(backupRoot));
     }
     const QString warnings = warningText(plan.warnings);
     if (!warnings.isEmpty())
@@ -488,8 +489,8 @@ void ModManagerDialog::addLocalMod()
 void ModManagerDialog::openThunderstore()
 {
     if (m_game.effectiveDirectory().isEmpty() || !QFileInfo(m_game.effectiveDirectory()).isDir()) {
-        QMessageBox::warning(this, QStringLiteral("Game folder unavailable"),
-                             QStringLiteral("The game folder is not available, so Vanta cannot install a mod."));
+        QMessageBox::warning(this, Vanta::tr("Game folder unavailable"),
+                             Vanta::tr("The game folder is not available, so Vanta cannot install a mod."));
         return;
     }
 
@@ -513,7 +514,7 @@ void ModManagerDialog::openModFolder()
 {
     const QString folder = modFolder();
     if (folder.isEmpty() || !QFileInfo::exists(folder)) {
-        setFeedback(QStringLiteral("The mod folder does not exist yet."), true);
+        setFeedback(Vanta::tr("The mod folder does not exist yet."), true);
         return;
     }
     UiHelp::openContainingDirectory(folder);

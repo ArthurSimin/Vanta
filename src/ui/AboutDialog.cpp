@@ -1,4 +1,5 @@
 #include "AboutDialog.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 #include "Version.h"
@@ -13,7 +14,7 @@
 #include <QVBoxLayout>
 
 AboutDialog::AboutDialog(ThemeManager *theme, QWidget *parent)
-    : VantaDialog(QStringLiteral("About Vanta"), theme, parent)
+    : VantaDialog(Vanta::tr("About Vanta"), theme, parent)
     , m_theme(theme)
 {
     setObjectName(QStringLiteral("aboutDialog"));
@@ -44,11 +45,11 @@ void AboutDialog::buildUi()
     auto *title = new QLabel(QStringLiteral("Vanta"), content);
     title->setProperty("class", QStringLiteral("pageTitle"));
     titleColumn->addWidget(title);
-    auto *subtitle = new QLabel(QStringLiteral("Linux game launcher — version %1").arg(QStringLiteral(VANTA_VERSION)),
+    auto *subtitle = new QLabel(Vanta::tr("Linux game launcher — version %1").arg(QStringLiteral(VANTA_VERSION)),
                                 content);
     subtitle->setProperty("class", QStringLiteral("muted"));
     titleColumn->addWidget(subtitle);
-    auto *license = new QLabel(QStringLiteral("Licensed under the GNU Affero General Public License v3.0"), content);
+    auto *license = new QLabel(Vanta::tr("Licensed under the GNU Affero General Public License v3.0"), content);
     license->setProperty("class", QStringLiteral("muted"));
     license->setWordWrap(true);
     titleColumn->addWidget(license);
@@ -59,7 +60,7 @@ void AboutDialog::buildUi()
     layout->addWidget(UiHelp::separator(content));
 
     auto *intro = UiHelp::helpLabel(
-        QStringLiteral("Vanta organises a local game library, launches native and Windows games through Wine or "
+        Vanta::tr("Vanta organises a local game library, launches native and Windows games through Wine or "
                        "Proton, discovers runners installed by other launchers, and reports what it finds in a game "
                        "folder. It never downloads games and never claims that a detected fix will work."),
         content);
@@ -70,16 +71,17 @@ void AboutDialog::buildUi()
     auto *creditsLayout = new QVBoxLayout(creditsPanel);
     creditsLayout->setContentsMargins(16, 14, 16, 14);
     creditsLayout->setSpacing(8);
-    creditsLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("OnlineFix Linux credit"), creditsPanel));
+    creditsLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("OnlineFix Linux credit"), creditsPanel));
     creditsLayout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("OnlineFix support in Vanta is a port of the launcher-side behaviour of OnlineFix Linux "
+        Vanta::tr("OnlineFix support in Vanta is a port of the launcher-side behaviour of OnlineFix Linux "
                        "(OFLL) by ZzEdovec, used under the GNU Affero General Public License v3.0. The upstream "
                        "project defines how OnlineFix signature files are recognised, how steamfix.ini is swapped "
                        "for FreeTP games, how ExtraProtection is written, and which Wine DLL overrides are composed. "
                        "Vanta reimplements that behaviour in C++/Qt and documents the mapping in ONLINEFIX.md."),
         creditsPanel));
 
-    auto *repoButton = new QPushButton(QStringLiteral("Open the OnlineFix Linux repository"), creditsPanel);
+    auto *repoButton = new QPushButton(Vanta::tr("Open the OnlineFix Linux repository"), creditsPanel);
+    repoButton->setObjectName(QStringLiteral("aboutRepoButton"));
     repoButton->setCursor(Qt::PointingHandCursor);
     repoButton->setAutoDefault(false);
     connect(repoButton, &QPushButton::clicked, this, [] {
@@ -99,15 +101,15 @@ void AboutDialog::buildUi()
     auto *componentsLayout = new QVBoxLayout(componentsPanel);
     componentsLayout->setContentsMargins(16, 14, 16, 14);
     componentsLayout->setSpacing(7);
-    componentsLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("Built with"), componentsPanel));
+    componentsLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("Built with"), componentsPanel));
     componentsLayout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Qt %1 (Widgets, SVG, Concurrent, Network), CMake, and the Ninja build system. "
+        Vanta::tr("Qt %1 (Widgets, SVG, Concurrent, Network), CMake, and the Ninja build system. "
                        "Icon artwork is original to Vanta. Icons for third-party launchers are simple original "
                        "glyphs, not vendor trademarks.")
             .arg(QString::fromLatin1(qVersion())),
         componentsPanel));
     componentsLayout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Vanta is an independent project. It is not affiliated with Valve, CodeWeavers, "
+        Vanta::tr("Vanta is an independent project. It is not affiliated with Valve, CodeWeavers, "
                        "GloriousEggroll, Kron4ek, or the authors of any game or fix."),
         componentsPanel));
     layout->addWidget(componentsPanel);
@@ -122,7 +124,8 @@ void AboutDialog::buildUi()
 
     auto *footer = new QHBoxLayout;
     footer->addStretch(1);
-    auto *close = new QPushButton(QStringLiteral("Close"), this);
+    auto *close = new QPushButton(Vanta::tr("Close"), this);
+    close->setObjectName(QStringLiteral("aboutCloseButton"));
     close->setCursor(Qt::PointingHandCursor);
     close->setDefault(true);
     connect(close, &QPushButton::clicked, this, &QDialog::accept);
@@ -137,9 +140,11 @@ void AboutDialog::refreshIcons()
     const ThemeColors &colors = m_theme->colors();
     const QList<QPushButton *> buttons = findChildren<QPushButton *>();
     for (QPushButton *button : buttons) {
-        if (button->text().startsWith(QStringLiteral("Open the OnlineFix")))
+        // Match on object names rather than text: the labels change with the
+        // interface language, and a translated label must not lose its icon.
+        if (button->objectName() == QStringLiteral("aboutRepoButton"))
             Icons::setButtonIcon(button, Glyph::External, colors.text, 16);
-        else if (button->text() == QStringLiteral("Close"))
+        else if (button->objectName() == QStringLiteral("aboutCloseButton"))
             Icons::setButtonIcon(button, Glyph::Check, colors.text, 16);
     }
 }

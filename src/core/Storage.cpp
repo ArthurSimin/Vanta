@@ -1,5 +1,7 @@
 #include "Storage.h"
 
+#include "I18n.h"
+
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -49,20 +51,20 @@ QJsonObject Storage::readJsonObject(const QString &path, bool *ok, QString *erro
     }
     if (!file.open(QIODevice::ReadOnly)) {
         if (error)
-            *error = QStringLiteral("Could not read %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not read %1: %2").arg(path, file.errorString());
         return {};
     }
     const QByteArray data = file.readAll();
     if (file.error() != QFileDevice::NoError) {
         if (error)
-            *error = QStringLiteral("Could not read %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not read %1: %2").arg(path, file.errorString());
         return {};
     }
     QJsonParseError parseError;
     const QJsonDocument document = QJsonDocument::fromJson(data, &parseError);
     if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
         if (error)
-            *error = QStringLiteral("Invalid JSON in %1: %2").arg(path, parseError.errorString());
+            *error = Vanta::tr("Invalid JSON in %1: %2").arg(path, parseError.errorString());
         if (!data.trimmed().isEmpty())
             quarantineCorruptFile(path);
         return {};
@@ -94,30 +96,30 @@ bool Storage::writeBytesAtomically(const QString &path, const QByteArray &data, 
     QSaveFile file(path);
     if (!file.open(QIODevice::WriteOnly)) {
         if (error)
-            *error = QStringLiteral("Could not open %1 for writing: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not open %1 for writing: %2").arg(path, file.errorString());
         return false;
     }
     if (file.write(data) != data.size()) {
         if (error)
-            *error = QStringLiteral("Could not write %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not write %1: %2").arg(path, file.errorString());
         file.cancelWriting();
         return false;
     }
     if (!file.flush()) {
         if (error)
-            *error = QStringLiteral("Could not flush %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not flush %1: %2").arg(path, file.errorString());
         file.cancelWriting();
         return false;
     }
     if (!file.commit()) {
         if (error)
-            *error = QStringLiteral("Could not commit %1: %2").arg(path, file.errorString());
+            *error = Vanta::tr("Could not commit %1: %2").arg(path, file.errorString());
         return false;
     }
     QFile verify(path);
     if (!verify.open(QIODevice::ReadOnly) || verify.size() != data.size()) {
         if (error)
-            *error = QStringLiteral("Verification failed after writing %1").arg(path);
+            *error = Vanta::tr("Verification failed after writing %1").arg(path);
         return false;
     }
     return true;
@@ -145,7 +147,7 @@ QList<Game> Storage::loadLibrary(QStringList *warnings)
     const QJsonValue gamesValue = root.value(QStringLiteral("games"));
     if (!gamesValue.isArray()) {
         if (!root.isEmpty() && warnings)
-            warnings->append(QStringLiteral("Library file has no games array; starting with an empty library."));
+            warnings->append(Vanta::tr("Library file has no games array; starting with an empty library."));
         return games;
     }
     const QJsonArray array = gamesValue.toArray();
@@ -212,6 +214,12 @@ ScanCache Storage::loadScanCache(QStringList *warnings)
             warnings->append(error);
         return cache;
     }
+    // ScanResult carries report text (architecture, component explanations,
+    // warnings) that is translated when the scan runs, so a cache written under
+    // another interface language would paint stale strings. Treat it as empty
+    // and let the scanner rebuild it in the active language.
+    if (root.value(QStringLiteral("language")).toString() != I18n::currentCode())
+        return cache;
     const QJsonObject scans = root.value(QStringLiteral("scans")).toObject();
     for (auto it = scans.constBegin(); it != scans.constEnd(); ++it) {
         if (!it.value().isObject())
@@ -230,6 +238,7 @@ bool Storage::saveScanCache(const ScanCache &cache, QString *error)
         scans.insert(it.key(), it.value().toJson());
     QJsonObject root;
     root.insert(QStringLiteral("version"), 1);
+    root.insert(QStringLiteral("language"), I18n::currentCode());
     root.insert(QStringLiteral("scans"), scans);
     return writeJsonAtomically(scanCachePath(), root, error);
 }

@@ -1,5 +1,7 @@
 #include "BepInEx.h"
 
+#include "I18n.h"
+
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
@@ -128,7 +130,7 @@ void appendMods(const QString &root, const QString &directory, bool patcher, Bep
         const QFileInfo info(path);
         if (info.isSymLink()) {
             install->warnings.append(
-                QStringLiteral("Skipped symbolic link %1.").arg(QDir::toNativeSeparators(path)));
+                Vanta::tr("Skipped symbolic link %1.").arg(QDir::toNativeSeparators(path)));
             continue;
         }
         if (!info.isFile())
@@ -154,7 +156,7 @@ void appendMods(const QString &root, const QString &directory, bool patcher, Bep
 
 QString stateName(bool enabled)
 {
-    return enabled ? QStringLiteral("enabled") : QStringLiteral("disabled");
+    return enabled ? Vanta::tr("enabled") : Vanta::tr("disabled");
 }
 }
 
@@ -205,7 +207,7 @@ BepInExInstall BepInEx::detect(const QString &gameDirectory, const QString &exec
     // therefore normal and must not be reported as a broken installation.
     if (install.corePath.isEmpty() && install.pluginsPath.isEmpty() && install.patchersPath.isEmpty()) {
         install.warnings.append(
-            QStringLiteral("The BepInEx folder does not contain a core, plugins, or patchers folder."));
+            Vanta::tr("The BepInEx folder does not contain a core, plugins, or patchers folder."));
     }
 
     appendMods(install.root, install.pluginsPath, false, &install);
@@ -222,7 +224,7 @@ BepInExInstall BepInEx::detect(const QString &gameDirectory, const QString &exec
 
     if (install.truncated) {
         install.warnings.append(
-            QStringLiteral("Only the first %1 DLLs were listed. Use the plugins folder for the complete list.")
+            Vanta::tr("Only the first %1 DLLs were listed. Use the plugins folder for the complete list.")
                 .arg(kMaximumMods));
     }
     return install;
@@ -238,54 +240,54 @@ bool BepInEx::setModEnabled(const BepInExInstall &install, const BepInExMod &mod
     };
 
     if (!install.isValid())
-        return fail(QStringLiteral("BepInEx was not detected for this game."));
+        return fail(Vanta::tr("BepInEx was not detected for this game."));
     if (mod.path.trimmed().isEmpty())
-        return fail(QStringLiteral("The selected mod has no file path."));
+        return fail(Vanta::tr("The selected mod has no file path."));
     if (error)
         error->clear();
 
     const QFileInfo rootInfo(install.root);
     const QString rootPath = rootInfo.canonicalFilePath();
     if (rootPath.isEmpty())
-        return fail(QStringLiteral("The BepInEx folder is no longer available: %1")
+        return fail(Vanta::tr("The BepInEx folder is no longer available: %1")
                         .arg(QDir::toNativeSeparators(install.root)));
 
     const QFileInfo sourceInfo(mod.path);
     if (sourceInfo.isSymLink()) {
-        return fail(QStringLiteral("Refusing to change the symbolic link %1. Rename or replace the link yourself.")
+        return fail(Vanta::tr("Refusing to change the symbolic link %1. Rename or replace the link yourself.")
                         .arg(QDir::toNativeSeparators(mod.path)));
     }
     if (!sourceInfo.isFile())
-        return fail(QStringLiteral("The mod file no longer exists: %1")
+        return fail(Vanta::tr("The mod file no longer exists: %1")
                         .arg(QDir::toNativeSeparators(mod.path)));
 
     const QString sourcePath = sourceInfo.canonicalFilePath();
     if (sourcePath.isEmpty())
-        return fail(QStringLiteral("The mod file could not be resolved: %1")
+        return fail(Vanta::tr("The mod file could not be resolved: %1")
                         .arg(QDir::toNativeSeparators(mod.path)));
 
     const QString parentPath = sourceInfo.absoluteDir().canonicalPath();
     if (!pathIsInside(parentPath, rootPath)) {
-        return fail(QStringLiteral("Refusing to change %1 because it is outside the detected BepInEx folder.")
+        return fail(Vanta::tr("Refusing to change %1 because it is outside the detected BepInEx folder.")
                         .arg(QDir::toNativeSeparators(mod.path)));
     }
 
     const QString pluginsPath = QFileInfo(install.pluginsPath).canonicalFilePath();
     const QString patchersPath = QFileInfo(install.patchersPath).canonicalFilePath();
     if (!pathIsWithin(parentPath, pluginsPath) && !pathIsWithin(parentPath, patchersPath)) {
-        return fail(QStringLiteral("Refusing to change %1 because it is not inside the plugins or patchers folder.")
+        return fail(Vanta::tr("Refusing to change %1 because it is not inside the plugins or patchers folder.")
                         .arg(QDir::toNativeSeparators(mod.path)));
     }
 
     const QString fileName = sourceInfo.fileName();
     const bool disabled = fileName.endsWith(QStringLiteral(".dll.disabled"), Qt::CaseInsensitive);
     if (!disabled && !fileName.endsWith(QStringLiteral(".dll"), Qt::CaseInsensitive)) {
-        return fail(QStringLiteral("Only plugin and patcher DLLs can be enabled or disabled: %1")
+        return fail(Vanta::tr("Only plugin and patcher DLLs can be enabled or disabled: %1")
                         .arg(QDir::toNativeSeparators(mod.path)));
     }
 
     if (enabled == !disabled) {
-        return fail(QStringLiteral("%1 is already %2.")
+        return fail(Vanta::tr("%1 is already %2.")
                         .arg(QDir::toNativeSeparators(mod.relativePath), stateName(enabled)));
     }
 
@@ -297,14 +299,14 @@ bool BepInEx::setModEnabled(const BepInExInstall &install, const BepInExMod &mod
 
     const QString targetPath = sourceInfo.absoluteDir().filePath(targetName);
     if (QFileInfo::exists(targetPath)) {
-        return fail(QStringLiteral("Cannot rename %1 because %2 already exists.")
+        return fail(Vanta::tr("Cannot rename %1 because %2 already exists.")
                         .arg(QDir::toNativeSeparators(sourceInfo.absoluteFilePath()),
                              QDir::toNativeSeparators(targetName)));
     }
 
     QFile file(sourceInfo.absoluteFilePath());
     if (!file.rename(targetPath)) {
-        return fail(QStringLiteral("Could not rename %1 to %2: %3")
+        return fail(Vanta::tr("Could not rename %1 to %2: %3")
                         .arg(QDir::toNativeSeparators(sourceInfo.absoluteFilePath()),
                              QDir::toNativeSeparators(targetName), file.errorString()));
     }

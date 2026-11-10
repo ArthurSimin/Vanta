@@ -1,4 +1,5 @@
 #include "Sidebar.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 #include "Version.h"
@@ -213,7 +214,7 @@ Sidebar::Sidebar(ThemeManager *theme, QWidget *parent)
     nameFont.setWeight(QFont::Black);
     name->setFont(nameFont);
     titles->addWidget(name);
-    auto *tagline = new QLabel(QStringLiteral("GAME LIBRARY"), logoArea);
+    auto *tagline = new QLabel(Vanta::tr("GAME LIBRARY"), logoArea);
     tagline->setProperty("class", QStringLiteral("sidebarTagline"));
     QFont taglineFont = tagline->font();
     taglineFont.setPixelSize(9);
@@ -258,17 +259,17 @@ Sidebar::Sidebar(ThemeManager *theme, QWidget *parent)
         footerLayout->addWidget(button);
         return button;
     };
-    m_settingsButton = makeFooterButton(QStringLiteral("Settings"));
-    m_tutorialButton = makeFooterButton(QStringLiteral("Tutorial"));
-    m_aboutButton = makeFooterButton(QStringLiteral("About"));
+    m_settingsButton = makeFooterButton(Vanta::tr("Settings"));
+    m_tutorialButton = makeFooterButton(Vanta::tr("Tutorial"));
+    m_aboutButton = makeFooterButton(Vanta::tr("About"));
     m_targets.insert(QStringLiteral("footer.settings"), m_settingsButton);
     m_targets.insert(QStringLiteral("footer.tutorial"), m_tutorialButton);
     m_targets.insert(QStringLiteral("footer.about"), m_aboutButton);
-    m_labels.insert(QStringLiteral("footer.settings"), QStringLiteral("Settings"));
-    m_labels.insert(QStringLiteral("footer.tutorial"), QStringLiteral("Tutorial"));
-    m_labels.insert(QStringLiteral("footer.about"), QStringLiteral("About"));
+    m_labels.insert(QStringLiteral("footer.settings"), Vanta::tr("Settings"));
+    m_labels.insert(QStringLiteral("footer.tutorial"), Vanta::tr("Tutorial"));
+    m_labels.insert(QStringLiteral("footer.about"), Vanta::tr("About"));
 
-    m_versionLabel = new QLabel(QStringLiteral("Version %1").arg(QStringLiteral(VANTA_VERSION)), footer);
+    m_versionLabel = new QLabel(Vanta::tr("Version %1").arg(QStringLiteral(VANTA_VERSION)), footer);
     m_versionLabel->setProperty("class", QStringLiteral("muted"));
     m_versionLabel->setAlignment(Qt::AlignCenter);
     QFont versionFont = m_versionLabel->font();
@@ -330,7 +331,7 @@ void Sidebar::refreshTheme()
 
 QString Sidebar::labelFor(const QString &id) const
 {
-    return m_labels.value(id, QStringLiteral("Library"));
+    return m_labels.value(id, Vanta::tr("Library"));
 }
 
 QWidget *Sidebar::targetFor(const QString &id) const
@@ -447,7 +448,7 @@ void Sidebar::rebuild()
     QMap<QString, QList<RowSpec>> sections;
     RowSpec allGames;
     allGames.id = QStringLiteral("library.games");
-    allGames.label = QStringLiteral("All games");
+    allGames.label = Vanta::tr("All games");
     allGames.icon = glyphIcons(Glyph::Gamepad).first;
     allGames.selectedIcon = glyphIcons(Glyph::Gamepad).second;
     allGames.count = m_games.size();
@@ -455,7 +456,7 @@ void Sidebar::rebuild()
 
     RowSpec favorites = allGames;
     favorites.id = QStringLiteral("library.favorites");
-    favorites.label = QStringLiteral("Favorites");
+    favorites.label = Vanta::tr("Favorites");
     favorites.icon = glyphIcons(Glyph::Star).first;
     favorites.selectedIcon = glyphIcons(Glyph::Star).second;
     favorites.count = 0;
@@ -467,7 +468,7 @@ void Sidebar::rebuild()
 
     RowSpec recent = favorites;
     recent.id = QStringLiteral("library.recent");
-    recent.label = QStringLiteral("Recently played");
+    recent.label = Vanta::tr("Recently played");
     recent.icon = glyphIcons(Glyph::Clock).first;
     recent.selectedIcon = glyphIcons(Glyph::Clock).second;
     recent.count = 0;
@@ -502,7 +503,7 @@ void Sidebar::rebuild()
         const QString source = it.key();
         RowSpec row;
         row.id = QStringLiteral("source.") + source;
-        row.label = source;
+        row.label = sourceDisplayName(source);
         row.icon = Icons::sourceIcon(source, muted, 18);
         row.selectedIcon = Icons::sourceIcon(source, accent, 18);
         row.count = it.value();
@@ -527,7 +528,7 @@ void Sidebar::rebuild()
         }
         RowSpec row;
         row.id = QStringLiteral("runner.") + runnerName(runner);
-        row.label = runnerName(runner);
+        row.label = runnerDisplayName(runner);
         if (runner == RunnerType::Proton) {
             // Proton has an official mark, so the runner row uses it rather
             // than the generic rounded-box glyph.
@@ -548,7 +549,7 @@ void Sidebar::rebuild()
             continue;
         RowSpec row;
         row.id = QStringLiteral("platform.") + platformName(platform);
-        row.label = platformName(platform);
+        row.label = platformDisplayName(platform);
         row.icon = glyphIcons(platform == Platform::Windows ? Glyph::Windows : Glyph::Linux).first;
         row.selectedIcon = glyphIcons(platform == Platform::Windows ? Glyph::Windows : Glyph::Linux).second;
         row.count = count;
@@ -558,7 +559,7 @@ void Sidebar::rebuild()
     if (detected > 0) {
         RowSpec row;
         row.id = QStringLiteral("compat.detected");
-        row.label = QStringLiteral("Detected");
+        row.label = Vanta::tr("Detected");
         row.icon = glyphIcons(Glyph::Shield).first;
         row.selectedIcon = glyphIcons(Glyph::Shield).second;
         row.count = detected;
@@ -567,7 +568,7 @@ void Sidebar::rebuild()
     if (attention > 0) {
         RowSpec row;
         row.id = QStringLiteral("compat.attention");
-        row.label = QStringLiteral("Needs attention");
+        row.label = Vanta::tr("Needs attention");
         row.icon = glyphIcons(Glyph::Warning).first;
         row.selectedIcon = glyphIcons(Glyph::Warning).second;
         row.count = attention;
@@ -576,7 +577,7 @@ void Sidebar::rebuild()
     if (notDetected > 0) {
         RowSpec row;
         row.id = QStringLiteral("compat.notdetected");
-        row.label = QStringLiteral("Not detected");
+        row.label = Vanta::tr("Not detected");
         row.icon = glyphIcons(Glyph::Info).first;
         row.selectedIcon = glyphIcons(Glyph::Info).second;
         row.count = notDetected;
@@ -584,11 +585,11 @@ void Sidebar::rebuild()
     }
 
     const QList<QPair<QString, QString>> groupOrder = {
-        {QStringLiteral("library"), QStringLiteral("Library")},
-        {QStringLiteral("sources"), QStringLiteral("Sources")},
-        {QStringLiteral("runners"), QStringLiteral("Runners")},
-        {QStringLiteral("platforms"), QStringLiteral("Platforms")},
-        {QStringLiteral("compatibility"), QStringLiteral("Compatibility")}
+        {QStringLiteral("library"), Vanta::tr("Library")},
+        {QStringLiteral("sources"), Vanta::tr("Sources")},
+        {QStringLiteral("runners"), Vanta::tr("Runners")},
+        {QStringLiteral("platforms"), Vanta::tr("Platforms")},
+        {QStringLiteral("compatibility"), Vanta::tr("Compatibility")}
     };
     for (const auto &group : groupOrder) {
         const QList<RowSpec> rows = sections.value(group.first);

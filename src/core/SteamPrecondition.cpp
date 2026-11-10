@@ -1,5 +1,7 @@
 #include "SteamPrecondition.h"
 
+#include "I18n.h"
+
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -284,7 +286,7 @@ void SteamPrecondition::ensureRunning()
     m_attempts = 0;
     QString steamPath;
     if (!SteamIntegration::steamBinaryAvailable(&steamPath)) {
-        fail(QStringLiteral("Steam is required for an OnlineFix launch, but the steam command was not found on PATH. Disable the Steam precondition in Settings if you do not need the Steam client."));
+        fail(Vanta::tr("Steam is required for an OnlineFix launch, but the steam command was not found on PATH. Disable the Steam precondition in Settings if you do not need the Steam client."));
         return;
     }
     QFileInfo loginInfo(SteamIntegration::loginUsersPath());
@@ -309,10 +311,10 @@ void SteamPrecondition::startSteam()
 {
     if (m_finished)
         return;
-    emit progress(QStringLiteral("Starting Steam and waiting for the client to become ready…"));
+    emit progress(Vanta::tr("Starting Steam and waiting for the client to become ready…"));
     const bool started = QProcess::startDetached(QStringLiteral("steam"), {QStringLiteral("-silent")});
     if (!started) {
-        fail(QStringLiteral("Steam could not be started. Start Steam manually and try again."));
+        fail(Vanta::tr("Steam could not be started. Start Steam manually and try again."));
         return;
     }
     m_pollTimer->start();
@@ -334,10 +336,10 @@ void SteamPrecondition::pollLoginUsers()
         }
     }
     if (m_attempts >= 420) {
-        fail(QStringLiteral("Steam did not finish starting within seven minutes. Start Steam manually, verify that you are signed in, and try again."));
+        fail(Vanta::tr("Steam did not finish starting within seven minutes. Start Steam manually, verify that you are signed in, and try again."));
         return;
     }
-    emit progress(QStringLiteral("Waiting for Steam… (%1/420)").arg(m_attempts));
+    emit progress(Vanta::tr("Waiting for Steam… (%1/420)").arg(m_attempts));
 }
 
 void SteamPrecondition::cancel()

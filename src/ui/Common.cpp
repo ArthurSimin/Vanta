@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -192,7 +193,7 @@ VantaDialog::VantaDialog(const QString &title, ThemeManager *theme, QWidget *par
     auto *closeButton = new QToolButton(m_header);
     closeButton->setObjectName(QStringLiteral("dialogCloseButton"));
     closeButton->setCursor(Qt::PointingHandCursor);
-    closeButton->setToolTip(QStringLiteral("Close"));
+    closeButton->setToolTip(Vanta::tr("Close"));
     Icons::setButtonIcon(closeButton, Glyph::Close, palette().color(QPalette::Text), 15);
     closeButton->setFixedSize(30, 30);
     connect(closeButton, &QToolButton::clicked, this, &QDialog::reject);
@@ -346,7 +347,7 @@ bool validateDllOverrides(const QString &text, QString *message)
             continue;
         if (!expression.match(entry).hasMatch()) {
             if (message) {
-                *message = QStringLiteral("Invalid override \"%1\". Use semicolon-separated entries such as d3d11=n,b or winmm=n.").arg(entry);
+                *message = Vanta::tr("Invalid override \"%1\". Use semicolon-separated entries such as d3d11=n,b or winmm=n.").arg(entry);
             }
             return false;
         }
@@ -371,13 +372,13 @@ bool parseEnvironment(const QString &text, QMap<QString, QString> *environment, 
         const int equals = line.indexOf(QLatin1Char('='));
         if (equals <= 0) {
             if (message)
-                *message = QStringLiteral("Environment line %1 must use KEY=VALUE.").arg(lineNumber);
+                *message = Vanta::tr("Environment line %1 must use KEY=VALUE.").arg(lineNumber);
             return false;
         }
         const QString key = line.left(equals).trimmed();
         if (!keyPattern.match(key).hasMatch()) {
             if (message)
-                *message = QStringLiteral("Invalid environment variable name on line %1: %2").arg(lineNumber).arg(key);
+                *message = Vanta::tr("Invalid environment variable name on line %1: %2").arg(lineNumber).arg(key);
             return false;
         }
         parsed.insert(key, line.mid(equals + 1));
@@ -399,7 +400,7 @@ QString environmentToText(const QMap<QString, QString> &environment)
 QString dataSize(qint64 bytes)
 {
     if (bytes < 0)
-        return QStringLiteral("Unknown");
+        return Vanta::tr("Unknown");
     if (bytes < 1024)
         return QStringLiteral("%1 B").arg(bytes);
     const double kib = bytes / 1024.0;

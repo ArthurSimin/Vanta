@@ -301,8 +301,12 @@ fetch_latest() {
                 | head -n1)
         fi
         if [ -z "$LATEST" ]; then
+            # wget appends " [following]" to the redirect line, so strip that
+            # suffix before taking the tag name from the URL.
             effective=$("$WGET" --spider -S "$RELEASES/latest" 2>&1 \
-                | sed -n 's/.*[Ll]ocation: //p' | tr -d '\r' | tail -n1)
+                | sed -n 's/.*[Ll]ocation: //p' \
+                | sed 's/[[:space:]]*\[[^]]*\].*$//' \
+                | tr -d '\r' | tail -n1)
             case "$effective" in
                 */tag/*) LATEST=${effective##*/} ;;
             esac
@@ -862,12 +866,15 @@ case "$FORMAT" in
         step "Installing into /usr/local"
         # One elevated shell keeps this to a single authentication prompt.
         # The tarball is built on CI, so its files carry the runner's numeric
-        # ownership; chown after the copy keeps a user-owned file out of /usr.
+        # ownership. cp -R does not preserve ownership, so the copy is already
+        # root-owned; the chown and chmod below still normalise the paths in
+        # case the tree came from an older archive.
         # shellcheck disable=SC2016
         run_root sh -c '
             set -e
             mkdir -p /usr/local
-            cp -a "$1/usr/." /usr/local/
+            cp -R "$1/usr/." /usr/local/
+            chmod 755 /usr/local/bin/vanta
             chown root:root \
                 /usr/local/bin /usr/local/bin/vanta \
                 /usr/local/share/applications \

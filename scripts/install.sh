@@ -836,13 +836,21 @@ case "$FORMAT" in
                 fi
                 ;;
             zypper)
-                step "Installing with zypper"
-                if [ "$ACTION" = "reinstall" ]; then
-                    run_root zypper --non-interactive install --allow-unsigned-rpm --force "$WORKDIR/$ASSET" \
-                        || die "zypper did not complete. Nothing else was changed."
+                if [ "$VERSION_CMP" = "-1" ] && have rpm; then
+                    # zypper refuses a lower version from a local RPM; rpm
+                    # with --oldpackage is how the deliberate downgrade runs.
+                    step "Installing the RPM directly"
+                    install_rpm_file "$WORKDIR/$ASSET" \
+                        || die "rpm did not complete. Nothing else was changed."
                 else
-                    run_root zypper --non-interactive install --allow-unsigned-rpm "$WORKDIR/$ASSET" \
-                        || die "zypper did not complete. Nothing else was changed."
+                    step "Installing with zypper"
+                    if [ "$ACTION" = "reinstall" ]; then
+                        run_root zypper --non-interactive install --allow-unsigned-rpm --force "$WORKDIR/$ASSET" \
+                            || die "zypper did not complete. Nothing else was changed."
+                    else
+                        run_root zypper --non-interactive install --allow-unsigned-rpm "$WORKDIR/$ASSET" \
+                            || die "zypper did not complete. Nothing else was changed."
+                    fi
                 fi
                 ;;
             rpm-ostree)

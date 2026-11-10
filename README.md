@@ -5,6 +5,7 @@
 <p align="center">
   <img height="56" src="https://raw.githubusercontent.com/ArthurSimin/Badgeworks/main/devin_opencode_badge.svg" alt="Made with OpenCode">
   <img height="56" src="https://raw.githubusercontent.com/ArthurSimin/Badgeworks/8a1b2c7416b2803778497d1088ec23d47783235f/devin_google_antigravity_badge.svg" alt="Made with Google Antigravity">
+  <a href="https://arthursimin.github.io/Vanta/"><img height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/website_vector.svg" alt="Website"></a>
 </p>
 
 <p align="center">

@@ -1,5 +1,7 @@
 #include "LaunchLogs.h"
 
+#include "I18n.h"
+
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
@@ -73,7 +75,7 @@ QString writeBody(const QString &path, const QString &text, QString *error)
     QSaveFile file(path);
     if (!file.open(QIODevice::WriteOnly)) {
         if (error)
-            *error = QStringLiteral("Could not create the log file %1: %2")
+            *error = Vanta::tr("Could not create the log file %1: %2")
                          .arg(QDir::toNativeSeparators(path), file.errorString());
         return {};
     }
@@ -82,7 +84,7 @@ QString writeBody(const QString &path, const QString &text, QString *error)
         file.write("\n");
     if (!file.commit()) {
         if (error)
-            *error = QStringLiteral("Could not finish writing the log file %1: %2")
+            *error = Vanta::tr("Could not finish writing the log file %1: %2")
                          .arg(QDir::toNativeSeparators(path), file.errorString());
         return {};
     }
@@ -155,7 +157,7 @@ QString LaunchLogs::write(const QString &gameId, const QString &gameName, const 
     const QString path = pathFor(gameId, finishedAt);
     if (!QDir().mkpath(QFileInfo(path).absolutePath())) {
         if (error)
-            *error = QStringLiteral("Could not create the log folder %1.")
+            *error = Vanta::tr("Could not create the log folder %1.")
                          .arg(QDir::toNativeSeparators(QFileInfo(path).absolutePath()));
         return {};
     }
@@ -174,7 +176,7 @@ QString LaunchLogs::beginLive(const QString &gameId, const QString &gameName, co
     const QString path = pathFor(gameId, startedAt);
     if (!QDir().mkpath(QFileInfo(path).absolutePath())) {
         if (error)
-            *error = QStringLiteral("Could not create the log folder %1.")
+            *error = Vanta::tr("Could not create the log folder %1.")
                          .arg(QDir::toNativeSeparators(QFileInfo(path).absolutePath()));
         return {};
     }
@@ -282,7 +284,7 @@ QString LaunchLogs::read(const QString &path, QString *error)
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         if (error)
-            *error = QStringLiteral("Could not read %1: %2")
+            *error = Vanta::tr("Could not read %1: %2")
                          .arg(QDir::toNativeSeparators(path), file.errorString());
         return {};
     }
@@ -292,7 +294,7 @@ QString LaunchLogs::read(const QString &path, QString *error)
     const QString text = QString::fromUtf8(file.readAll());
     file.close();
     return size > kMaximumReadBytes
-        ? QStringLiteral("… the first %1 KiB of this log were trimmed.\n\n").arg((size - kMaximumReadBytes) / 1024)
+        ? Vanta::tr("… the first %1 KiB of this log were trimmed.\n\n").arg((size - kMaximumReadBytes) / 1024)
               + text
         : text;
 }

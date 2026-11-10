@@ -2,6 +2,7 @@
 #include "Common.h"
 #include "GameGridView.h"
 #include "GameListView.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -68,7 +69,7 @@ LibraryView::LibraryView(ThemeManager *theme, QWidget *parent)
     m_emptyMessage->setSizePolicy(messagePolicy);
     cardLayout->addWidget(m_emptyMessage, 0, Qt::AlignHCenter);
 
-    m_emptyButton = new QPushButton(QStringLiteral("Add game"), card);
+    m_emptyButton = new QPushButton(Vanta::tr("Add game"), card);
     m_emptyButton->setCursor(Qt::PointingHandCursor);
     m_emptyButton->setMinimumWidth(150);
     UiHelp::makePrimary(m_emptyButton);
@@ -100,8 +101,8 @@ LibraryView::LibraryView(ThemeManager *theme, QWidget *parent)
             emit clearFiltersRequested();
     });
 
-    showEmptyState(QStringLiteral("No games yet"),
-                   QStringLiteral("Add a game folder or executable to start building your Vanta library."),
+    showEmptyState(Vanta::tr("No games yet"),
+                   Vanta::tr("Add a game folder or executable to start building your Vanta library."),
                    true);
     refreshTheme();
 }
@@ -155,7 +156,7 @@ void LibraryView::showEmptyState(const QString &title, const QString &message, b
     m_emptyTitle->setText(title);
     m_emptyMessage->setText(message);
     m_emptyOffersAdd = offerAdd;
-    m_emptyButton->setText(offerAdd ? QStringLiteral("Add game") : QStringLiteral("Clear filters"));
+    m_emptyButton->setText(offerAdd ? Vanta::tr("Add game") : Vanta::tr("Clear filters"));
     m_emptyButton->setProperty("primary", offerAdd);
     m_emptyButton->style()->unpolish(m_emptyButton);
     m_emptyButton->style()->polish(m_emptyButton);
@@ -188,10 +189,10 @@ void LibraryView::updatePage()
 {
     if (m_games.isEmpty() || m_showEmpty) {
         if (m_games.isEmpty() && !m_showEmpty) {
-            m_emptyTitle->setText(QStringLiteral("No games match your filters"));
-            m_emptyMessage->setText(QStringLiteral("Try a different search, or clear the active filters to see your whole library."));
+            m_emptyTitle->setText(Vanta::tr("No games match your filters"));
+            m_emptyMessage->setText(Vanta::tr("Try a different search, or clear the active filters to see your whole library."));
             m_emptyOffersAdd = false;
-            m_emptyButton->setText(QStringLiteral("Clear filters"));
+            m_emptyButton->setText(Vanta::tr("Clear filters"));
             m_emptyButton->setProperty("primary", false);
             m_emptyButton->style()->unpolish(m_emptyButton);
             m_emptyButton->style()->polish(m_emptyButton);

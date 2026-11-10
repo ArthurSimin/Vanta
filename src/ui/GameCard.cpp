@@ -1,5 +1,6 @@
 #include "GameCard.h"
 #include "Common.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -348,7 +349,7 @@ void GameCard::paintEvent(QPaintEvent *event)
         int leftX = cover.left() + 7;
         const int bottomY = cover.bottom() - 31;
         if (!m_game.executableExists()) {
-            const QString text = QStringLiteral("Missing");
+            const QString text = Vanta::tr("Missing");
             const QRect missingRect(leftX, bottomY, badgeMetrics.horizontalAdvance(text) + 14, 24);
             drawBadge(painter, missingRect, text, QColor(QStringLiteral("#b91c1c")), Qt::white);
             leftX = missingRect.right() + 4;
@@ -379,7 +380,7 @@ void GameCard::paintEvent(QPaintEvent *event)
         font.setPixelSize(10);
         font.setBold(true);
         const QFontMetrics runMetrics(font);
-        const QString runText = QStringLiteral("Running");
+        const QString runText = Vanta::tr("Running");
         const int runWidth = qMin(cover.width() - 14, 20 + runMetrics.horizontalAdvance(runText) + 12);
         const QRect runRect(cover.left() + 7, cover.top() + 7, runWidth, 24);
         painter.save();

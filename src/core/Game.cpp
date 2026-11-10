@@ -1,5 +1,7 @@
 #include "Game.h"
 
+#include "I18n.h"
+
 #include <QDir>
 #include <QFileInfo>
 #include <QJsonArray>
@@ -152,6 +154,7 @@ QJsonObject AppSettings::toJson() const
 
     QJsonObject object;
     object.insert(QStringLiteral("theme"), themeChoiceName(theme));
+    object.insert(QStringLiteral("language"), language);
     object.insert(QStringLiteral("animations"), animations);
     object.insert(QStringLiteral("coverSize"), coverSizeName(coverSize));
     object.insert(QStringLiteral("sortMode"), sortModeName(sortMode));
@@ -189,6 +192,20 @@ AppSettings AppSettings::fromJson(const QJsonObject &object)
 {
     AppSettings settings;
     settings.theme = themeChoiceFromName(object.value(QStringLiteral("theme")).toString());
+    // Keep only a code Vanta knows, so a hand-edited settings.json cannot leave
+    // the picker pointing at a language that has no catalog.
+    const QString storedLanguage = object.value(QStringLiteral("language")).toString(QStringLiteral("system"));
+    settings.language = QStringLiteral("system");
+    if (storedLanguage == QStringLiteral("system") || storedLanguage == QStringLiteral("en")) {
+        settings.language = storedLanguage;
+    } else {
+        for (const I18n::Language &language : I18n::languages()) {
+            if (language.code == storedLanguage) {
+                settings.language = storedLanguage;
+                break;
+            }
+        }
+    }
     settings.animations = object.value(QStringLiteral("animations")).toBool(true);
     settings.coverSize = coverSizeFromName(object.value(QStringLiteral("coverSize")).toString());
     settings.sortMode = sortModeFromName(object.value(QStringLiteral("sortMode")).toString());
@@ -230,20 +247,20 @@ AppSettings AppSettings::fromJson(const QJsonObject &object)
 QString formatPlaytime(qint64 seconds)
 {
     if (seconds <= 0)
-        return QStringLiteral("Never played");
+        return Vanta::tr("Never played");
     const qint64 hours = seconds / 3600;
     const qint64 minutes = (seconds % 3600) / 60;
     if (hours > 0)
-        return QStringLiteral("%1h %2m").arg(hours).arg(minutes);
+        return Vanta::tr("%1h %2m").arg(hours).arg(minutes);
     if (minutes > 0)
-        return QStringLiteral("%1m").arg(minutes);
-    return QStringLiteral("<1m");
+        return Vanta::tr("%1m").arg(minutes);
+    return Vanta::tr("<1m");
 }
 
 QString formatLastPlayed(const QDateTime &dateTime)
 {
     if (!dateTime.isValid())
-        return QStringLiteral("Never");
+        return Vanta::tr("Never");
     return dateTime.toLocalTime().toString(QStringLiteral("d MMM yyyy, HH:mm"));
 }
 

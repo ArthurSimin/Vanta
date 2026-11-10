@@ -1,5 +1,7 @@
 #include "Library.h"
 
+#include "I18n.h"
+
 #include <algorithm>
 
 GameLibrary::GameLibrary(Storage &storage, QObject *parent)
@@ -134,7 +136,7 @@ bool GameLibrary::saveLibrary()
 {
     QString error;
     if (!m_storage.saveLibrary(m_games, &error)) {
-        emit saveError(error.isEmpty() ? QStringLiteral("Could not save the game library.") : error);
+        emit saveError(error.isEmpty() ? Vanta::tr("Could not save the game library.") : error);
         return false;
     }
     return true;
@@ -144,7 +146,7 @@ bool GameLibrary::saveSettings()
 {
     QString error;
     if (!m_storage.saveSettings(m_settings, &error)) {
-        emit saveError(error.isEmpty() ? QStringLiteral("Could not save settings.") : error);
+        emit saveError(error.isEmpty() ? Vanta::tr("Could not save settings.") : error);
         return false;
     }
     return true;

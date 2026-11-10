@@ -1,4 +1,5 @@
 #include "GameListView.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -15,8 +16,8 @@ GameListView::GameListView(ThemeManager *theme, QWidget *parent)
     setObjectName(QStringLiteral("gameList"));
     setColumnCount(6);
     setHorizontalHeaderLabels({
-        QStringLiteral("Game"), QStringLiteral("Runner"), QStringLiteral("Platform"),
-        QStringLiteral("Compatibility"), QStringLiteral("Last played"), QStringLiteral("Playtime")
+        Vanta::tr("Game"), Vanta::tr("Runner"), Vanta::tr("Platform"),
+        Vanta::tr("Compatibility"), Vanta::tr("Last played"), Vanta::tr("Playtime")
     });
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSelectionMode(QAbstractItemView::SingleSelection);
@@ -71,7 +72,7 @@ QString GameListView::selectedGameId() const
 
 QString GameListView::displayName(const Game &game, bool running) const
 {
-    QString name = game.favorite ? QStringLiteral("★  %1").arg(game.name) : game.name;
+    QString name = game.favorite ? Vanta::tr("★  %1").arg(game.name) : game.name;
     if (running)
         name.prepend(QStringLiteral("●  "));
     return name;
@@ -81,7 +82,7 @@ QString GameListView::compatibilityText(const Game &game) const
 {
     if ((game.compatibility == ScanState::ComponentsDetected || scanNeedsAttention(game.compatibility))
         && game.showsOnlineFix()) {
-        return QStringLiteral("OnlineFix detected");
+        return Vanta::tr("OnlineFix detected");
     }
     return scanStateLabel(game.compatibility);
 }
@@ -102,7 +103,7 @@ void GameListView::setGames(const QList<Game> &games)
         const bool running = m_runningIds.contains(game.id);
         auto *nameItem = new QTableWidgetItem(displayName(game, running));
         nameItem->setData(Qt::UserRole, game.id);
-        nameItem->setToolTip(running ? QStringLiteral("%1\nThis game is running.").arg(game.name)
+        nameItem->setToolTip(running ? Vanta::tr("%1\nThis game is running.").arg(game.name)
                                      : game.name);
         const QSize iconSize(40, 54);
         const qreal dpr = devicePixelRatioF();
@@ -114,8 +115,8 @@ void GameListView::setGames(const QList<Game> &games)
         nameItem->setFont(nameFont);
         setItem(row, 0, nameItem);
 
-        auto *runnerItem = new QTableWidgetItem(runnerName(game.runner));
-        auto *platformItem = new QTableWidgetItem(platformName(game.platform));
+        auto *runnerItem = new QTableWidgetItem(runnerDisplayName(game.runner));
+        auto *platformItem = new QTableWidgetItem(platformDisplayName(game.platform));
         auto *compatItem = new QTableWidgetItem(compatibilityText(game));
         auto *playedItem = new QTableWidgetItem(formatLastPlayed(game.lastPlayed));
         auto *playtimeItem = new QTableWidgetItem(formatPlaytime(game.playtimeSeconds));
@@ -129,10 +130,10 @@ void GameListView::setGames(const QList<Game> &games)
         if (running)
             nameItem->setForeground(colors.success);
         if (!game.executableExists())
-            compatItem->setToolTip(QStringLiteral("The configured executable is missing."));
+            compatItem->setToolTip(Vanta::tr("The configured executable is missing."));
         else if (game.showsOnlineFix() && game.compatibility != ScanState::NoKnownComponents
                  && game.compatibility != ScanState::NotScanned)
-            compatItem->setToolTip(QStringLiteral("Filename signatures associated with OnlineFix were detected. Detection is not proof that a copy is functional."));
+            compatItem->setToolTip(Vanta::tr("Filename signatures associated with OnlineFix were detected. Detection is not proof that a copy is functional."));
         compatItem->setForeground(scanNeedsAttention(game.compatibility)
             ? colors.warning : palette().color(QPalette::Text));
         setRowHeight(row, 62);
@@ -173,7 +174,7 @@ void GameListView::setRunningGames(const QStringList &gameIds)
         if (!game)
             continue;
         nameItem->setText(displayName(*game, running));
-        nameItem->setToolTip(running ? QStringLiteral("%1\nThis game is running.").arg(game->name)
+        nameItem->setToolTip(running ? Vanta::tr("%1\nThis game is running.").arg(game->name)
                                      : game->name);
         nameItem->setForeground(QBrush(running ? colors.success : colors.text));
     }

@@ -1,4 +1,5 @@
 #include "RunnerDetector.h"
+#include "I18n.h"
 #include "SteamPrecondition.h"
 
 #include <QDir>
@@ -324,18 +325,18 @@ bool RunnerDetector::validateWine(const QString &path, QString *reason)
     const QString executable = wineExecutableInDirectory(path);
     if (path.isEmpty() || executable.isEmpty()) {
         if (reason)
-            *reason = QStringLiteral("No Wine executable was found at this path.");
+            *reason = Vanta::tr("No Wine executable was found at this path.");
         return false;
     }
     const QFileInfo info(executable);
     if (!info.isFile()) {
         if (reason)
-            *reason = QStringLiteral("The Wine executable path does not point to a file.");
+            *reason = Vanta::tr("The Wine executable path does not point to a file.");
         return false;
     }
     if (!info.isExecutable()) {
         if (reason)
-            *reason = QStringLiteral("The Wine executable is not executable.");
+            *reason = Vanta::tr("The Wine executable is not executable.");
         return false;
     }
     return true;
@@ -346,12 +347,12 @@ bool RunnerDetector::validateProton(const QString &path, QString *reason)
     const QString executable = protonExecutable(path);
     if (executable.isEmpty()) {
         if (reason)
-            *reason = QStringLiteral("No Proton launcher was found at this path.");
+            *reason = Vanta::tr("No Proton launcher was found at this path.");
         return false;
     }
     if (!QFileInfo(executable).isExecutable()) {
         if (reason)
-            *reason = QStringLiteral("The Proton launcher is not executable.");
+            *reason = Vanta::tr("The Proton launcher is not executable.");
         return false;
     }
     return true;

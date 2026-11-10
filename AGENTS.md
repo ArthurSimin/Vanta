@@ -126,6 +126,7 @@ src/
     CoverFetcher.*      SteamGridDB search, artwork listing, downloads
     UpdateChecker.*     GitHub latest-release lookup, version comparison
     ThemeManager.*      ThemeColors, palettes and the QSS
+    I18n.*              Translation context, language list, catalog loading
     Types.*             Enums and their display names
 
   ui/                   Qt Widgets only. No file I/O, no process spawning.
@@ -402,6 +403,32 @@ OnlineFix. A change that violates these rules is rejected.
   closes dialogs, Enter activates the default action.
 - User-facing strings are complete sentences with proper punctuation. No
   exclamation marks, no "Oops", no blame.
+
+## Translations
+
+The interface is translated through one context, `Vanta`, declared in
+`src/core/I18n.h`. Wrap user-facing text in `Vanta::tr("...")`; never use
+`QObject::tr` or an unqualified `tr`.
+
+- **Stored values never go through `tr`.** Settings tokens, JSON/INI keys,
+  enum tokens, sidebar ids, environment variable names and command-line flags
+  stay English. The `*Name()` helpers in `Types.cpp` produce those tokens; the
+  translated form is the matching `*DisplayName()` function, which the UI calls
+  instead. `Game::source` follows the same rule through `sourceDisplayName()`.
+- **Do not translate log evidence.** The command, workdir, environment
+  overrides and plan diagnostics written by `LaunchPlan`/`Launcher`/`LaunchLogs`
+  are a record of what Vanta ran, not interface text.
+- **Plurals use `%n`.** Write `Vanta::tr("%n game(s)", nullptr, count)` and let
+  the catalog supply the plural forms; do not append an "s" fragment.
+- Catalogs live in `translations/vanta_<code>.ts`. Complete catalogs are
+  compiled to `resources/i18n/vanta_<code>.qm`, committed, and embedded through
+  `resources.qrc`. Run `scripts/update-translations.sh` after adding or changing
+  a string; it refreshes the `.ts` files and recompiles the shipped catalogs.
+- The scan cache stores translated report text, so `Storage::loadScanCache()`
+  discards it when `I18n::currentCode()` differs from the language it was
+  written in. Do not remove that check without keeping the cache language-aware.
+- `docs/TRANSLATIONS.md` is the contributor guide. Keep it in step with the
+  script and the language list in `I18n::languages()`.
 
 ## Adding a game source
 

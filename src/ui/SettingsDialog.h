@@ -49,6 +49,7 @@ private:
     bool m_replayTutorial = false;
 
     QComboBox *m_themeCombo = nullptr;
+    QComboBox *m_languageCombo = nullptr;
     QCheckBox *m_animationsCheck = nullptr;
     QComboBox *m_coverSizeCombo = nullptr;
     QComboBox *m_viewModeCombo = nullptr;

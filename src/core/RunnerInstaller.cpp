@@ -1,4 +1,5 @@
 #include "RunnerInstaller.h"
+#include "I18n.h"
 #include "RunnerDetector.h"
 #include "Version.h"
 
@@ -363,7 +364,7 @@ QStringList RunnerInstaller::installArguments(const PackageManagerInfo &manager)
 QString RunnerInstaller::installCommandLine(const PackageManagerInfo &manager)
 {
     if (!manager.available)
-        return QStringLiteral("No supported package manager was detected.");
+        return Vanta::tr("No supported package manager was detected.");
     if (!isRoot() && elevationTool().isEmpty()) {
         QStringList command = {QStringLiteral("sudo"), manager.executable};
         command.append(installArguments(manager));
@@ -390,9 +391,9 @@ QStringList RunnerInstaller::uninstallArguments(const PackageManagerInfo &manage
 QString RunnerInstaller::uninstallCommandLine(const PackageManagerInfo &manager)
 {
     if (!manager.available)
-        return QStringLiteral("No supported package manager was detected.");
+        return Vanta::tr("No supported package manager was detected.");
     if (manager.removalUnsupported)
-        return QStringLiteral("This system removes packages with %1, which was not found.")
+        return Vanta::tr("This system removes packages with %1, which was not found.")
             .arg(manager.uninstallToolName);
     if (!isRoot() && elevationTool().isEmpty()) {
         QStringList command = {QStringLiteral("sudo"), manager.removalExecutable()};
@@ -443,7 +444,7 @@ QList<QPair<QString, QString>> RunnerInstaller::installedProtonInstallations()
         if (results.isEmpty()) {
             const QString candidate = RunnerDetector::protonExecutable(managed);
             if (!candidate.isEmpty()) {
-                results.append({QStringLiteral("Managed Proton"), managed});
+                results.append({Vanta::tr("Managed Proton"), managed});
                 seen.insert(managed);
             }
         }
@@ -484,11 +485,11 @@ void RunnerInstaller::installSystemWine()
         return;
     const PackageManagerInfo manager = detectPackageManager();
     if (!manager.available) {
-        emit failed(QStringLiteral("No supported package manager was detected on this system. Use the portable Wine download instead."));
+        emit failed(Vanta::tr("No supported package manager was detected on this system. Use the portable Wine download instead."));
         return;
     }
     if (!isRoot() && elevationTool().isEmpty()) {
-        emit failed(QStringLiteral("No graphical elevation tool (pkexec) or sudo was found. Run this command in a terminal:\n%1")
+        emit failed(Vanta::tr("No graphical elevation tool (pkexec) or sudo was found. Run this command in a terminal:\n%1")
                         .arg(installCommandLine(manager)));
         return;
     }
@@ -498,7 +499,7 @@ void RunnerInstaller::installSystemWine()
         return;
     const QString program = command.takeFirst();
     beginOperation(Operation::InstallingPackage,
-                   QStringLiteral("Installing Wine with %1…").arg(manager.displayName));
+                   Vanta::tr("Installing Wine with %1…").arg(manager.displayName));
     m_processOutput.clear();
 
     auto *process = new QProcess(this);
@@ -517,7 +518,7 @@ void RunnerInstaller::installSystemWine()
             return;
         if (m_process == process)
             m_process = nullptr;
-        failOperation(QStringLiteral("The package manager could not be started. Run this command manually:\n%1")
+        failOperation(Vanta::tr("The package manager could not be started. Run this command manually:\n%1")
                           .arg(installCommandLine(manager)));
         process->deleteLater();
     });
@@ -530,16 +531,16 @@ void RunnerInstaller::uninstallSystemWine()
         return;
     const PackageManagerInfo manager = detectPackageManager();
     if (!manager.available) {
-        emit failed(QStringLiteral("No supported package manager was detected on this system."));
+        emit failed(Vanta::tr("No supported package manager was detected on this system."));
         return;
     }
     if (manager.removalUnsupported) {
-        emit failed(QStringLiteral("Wine can be removed with %1, but that command was not found on this system.")
+        emit failed(Vanta::tr("Wine can be removed with %1, but that command was not found on this system.")
                         .arg(manager.uninstallToolName));
         return;
     }
     if (!isRoot() && elevationTool().isEmpty()) {
-        emit failed(QStringLiteral("No graphical elevation tool (pkexec) or sudo was found. Run this command in a terminal:\n%1")
+        emit failed(Vanta::tr("No graphical elevation tool (pkexec) or sudo was found. Run this command in a terminal:\n%1")
                         .arg(uninstallCommandLine(manager)));
         return;
     }
@@ -549,7 +550,7 @@ void RunnerInstaller::uninstallSystemWine()
         return;
     const QString program = command.takeFirst();
     beginOperation(Operation::UninstallingPackage,
-                   QStringLiteral("Uninstalling Wine with %1…").arg(manager.displayName));
+                   Vanta::tr("Uninstalling Wine with %1…").arg(manager.displayName));
     m_processOutput.clear();
 
     auto *process = new QProcess(this);
@@ -568,7 +569,7 @@ void RunnerInstaller::uninstallSystemWine()
             return;
         if (m_process == process)
             m_process = nullptr;
-        failOperation(QStringLiteral("The package manager could not be started. Run this command manually:\n%1")
+        failOperation(Vanta::tr("The package manager could not be started. Run this command manually:\n%1")
                           .arg(uninstallCommandLine(manager)));
         process->deleteLater();
     });
@@ -581,15 +582,15 @@ void RunnerInstaller::uninstallPortableWine()
         return;
     const QString root = managedRunnerRoot(RunnerType::Wine);
     if (!QDir(root).exists()) {
-        failOperation(QStringLiteral("Portable Wine is not installed."));
+        failOperation(Vanta::tr("Portable Wine is not installed."));
         return;
     }
-    beginOperation(Operation::Extracting, QStringLiteral("Uninstalling portable Wine…"));
+    beginOperation(Operation::Extracting, Vanta::tr("Uninstalling portable Wine…"));
     QDir dir(root);
     if (dir.removeRecursively()) {
-        completeOperation(QStringLiteral("Portable Wine was uninstalled successfully."));
+        completeOperation(Vanta::tr("Portable Wine was uninstalled successfully."));
     } else {
-        failOperation(QStringLiteral("Could not remove the folder %1.").arg(root));
+        failOperation(Vanta::tr("Could not remove the folder %1.").arg(root));
     }
 }
 
@@ -598,16 +599,16 @@ void RunnerInstaller::uninstallProton(const QString &directoryPath)
     if (busy())
         return;
     if (directoryPath.isEmpty() || !QDir(directoryPath).exists()) {
-        failOperation(QStringLiteral("The specified Proton directory was not found."));
+        failOperation(Vanta::tr("The specified Proton directory was not found."));
         return;
     }
     const QString name = QFileInfo(directoryPath).fileName();
-    beginOperation(Operation::Extracting, QStringLiteral("Uninstalling %1…").arg(name));
+    beginOperation(Operation::Extracting, Vanta::tr("Uninstalling %1…").arg(name));
     QDir dir(directoryPath);
     if (dir.removeRecursively()) {
-        completeOperation(QStringLiteral("Uninstalled %1 successfully.").arg(name));
+        completeOperation(Vanta::tr("Uninstalled %1 successfully.").arg(name));
     } else {
-        failOperation(QStringLiteral("Could not remove the folder %1.").arg(directoryPath));
+        failOperation(Vanta::tr("Could not remove the folder %1.").arg(directoryPath));
     }
 }
 
@@ -631,7 +632,7 @@ void RunnerInstaller::fetchLatestRelease(RunnerType type)
         ? QStringLiteral("GloriousEggroll/proton-ge-custom")
         : QStringLiteral("Kron4ek/Wine-Builds");
     beginOperation(Operation::FetchingRelease,
-                   QStringLiteral("Checking GitHub for the latest %1 release…")
+                   Vanta::tr("Checking GitHub for the latest %1 release…")
                        .arg(type == RunnerType::Proton ? QStringLiteral("GE-Proton") : QStringLiteral("Wine build")));
 
     QNetworkRequest request{QUrl(QStringLiteral("https://api.github.com/repos/%1/releases/latest").arg(repository))};
@@ -655,12 +656,12 @@ void RunnerInstaller::handleReleaseReply(QNetworkReply *reply)
     reply->deleteLater();
 
     if (reply->error() != QNetworkReply::NoError) {
-        failOperation(QStringLiteral("Could not reach GitHub: %1").arg(reply->errorString()));
+        failOperation(Vanta::tr("Could not reach GitHub: %1").arg(reply->errorString()));
         return;
     }
     const QVariant status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     if (status.isValid() && status.toInt() != 200) {
-        failOperation(QStringLiteral("GitHub returned HTTP %1 while looking up the latest release.")
+        failOperation(Vanta::tr("GitHub returned HTTP %1 while looking up the latest release.")
                           .arg(status.toInt()));
         return;
     }
@@ -668,7 +669,7 @@ void RunnerInstaller::handleReleaseReply(QNetworkReply *reply)
     QJsonParseError parseError;
     const QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &parseError);
     if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
-        failOperation(QStringLiteral("GitHub returned an unreadable release description: %1")
+        failOperation(Vanta::tr("GitHub returned an unreadable release description: %1")
                           .arg(parseError.errorString()));
         return;
     }
@@ -677,15 +678,15 @@ void RunnerInstaller::handleReleaseReply(QNetworkReply *reply)
     const AssetChoice asset = chooseAsset(release.value(QStringLiteral("assets")).toArray(), m_requestedType);
     if (asset.name.isEmpty() || asset.url.isEmpty()) {
         failOperation(m_requestedType == RunnerType::Proton
-            ? QStringLiteral("No suitable %1 GE-Proton archive was published in the latest release.").arg(
+            ? Vanta::tr("No suitable %1 GE-Proton archive was published in the latest release.").arg(
                   QSysInfo::currentCpuArchitecture())
-            : QStringLiteral("No suitable portable Wine archive was published in the latest release. Use the package manager option instead."));
+            : Vanta::tr("No suitable portable Wine archive was published in the latest release. Use the package manager option instead."));
         return;
     }
 
     m_extractionRoot = managedRunnerRoot(m_requestedType);
     if (!QDir().mkpath(m_extractionRoot)) {
-        failOperation(QStringLiteral("Could not create the runner folder: %1").arg(m_extractionRoot));
+        failOperation(Vanta::tr("Could not create the runner folder: %1").arg(m_extractionRoot));
         return;
     }
     startDownload(asset.url, asset.name, asset.size);
@@ -695,26 +696,26 @@ void RunnerInstaller::startDownload(const QString &url, const QString &name, qin
 {
     const QString safeName = QFileInfo(name).fileName();
     if (safeName.isEmpty()) {
-        failOperation(QStringLiteral("The release asset has an invalid file name."));
+        failOperation(Vanta::tr("The release asset has an invalid file name."));
         return;
     }
     const QString downloadDirectory = QDir(m_extractionRoot).filePath(QStringLiteral(".downloads"));
     if (!QDir().mkpath(downloadDirectory)) {
-        failOperation(QStringLiteral("Could not create the download folder: %1").arg(downloadDirectory));
+        failOperation(Vanta::tr("Could not create the download folder: %1").arg(downloadDirectory));
         return;
     }
     m_temporaryFile = QDir(downloadDirectory).filePath(safeName);
     QFile::remove(m_temporaryFile);
     m_file.setFileName(m_temporaryFile);
     if (!m_file.open(QIODevice::WriteOnly)) {
-        failOperation(QStringLiteral("Could not write to %1: %2").arg(m_temporaryFile, m_file.errorString()));
+        failOperation(Vanta::tr("Could not write to %1: %2").arg(m_temporaryFile, m_file.errorString()));
         return;
     }
     m_downloadName = safeName;
     m_downloadUrl = url;
     m_expectedSize = expectedSize;
     beginOperation(Operation::Downloading,
-                   QStringLiteral("Downloading %1…").arg(m_releaseTag.isEmpty() ? safeName : m_releaseTag));
+                   Vanta::tr("Downloading %1…").arg(m_releaseTag.isEmpty() ? safeName : m_releaseTag));
 
     QNetworkRequest request{QUrl(url)};
     request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Vanta/%1").arg(QStringLiteral(VANTA_VERSION)));
@@ -758,22 +759,22 @@ void RunnerInstaller::handleDownloadFinished(QNetworkReply *reply)
 
     if (error != QNetworkReply::NoError) {
         if (error == QNetworkReply::OperationCanceledError)
-            failOperation(QStringLiteral("The download was cancelled."));
+            failOperation(Vanta::tr("The download was cancelled."));
         else
-            failOperation(QStringLiteral("The download failed: %1").arg(errorText));
+            failOperation(Vanta::tr("The download failed: %1").arg(errorText));
         return;
     }
     if (status.isValid() && status.toInt() != 200) {
-        failOperation(QStringLiteral("The download server returned HTTP %1.").arg(status.toInt()));
+        failOperation(Vanta::tr("The download server returned HTTP %1.").arg(status.toInt()));
         return;
     }
     const QFileInfo fileInfo(m_temporaryFile);
     if (!fileInfo.isFile() || fileInfo.size() <= 0) {
-        failOperation(QStringLiteral("The downloaded archive is empty."));
+        failOperation(Vanta::tr("The downloaded archive is empty."));
         return;
     }
     if (m_expectedSize > 0 && fileInfo.size() != m_expectedSize) {
-        failOperation(QStringLiteral("The downloaded archive is incomplete (%1 of %2 bytes).")
+        failOperation(Vanta::tr("The downloaded archive is incomplete (%1 of %2 bytes).")
                           .arg(fileInfo.size()).arg(m_expectedSize));
         return;
     }
@@ -784,7 +785,7 @@ void RunnerInstaller::beginExtraction()
 {
     const QString tar = QStandardPaths::findExecutable(QStringLiteral("tar"));
     if (tar.isEmpty()) {
-        failOperation(QStringLiteral("The tar command was not found; the downloaded archive cannot be extracted."));
+        failOperation(Vanta::tr("The tar command was not found; the downloaded archive cannot be extracted."));
         return;
     }
 
@@ -796,7 +797,7 @@ void RunnerInstaller::beginExtraction()
     listing.start(tar, {QStringLiteral("-tf"), m_temporaryFile});
     if (!listing.waitForFinished(30000) || listing.exitStatus() != QProcess::NormalExit
         || listing.exitCode() != 0) {
-        failOperation(QStringLiteral("The downloaded archive could not be read."));
+        failOperation(Vanta::tr("The downloaded archive could not be read."));
         return;
     }
     const QStringList members = QString::fromLocal8Bit(listing.readAllStandardOutput())
@@ -806,14 +807,14 @@ void RunnerInstaller::beginExtraction()
         const QStringList parts = member.split(QLatin1Char('/'), Qt::SkipEmptyParts);
         if (member.startsWith(QLatin1Char('/')) || member.startsWith(QLatin1Char('\\'))
             || parts.contains(QStringLiteral(".."))) {
-            failOperation(QStringLiteral("The downloaded archive contains a path outside its own folder: %1")
+            failOperation(Vanta::tr("The downloaded archive contains a path outside its own folder: %1")
                               .arg(member));
             return;
         }
     }
 
     beginOperation(Operation::Extracting,
-                   QStringLiteral("Extracting %1…").arg(m_releaseTag.isEmpty() ? m_downloadName : m_releaseTag));
+                   Vanta::tr("Extracting %1…").arg(m_releaseTag.isEmpty() ? m_downloadName : m_releaseTag));
     m_processOutput.clear();
 
     // Extract beside the final tree and move it into place only after tar
@@ -823,7 +824,7 @@ void RunnerInstaller::beginExtraction()
     m_stagingRoot = QDir(m_extractionRoot).filePath(QStringLiteral(".extracting"));
     QDir(m_stagingRoot).removeRecursively();
     if (!QDir().mkpath(m_stagingRoot)) {
-        failOperation(QStringLiteral("Could not create the extraction folder: %1")
+        failOperation(Vanta::tr("Could not create the extraction folder: %1")
                           .arg(QDir::toNativeSeparators(m_stagingRoot)));
         return;
     }
@@ -844,7 +845,7 @@ void RunnerInstaller::beginExtraction()
             return;
         if (m_process == process)
             m_process = nullptr;
-        failOperation(QStringLiteral("The tar command could not be started."));
+        failOperation(Vanta::tr("The tar command could not be started."));
         process->deleteLater();
     });
     process->start(tar, {QStringLiteral("-xf"), m_temporaryFile, QStringLiteral("-C"), m_stagingRoot,
@@ -860,8 +861,8 @@ void RunnerInstaller::handleExtractionFinished(int exitCode, QProcess::ExitStatu
         if (detail.size() > 4000)
             detail = detail.right(4000);
         failOperation(detail.isEmpty()
-            ? QStringLiteral("The archive could not be extracted.")
-            : QStringLiteral("The archive could not be extracted:\n%1").arg(detail));
+            ? Vanta::tr("The archive could not be extracted.")
+            : Vanta::tr("The archive could not be extracted:\n%1").arg(detail));
         return;
     }
     if (!m_temporaryFile.isEmpty()) {
@@ -870,8 +871,8 @@ void RunnerInstaller::handleExtractionFinished(int exitCode, QProcess::ExitStatu
     }
     if (firstExistingRunnerInRoot(m_stagingRoot, m_requestedType).isEmpty()) {
         failOperation(m_requestedType == RunnerType::Proton
-            ? QStringLiteral("The downloaded archive does not contain a Proton launcher.")
-            : QStringLiteral("The downloaded archive does not contain a Wine executable."));
+            ? Vanta::tr("The downloaded archive does not contain a Proton launcher.")
+            : Vanta::tr("The downloaded archive does not contain a Wine executable."));
         return;
     }
     QString moveError;
@@ -889,7 +890,7 @@ bool RunnerInstaller::commitExtraction(QString *error)
         staging.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
     if (entries.isEmpty()) {
         if (error)
-            *error = QStringLiteral("The downloaded archive did not contain any files.");
+            *error = Vanta::tr("The downloaded archive did not contain any files.");
         return false;
     }
 
@@ -904,7 +905,7 @@ bool RunnerInstaller::commitExtraction(QString *error)
                                                     : QFile::remove(target);
             if (!removed) {
                 if (error) {
-                    *error = QStringLiteral("Could not replace the existing runner at %1.")
+                    *error = Vanta::tr("Could not replace the existing runner at %1.")
                                  .arg(QDir::toNativeSeparators(target));
                 }
                 return false;
@@ -912,7 +913,7 @@ bool RunnerInstaller::commitExtraction(QString *error)
         }
         if (!QDir().rename(entry.absoluteFilePath(), target)) {
             if (error) {
-                *error = QStringLiteral("Could not move the extracted runner into %1.")
+                *error = Vanta::tr("Could not move the extracted runner into %1.")
                              .arg(QDir::toNativeSeparators(m_extractionRoot));
             }
             return false;
@@ -929,13 +930,13 @@ void RunnerInstaller::validateManagedRunner()
     const QString runner = firstExistingRunnerInRoot(m_extractionRoot, m_requestedType);
     if (runner.isEmpty()) {
         failOperation(m_requestedType == RunnerType::Proton
-            ? QStringLiteral("The archive was extracted, but no Proton launcher was found in %1.").arg(m_extractionRoot)
-            : QStringLiteral("The archive was extracted, but no Wine executable was found in %1.").arg(m_extractionRoot));
+            ? Vanta::tr("The archive was extracted, but no Proton launcher was found in %1.").arg(m_extractionRoot)
+            : Vanta::tr("The archive was extracted, but no Wine executable was found in %1.").arg(m_extractionRoot));
         return;
     }
     const QString label = m_requestedType == RunnerType::Proton
         ? QStringLiteral("GE-Proton") : QStringLiteral("portable Wine");
-    completeOperation(QStringLiteral("Downloaded %1 %2 to %3.")
+    completeOperation(Vanta::tr("Downloaded %1 %2 to %3.")
                           .arg(label, m_releaseTag.isEmpty() ? m_downloadName : m_releaseTag,
                                QFileInfo(runner).absolutePath()));
 }
@@ -949,21 +950,21 @@ void RunnerInstaller::handlePackageFinished(int exitCode, QProcess::ExitStatus s
         if (detail.size() > 4000)
             detail = detail.right(4000);
         const PackageManagerInfo manager = detectPackageManager();
-        QString message = QStringLiteral("The package manager did not install Wine successfully.");
+        QString message = Vanta::tr("The package manager did not install Wine successfully.");
         if (!detail.isEmpty())
-            message += QStringLiteral("\n\n%1").arg(detail);
+            message += Vanta::tr("\n\n%1").arg(detail);
         if (manager.available)
-            message += QStringLiteral("\n\nYou can run this command manually:\n%1").arg(installCommandLine(manager));
-        message += QStringLiteral("\n\nAlternatively install the portable Wine build from this dialog.");
+            message += Vanta::tr("\n\nYou can run this command manually:\n%1").arg(installCommandLine(manager));
+        message += Vanta::tr("\n\nAlternatively install the portable Wine build from this dialog.");
         failOperation(message);
         return;
     }
     const QString wine = RunnerDetector::wineExecutable(AppSettings());
     if (wine.isEmpty()) {
-        failOperation(QStringLiteral("The package manager finished, but the wine command is still not available. Log out and back in, or use the portable Wine download below."));
+        failOperation(Vanta::tr("The package manager finished, but the wine command is still not available. Log out and back in, or use the portable Wine download below."));
         return;
     }
-    completeOperation(QStringLiteral("Wine was installed successfully: %1").arg(wine));
+    completeOperation(Vanta::tr("Wine was installed successfully: %1").arg(wine));
 }
 
 void RunnerInstaller::handlePackageUninstallFinished(int exitCode, QProcess::ExitStatus status)
@@ -975,11 +976,11 @@ void RunnerInstaller::handlePackageUninstallFinished(int exitCode, QProcess::Exi
         if (detail.size() > 4000)
             detail = detail.right(4000);
         failOperation(detail.isEmpty()
-            ? QStringLiteral("The package manager did not uninstall Wine successfully.")
-            : QStringLiteral("The package manager did not uninstall Wine successfully:\n\n%1").arg(detail));
+            ? Vanta::tr("The package manager did not uninstall Wine successfully.")
+            : Vanta::tr("The package manager did not uninstall Wine successfully:\n\n%1").arg(detail));
         return;
     }
-    completeOperation(QStringLiteral("System Wine was uninstalled."));
+    completeOperation(Vanta::tr("System Wine was uninstalled."));
 }
 
 void RunnerInstaller::beginOperation(Operation operation, const QString &message)
@@ -1038,7 +1039,7 @@ void RunnerInstaller::cancelOperation()
     // the package database mid-transaction. The only safe cancellation is to
     // let the package manager finish and report its real result.
     if (m_operation == Operation::InstallingPackage || m_operation == Operation::UninstallingPackage) {
-        emit progress(QStringLiteral("The package manager is still running. Wait for it to finish before closing this dialog."));
+        emit progress(Vanta::tr("The package manager is still running. Wait for it to finish before closing this dialog."));
         return;
     }
     m_cancelRequested = true;

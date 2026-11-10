@@ -1,5 +1,7 @@
 #include "Types.h"
 
+#include "I18n.h"
+
 QString runnerName(RunnerType type)
 {
     switch (type) {
@@ -42,16 +44,16 @@ QString fixKindName(FixKind kind)
 QString scanStateLabel(ScanState state)
 {
     switch (state) {
-    case ScanState::NotScanned: return QStringLiteral("Not scanned");
-    case ScanState::Scanning: return QStringLiteral("Scanning…");
-    case ScanState::NoKnownComponents: return QStringLiteral("No components");
-    case ScanState::ComponentsDetected: return QStringLiteral("Components detected");
-    case ScanState::IncompleteInstallation: return QStringLiteral("Incomplete install");
-    case ScanState::IncompatibleArchitecture: return QStringLiteral("Wrong architecture");
-    case ScanState::MissingRequiredFiles: return QStringLiteral("Missing files");
-    case ScanState::ScanError: return QStringLiteral("Scan error");
+    case ScanState::NotScanned: return Vanta::tr("Not scanned");
+    case ScanState::Scanning: return Vanta::tr("Scanning…");
+    case ScanState::NoKnownComponents: return Vanta::tr("No components");
+    case ScanState::ComponentsDetected: return Vanta::tr("Components detected");
+    case ScanState::IncompleteInstallation: return Vanta::tr("Incomplete install");
+    case ScanState::IncompatibleArchitecture: return Vanta::tr("Wrong architecture");
+    case ScanState::MissingRequiredFiles: return Vanta::tr("Missing files");
+    case ScanState::ScanError: return Vanta::tr("Scan error");
     }
-    return QStringLiteral("Not scanned");
+    return Vanta::tr("Not scanned");
 }
 
 QString viewModeName(ViewMode mode)
@@ -121,6 +123,27 @@ QString installFilterName(InstallFilter filter)
     return QStringLiteral("All");
 }
 
+QString compatibilityFilterDisplayName(CompatibilityFilter filter)
+{
+    switch (filter) {
+    case CompatibilityFilter::All: return Vanta::tr("All");
+    case CompatibilityFilter::Detected: return Vanta::tr("Detected");
+    case CompatibilityFilter::NeedsAttention: return Vanta::tr("Needs attention");
+    case CompatibilityFilter::NotDetected: return Vanta::tr("Not detected");
+    }
+    return Vanta::tr("All");
+}
+
+QString installFilterDisplayName(InstallFilter filter)
+{
+    switch (filter) {
+    case InstallFilter::All: return Vanta::tr("All");
+    case InstallFilter::Installed: return Vanta::tr("Installed");
+    case InstallFilter::Missing: return Vanta::tr("Missing");
+    }
+    return Vanta::tr("All");
+}
+
 QString wineLogLevelName(WineLogLevel level)
 {
     switch (level) {
@@ -143,6 +166,105 @@ QString wineDebugValue(WineLogLevel level)
     case WineLogLevel::Trace: return QStringLiteral("+all");
     }
     return QStringLiteral("-all,err+all");
+}
+
+QString runnerDisplayName(RunnerType type)
+{
+    switch (type) {
+    case RunnerType::Native: return Vanta::tr("Native");
+    case RunnerType::Wine: return QStringLiteral("Wine");
+    case RunnerType::Proton: return QStringLiteral("Proton");
+    case RunnerType::Flatpak: return QStringLiteral("Flatpak");
+    case RunnerType::Custom: return Vanta::tr("Custom");
+    }
+    return Vanta::tr("Native");
+}
+
+QString platformDisplayName(Platform platform)
+{
+    // Linux and Windows are product names, not common nouns, so they are the
+    // same in every catalog.
+    return platform == Platform::Windows ? QStringLiteral("Windows") : QStringLiteral("Linux");
+}
+
+QString onlineFixModeDisplayName(OnlineFixMode mode)
+{
+    switch (mode) {
+    case OnlineFixMode::Auto: return Vanta::tr("Auto");
+    case OnlineFixMode::Force: return Vanta::tr("Force");
+    case OnlineFixMode::Disabled: return Vanta::tr("Disabled");
+    }
+    return Vanta::tr("Auto");
+}
+
+QString fixKindDisplayName(FixKind kind)
+{
+    switch (kind) {
+    case FixKind::Unknown: return Vanta::tr("Unknown");
+    case FixKind::OnlineFix: return QStringLiteral("OnlineFix");
+    case FixKind::FreeTP: return QStringLiteral("FreeTP");
+    case FixKind::Photon: return Vanta::tr("Photon launcher");
+    case FixKind::SteamFixOnly: return QStringLiteral("SteamFix");
+    }
+    return Vanta::tr("Unknown");
+}
+
+QString viewModeDisplayName(ViewMode mode)
+{
+    return mode == ViewMode::Grid ? Vanta::tr("Grid") : Vanta::tr("List");
+}
+
+QString sortModeDisplayName(SortMode mode)
+{
+    switch (mode) {
+    case SortMode::Name: return Vanta::tr("Name");
+    case SortMode::LastPlayed: return Vanta::tr("Last played");
+    case SortMode::Playtime: return Vanta::tr("Playtime");
+    }
+    return Vanta::tr("Name");
+}
+
+QString themeChoiceDisplayName(ThemeChoice choice)
+{
+    switch (choice) {
+    case ThemeChoice::System: return Vanta::tr("System (light or dark)");
+    case ThemeChoice::Light: return Vanta::tr("Light");
+    case ThemeChoice::Dark: return Vanta::tr("Dark");
+    case ThemeChoice::SystemColors: return Vanta::tr("Follow system colors");
+    }
+    return Vanta::tr("System (light or dark)");
+}
+
+QString coverSizeDisplayName(CoverSize size)
+{
+    switch (size) {
+    case CoverSize::Small: return Vanta::tr("Small");
+    case CoverSize::Medium: return Vanta::tr("Medium");
+    case CoverSize::Large: return Vanta::tr("Large");
+    }
+    return Vanta::tr("Medium");
+}
+
+QString wineLogLevelDisplayName(WineLogLevel level)
+{
+    switch (level) {
+    case WineLogLevel::Off: return Vanta::tr("Off");
+    case WineLogLevel::Errors: return Vanta::tr("Errors only");
+    case WineLogLevel::Warnings: return Vanta::tr("Warnings and errors");
+    case WineLogLevel::Trace: return Vanta::tr("Everything (verbose)");
+    }
+    return Vanta::tr("Errors only");
+}
+
+QString sourceDisplayName(const QString &source)
+{
+    if (source == QStringLiteral("Manual"))
+        return Vanta::tr("Manual");
+    if (source == QStringLiteral("Other"))
+        return Vanta::tr("Other");
+    // Store and launcher brands are product names, so they are not translated.
+    // An unknown source keeps whatever name it was stored with.
+    return source;
 }
 
 RunnerType runnerFromName(const QString &name)

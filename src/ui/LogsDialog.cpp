@@ -1,5 +1,6 @@
 #include "LogsDialog.h"
 
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -20,7 +21,7 @@
 
 LogsDialog::LogsDialog(const QString &gameId, const QString &gameName, ThemeManager *theme,
                        QWidget *parent)
-    : VantaDialog(QStringLiteral("Logs"), theme, parent)
+    : VantaDialog(Vanta::tr("Logs"), theme, parent)
     , m_gameId(gameId)
     , m_gameName(gameName)
     , m_theme(theme)
@@ -42,19 +43,19 @@ void LogsDialog::selectLog(const QString &path)
 void LogsDialog::buildUi()
 {
     bodyLayout()->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Every launch writes the composed command and everything the runner printed here, so you "
+        Vanta::tr("Every launch writes the composed command and everything the runner printed here, so you "
                        "can see what happened after the game has already closed."),
         this));
 
     auto *topRow = new QHBoxLayout;
     topRow->setSpacing(8);
-    topRow->addWidget(new QLabel(QStringLiteral("Launch"), this));
+    topRow->addWidget(new QLabel(Vanta::tr("Launch"), this));
     m_logCombo = new QComboBox(this);
     m_logCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     connect(m_logCombo, &QComboBox::currentIndexChanged, this, [this](int) { updateSummary(); });
     topRow->addWidget(m_logCombo, 1);
 
-    m_refreshButton = new QPushButton(QStringLiteral("Refresh"), this);
+    m_refreshButton = new QPushButton(Vanta::tr("Refresh"), this);
     m_refreshButton->setCursor(Qt::PointingHandCursor);
     m_refreshButton->setAutoDefault(false);
     connect(m_refreshButton, &QPushButton::clicked, this, &LogsDialog::reload);
@@ -94,20 +95,20 @@ void LogsDialog::buildUi()
 
     auto *footer = new QHBoxLayout;
     footer->setSpacing(8);
-    m_folderButton = new QPushButton(QStringLiteral("Open folder"), this);
+    m_folderButton = new QPushButton(Vanta::tr("Open folder"), this);
     m_folderButton->setCursor(Qt::PointingHandCursor);
     m_folderButton->setAutoDefault(false);
     connect(m_folderButton, &QPushButton::clicked, this, &LogsDialog::openLogFolder);
     footer->addWidget(m_folderButton);
 
-    m_clearButton = new QPushButton(QStringLiteral("Clear logs"), this);
+    m_clearButton = new QPushButton(Vanta::tr("Clear logs"), this);
     m_clearButton->setCursor(Qt::PointingHandCursor);
     m_clearButton->setAutoDefault(false);
     connect(m_clearButton, &QPushButton::clicked, this, &LogsDialog::clearAll);
     footer->addWidget(m_clearButton);
     footer->addStretch(1);
 
-    m_closeButton = new QPushButton(QStringLiteral("Close"), this);
+    m_closeButton = new QPushButton(Vanta::tr("Close"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_closeButton);
     m_closeButton->setDefault(true);
@@ -140,18 +141,18 @@ void LogsDialog::reload()
     for (const LaunchLogEntry &entry : m_entries) {
         const QString stamp = entry.finishedAt.isValid()
             ? entry.finishedAt.toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
-            : QStringLiteral("Unknown time");
+            : Vanta::tr("Unknown time");
         QString label = stamp;
         if (entry.running)
-            label += QStringLiteral("  ·  running");
+            label += Vanta::tr("  ·  running");
         else if (entry.crashed)
-            label += QStringLiteral("  ·  exited unexpectedly");
+            label += Vanta::tr("  ·  exited unexpectedly");
         else if (entry.stopped)
-            label += QStringLiteral("  ·  stopped");
+            label += Vanta::tr("  ·  stopped");
         else if (entry.exitCode < 0)
-            label += QStringLiteral("  ·  never started");
+            label += Vanta::tr("  ·  never started");
         else if (entry.exitCode > 0)
-            label += QStringLiteral("  ·  exit %1").arg(entry.exitCode);
+            label += Vanta::tr("  ·  exit %1").arg(entry.exitCode);
         m_logCombo->addItem(label, entry.path);
     }
     m_logCombo->blockSignals(false);
@@ -185,14 +186,14 @@ void LogsDialog::updateSummary()
     const QString folder = logDirectory();
     m_folderButton->setEnabled(QFileInfo::exists(folder));
     m_folderButton->setToolTip(QFileInfo::exists(folder)
-        ? QStringLiteral("Open the folder that holds this game's logs.")
-        : QStringLiteral("No log folder exists yet. Start the game once and it will be created."));
+        ? Vanta::tr("Open the folder that holds this game's logs.")
+        : Vanta::tr("No log folder exists yet. Start the game once and it will be created."));
 
     if (!hasLogs) {
         m_summaryLabel->setText(
-            QStringLiteral("No launch log has been recorded for %1 yet. Start the game once and the runner "
+            Vanta::tr("No launch log has been recorded for %1 yet. Start the game once and the runner "
                            "output will appear here.").arg(m_gameName));
-        m_pathLabel->setText(QStringLiteral("No log selected"));
+        m_pathLabel->setText(Vanta::tr("No log selected"));
         m_view->setPlainText(QString());
         return;
     }
@@ -204,21 +205,21 @@ void LogsDialog::updateSummary()
 
     QString summary = entry.finishedAt.isValid()
         ? entry.finishedAt.toString(QStringLiteral("d MMM yyyy, HH:mm:ss"))
-        : QStringLiteral("Unknown time");
+        : Vanta::tr("Unknown time");
     if (!entry.runner.isEmpty())
-        summary += QStringLiteral("  ·  %1").arg(entry.runner);
+        summary += Vanta::tr("  ·  %1").arg(entry.runner);
     if (entry.running) {
-        summary += QStringLiteral("  ·  still running");
+        summary += Vanta::tr("  ·  still running");
     } else {
-        summary += entry.exitCode < 0 ? QStringLiteral("  ·  the process never started")
-                                      : QStringLiteral("  ·  exit code %1").arg(entry.exitCode);
+        summary += entry.exitCode < 0 ? Vanta::tr("  ·  the process never started")
+                                      : Vanta::tr("  ·  exit code %1").arg(entry.exitCode);
         if (entry.crashed)
-            summary += QStringLiteral("  ·  the game did not close normally");
+            summary += Vanta::tr("  ·  the game did not close normally");
         else if (entry.stopped)
-            summary += QStringLiteral("  ·  stopped from Vanta");
+            summary += Vanta::tr("  ·  stopped from Vanta");
     }
     if (entry.bytes > 0)
-        summary += QStringLiteral("  ·  %1").arg(UiHelp::dataSize(entry.bytes));
+        summary += Vanta::tr("  ·  %1").arg(UiHelp::dataSize(entry.bytes));
     m_summaryLabel->setText(summary);
 
     const QString path = entry.path;
@@ -252,7 +253,7 @@ void LogsDialog::openLogFolder()
     const QString directory = logDirectory();
     if (!QFileInfo::exists(directory)) {
         m_summaryLabel->setText(
-            QStringLiteral("No log folder exists for %1 yet. Start the game once and the runner output "
+            Vanta::tr("No log folder exists for %1 yet. Start the game once and the runner output "
                            "will be stored there.").arg(m_gameName));
         return;
     }
@@ -264,8 +265,8 @@ void LogsDialog::clearAll()
     if (m_entries.isEmpty())
         return;
     const auto reply = QMessageBox::question(
-        this, QStringLiteral("Clear launch logs?"),
-        QStringLiteral("Every stored log for %1 will be deleted. Future launches still write a new log. "
+        this, Vanta::tr("Clear launch logs?"),
+        Vanta::tr("Every stored log for %1 will be deleted. Future launches still write a new log. "
                        "The game folder is not touched.").arg(m_gameName),
         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
     if (reply != QMessageBox::Yes)
@@ -273,6 +274,6 @@ void LogsDialog::clearAll()
 
     const int removed = LaunchLogs::removeAll(m_gameId);
     reload();
-    m_summaryLabel->setText(QStringLiteral("Removed %1 log file(s).").arg(removed));
+    m_summaryLabel->setText(Vanta::tr("Removed %1 log file(s).").arg(removed));
     emit logsCleared();
 }

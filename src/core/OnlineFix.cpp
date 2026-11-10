@@ -1,4 +1,5 @@
 #include "OnlineFix.h"
+#include "I18n.h"
 #include "IniFile.h"
 
 #include <QDir>
@@ -54,11 +55,11 @@ bool ensureBackup(const QString &path, PatchResult &result)
 {
     const QString backup = backupPathFor(path);
     if (QFileInfo::exists(backup)) {
-        result.diagnostics.append(QStringLiteral("Existing backup kept unchanged: %1").arg(backup));
+        result.diagnostics.append(Vanta::tr("Existing backup kept unchanged: %1").arg(backup));
         return true;
     }
     if (!QFile::copy(path, backup)) {
-        result.errors.append(QStringLiteral("Could not back up %1 before modification.").arg(path));
+        result.errors.append(Vanta::tr("Could not back up %1 before modification.").arg(path));
         return false;
     }
     result.backedUpFiles.append(backup);
@@ -115,19 +116,19 @@ bool patchPhoton(const Game &game, const OnlineFixInfo &info, PatchResult &resul
 
         const QString dependencySource = findNewtonsoft(game.effectiveDirectory(), launcherDirectory);
         if (dependencySource.isEmpty()) {
-            result.diagnostics.append(QStringLiteral("Photon launcher dependency Newtonsoft.Json.dll was not found in the game tree. The launch will continue without it."));
+            result.diagnostics.append(Vanta::tr("Photon launcher dependency Newtonsoft.Json.dll was not found in the game tree. The launch will continue without it."));
             continue;
         }
         const QString target = QDir(launcherDirectory).filePath(QStringLiteral("Newtonsoft.Json.dll"));
         if (QFileInfo::exists(target))
             continue;
         if (!QFile::link(dependencySource, target)) {
-            result.diagnostics.append(QStringLiteral("Could not create Newtonsoft.Json.dll link beside the Photon launcher. The launch will continue without it."));
+            result.diagnostics.append(Vanta::tr("Could not create Newtonsoft.Json.dll link beside the Photon launcher. The launch will continue without it."));
             success = false;
             continue;
         }
         result.writtenFiles.append(target);
-        result.diagnostics.append(QStringLiteral("Linked %1 beside the Photon launcher.").arg(target));
+        result.diagnostics.append(Vanta::tr("Linked %1 beside the Photon launcher.").arg(target));
     }
     return success;
 }
@@ -488,7 +489,7 @@ PatchResult OnlineFixPatcher::apply(const Game &game, const OnlineFixInfo &info)
             if (hasFake)
                 set(kMainSection, QStringLiteral("RealAppId"), originalFake);
             else if (!hasReal)
-                result.diagnostics.append(QStringLiteral("steamfix.ini has no RealAppId or FakeAppId to swap."));
+                result.diagnostics.append(Vanta::tr("steamfix.ini has no RealAppId or FakeAppId to swap."));
             if (hasReal) {
                 ini.ensureSection(kOnlineFixSection);
                 set(kOnlineFixSection, QStringLiteral("RealAppId"), originalReal);
@@ -513,7 +514,7 @@ PatchResult OnlineFixPatcher::apply(const Game &game, const OnlineFixInfo &info)
         if (QFileInfo::exists(path))
             QFile::setPermissions(path, permissions);
         result.writtenFiles.append(path);
-        result.diagnostics.append(QStringLiteral("Updated OnlineFix configuration: %1").arg(path));
+        result.diagnostics.append(Vanta::tr("Updated OnlineFix configuration: %1").arg(path));
     }
 
     if (!patchPhoton(game, info, result))

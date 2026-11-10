@@ -1,5 +1,6 @@
 #include "SettingsDialog.h"
 #include "CoverFetcher.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "Library.h"
 #include "LibraryImportDialog.h"
@@ -49,7 +50,7 @@ QFormLayout *formFor(QWidget *parent)
 }
 
 SettingsDialog::SettingsDialog(const AppSettings &settings, ThemeManager *theme, GameLibrary *library, QWidget *parent)
-    : VantaDialog(QStringLiteral("Settings"), theme, parent)
+    : VantaDialog(Vanta::tr("Settings"), theme, parent)
     , m_settings(settings)
     , m_theme(theme)
     , m_library(library)
@@ -101,51 +102,61 @@ void SettingsDialog::buildUi()
     auto *appearance = new QWidget;
     auto *appearanceForm = formFor(appearance);
     m_themeCombo = new QComboBox(appearance);
-    m_themeCombo->addItem(themeChoiceName(ThemeChoice::System), static_cast<int>(ThemeChoice::System));
-    m_themeCombo->addItem(themeChoiceName(ThemeChoice::Light), static_cast<int>(ThemeChoice::Light));
-    m_themeCombo->addItem(themeChoiceName(ThemeChoice::Dark), static_cast<int>(ThemeChoice::Dark));
-    m_themeCombo->addItem(themeChoiceName(ThemeChoice::SystemColors), static_cast<int>(ThemeChoice::SystemColors));
-    appearanceForm->addRow(QStringLiteral("Theme"), m_themeCombo);
+    m_themeCombo->addItem(themeChoiceDisplayName(ThemeChoice::System), static_cast<int>(ThemeChoice::System));
+    m_themeCombo->addItem(themeChoiceDisplayName(ThemeChoice::Light), static_cast<int>(ThemeChoice::Light));
+    m_themeCombo->addItem(themeChoiceDisplayName(ThemeChoice::Dark), static_cast<int>(ThemeChoice::Dark));
+    m_themeCombo->addItem(themeChoiceDisplayName(ThemeChoice::SystemColors), static_cast<int>(ThemeChoice::SystemColors));
+    appearanceForm->addRow(Vanta::tr("Theme"), m_themeCombo);
     appearanceForm->addRow(UiHelp::helpLabel(
-        QStringLiteral("System (light or dark) follows the desktop color scheme reported by Qt. "
-                       "Follow system colors reads the palette of the active desktop theme directly, so a "
-                       "Breeze Dark or Breeze Light scheme is reproduced with its own window, text and accent "
-                       "colors instead of Vanta's built-in palette."),
+        Vanta::tr("System (light or dark) follows the desktop color scheme reported by Qt. "
+                  "Follow system colors reads the palette of the active desktop theme directly, so a "
+                  "Breeze Dark or Breeze Light scheme is reproduced with its own window, text and accent "
+                  "colors instead of Vanta's built-in palette."),
         appearance));
 
-    m_animationsCheck = new QCheckBox(QStringLiteral("Enable subtle hover and selection animations"), appearance);
+    m_languageCombo = new QComboBox(appearance);
+    m_languageCombo->addItem(Vanta::tr("System default"), QStringLiteral("system"));
+    m_languageCombo->addItem(QStringLiteral("English"), QStringLiteral("en"));
+    for (const I18n::Language &language : I18n::languages())
+        m_languageCombo->addItem(language.nativeName, language.code);
+    appearanceForm->addRow(Vanta::tr("Language"), m_languageCombo);
+    appearanceForm->addRow(UiHelp::helpLabel(
+        Vanta::tr("Translations come from the community. Changing the language takes effect after Vanta restarts."),
+        appearance));
+
+    m_animationsCheck = new QCheckBox(Vanta::tr("Enable subtle hover and selection animations"), appearance);
     appearanceForm->addRow(QString(), m_animationsCheck);
 
     m_coverSizeCombo = new QComboBox(appearance);
-    m_coverSizeCombo->addItem(coverSizeName(CoverSize::Small), static_cast<int>(CoverSize::Small));
-    m_coverSizeCombo->addItem(coverSizeName(CoverSize::Medium), static_cast<int>(CoverSize::Medium));
-    m_coverSizeCombo->addItem(coverSizeName(CoverSize::Large), static_cast<int>(CoverSize::Large));
-    appearanceForm->addRow(QStringLiteral("Cover size"), m_coverSizeCombo);
+    m_coverSizeCombo->addItem(coverSizeDisplayName(CoverSize::Small), static_cast<int>(CoverSize::Small));
+    m_coverSizeCombo->addItem(coverSizeDisplayName(CoverSize::Medium), static_cast<int>(CoverSize::Medium));
+    m_coverSizeCombo->addItem(coverSizeDisplayName(CoverSize::Large), static_cast<int>(CoverSize::Large));
+    appearanceForm->addRow(Vanta::tr("Cover size"), m_coverSizeCombo);
 
     m_viewModeCombo = new QComboBox(appearance);
-    m_viewModeCombo->addItem(viewModeName(ViewMode::Grid), static_cast<int>(ViewMode::Grid));
-    m_viewModeCombo->addItem(viewModeName(ViewMode::List), static_cast<int>(ViewMode::List));
-    appearanceForm->addRow(QStringLiteral("Default view"), m_viewModeCombo);
+    m_viewModeCombo->addItem(viewModeDisplayName(ViewMode::Grid), static_cast<int>(ViewMode::Grid));
+    m_viewModeCombo->addItem(viewModeDisplayName(ViewMode::List), static_cast<int>(ViewMode::List));
+    appearanceForm->addRow(Vanta::tr("Default view"), m_viewModeCombo);
 
     m_sortCombo = new QComboBox(appearance);
-    m_sortCombo->addItem(sortModeName(SortMode::Name), static_cast<int>(SortMode::Name));
-    m_sortCombo->addItem(sortModeName(SortMode::LastPlayed), static_cast<int>(SortMode::LastPlayed));
-    m_sortCombo->addItem(sortModeName(SortMode::Playtime), static_cast<int>(SortMode::Playtime));
-    appearanceForm->addRow(QStringLiteral("Sort by"), m_sortCombo);
+    m_sortCombo->addItem(sortModeDisplayName(SortMode::Name), static_cast<int>(SortMode::Name));
+    m_sortCombo->addItem(sortModeDisplayName(SortMode::LastPlayed), static_cast<int>(SortMode::LastPlayed));
+    m_sortCombo->addItem(sortModeDisplayName(SortMode::Playtime), static_cast<int>(SortMode::Playtime));
+    appearanceForm->addRow(Vanta::tr("Sort by"), m_sortCombo);
 
-    m_ascendingCheck = new QCheckBox(QStringLiteral("Sort ascending"), appearance);
+    m_ascendingCheck = new QCheckBox(Vanta::tr("Sort ascending"), appearance);
     appearanceForm->addRow(QString(), m_ascendingCheck);
 
-    m_badgesCheck = new QCheckBox(QStringLiteral("Show runner and platform badges on cards"), appearance);
+    m_badgesCheck = new QCheckBox(Vanta::tr("Show runner and platform badges on cards"), appearance);
     appearanceForm->addRow(QString(), m_badgesCheck);
 
-    m_rememberSidebarCheck = new QCheckBox(QStringLiteral("Remember the selected sidebar filter"), appearance);
+    m_rememberSidebarCheck = new QCheckBox(Vanta::tr("Remember the selected sidebar filter"), appearance);
     appearanceForm->addRow(QString(), m_rememberSidebarCheck);
 
-    m_rememberGroupsCheck = new QCheckBox(QStringLiteral("Remember collapsed sidebar groups"), appearance);
+    m_rememberGroupsCheck = new QCheckBox(Vanta::tr("Remember collapsed sidebar groups"), appearance);
     appearanceForm->addRow(QString(), m_rememberGroupsCheck);
 
-    m_replayButton = new QPushButton(QStringLiteral("Show the tutorial again"), appearance);
+    m_replayButton = new QPushButton(Vanta::tr("Show the tutorial again"), appearance);
     m_replayButton->setCursor(Qt::PointingHandCursor);
     // Without this Qt makes the first created button the dialog's implicit
     // default, so Enter on the Appearance tab replayed the tutorial instead of
@@ -156,51 +167,51 @@ void SettingsDialog::buildUi()
         m_settings.tutorialCompleted = false;
     });
     appearanceForm->addRow(QString(), m_replayButton);
-    tabs->addTab(scrollPage(appearance, tabs), QStringLiteral("Appearance"));
+    tabs->addTab(scrollPage(appearance, tabs), Vanta::tr("Appearance"));
 
     auto *library = new QWidget;
     auto *libraryForm = formFor(library);
-    m_autoScanCheck = new QCheckBox(QStringLiteral("Scan new games automatically when they are added"), library);
+    m_autoScanCheck = new QCheckBox(Vanta::tr("Scan new games automatically when they are added"), library);
     libraryForm->addRow(QString(), m_autoScanCheck);
-    m_rescanCheck = new QCheckBox(QStringLiteral("Rescan when the game folder changed since the last scan"), library);
+    m_rescanCheck = new QCheckBox(Vanta::tr("Rescan when the game folder changed since the last scan"), library);
     libraryForm->addRow(QString(), m_rescanCheck);
 
     m_depthSpin = new QSpinBox(library);
     m_depthSpin->setRange(2, 24);
-    m_depthSpin->setSuffix(QStringLiteral(" levels"));
-    libraryForm->addRow(QStringLiteral("Scan depth"), m_depthSpin);
+    m_depthSpin->setSuffix(Vanta::tr(" levels"));
+    libraryForm->addRow(Vanta::tr("Scan depth"), m_depthSpin);
 
     m_limitSpin = new QSpinBox(library);
     m_limitSpin->setRange(1000, 250000);
     m_limitSpin->setSingleStep(1000);
-    m_limitSpin->setSuffix(QStringLiteral(" entries"));
-    libraryForm->addRow(QStringLiteral("Scan entry limit"), m_limitSpin);
+    m_limitSpin->setSuffix(Vanta::tr(" entries"));
+    libraryForm->addRow(Vanta::tr("Scan entry limit"), m_limitSpin);
 
     libraryForm->addRow(UiHelp::helpLabel(
-        QStringLiteral("Scans run in the background and are read-only, except for confirmed OnlineFix INI updates and "
-                       "the Photon Newtonsoft.Json link. Lower limits keep very large folders responsive."),
+        Vanta::tr("Scans run in the background and are read-only, except for confirmed OnlineFix INI updates and "
+                  "the Photon Newtonsoft.Json link. Lower limits keep very large folders responsive."),
         library));
-    tabs->addTab(scrollPage(library, tabs), QStringLiteral("Scanning"));
+    tabs->addTab(scrollPage(library, tabs), Vanta::tr("Scanning"));
 
     auto *onlineFix = new QWidget;
     auto *fixForm = formFor(onlineFix);
     m_onlineFixPromptCombo = new QComboBox(onlineFix);
-    m_onlineFixPromptCombo->addItem(QStringLiteral("Ask before every launch"),
+    m_onlineFixPromptCombo->addItem(Vanta::tr("Ask before every launch"),
                                     static_cast<int>(OnlineFixPrompt::Ask));
-    m_onlineFixPromptCombo->addItem(QStringLiteral("Always apply when detected"),
+    m_onlineFixPromptCombo->addItem(Vanta::tr("Always apply when detected"),
                                     static_cast<int>(OnlineFixPrompt::AlwaysApply));
-    m_onlineFixPromptCombo->addItem(QStringLiteral("Never apply"),
+    m_onlineFixPromptCombo->addItem(Vanta::tr("Never apply"),
                                     static_cast<int>(OnlineFixPrompt::NeverApply));
-    fixForm->addRow(QStringLiteral("Launch policy"), m_onlineFixPromptCombo);
+    fixForm->addRow(Vanta::tr("Launch policy"), m_onlineFixPromptCombo);
 
-    m_requireSteamCheck = new QCheckBox(QStringLiteral("Require Steam to be running before an OnlineFix launch"),
+    m_requireSteamCheck = new QCheckBox(Vanta::tr("Require Steam to be running before an OnlineFix launch"),
                                         onlineFix);
     fixForm->addRow(QString(), m_requireSteamCheck);
 
     fixForm->addRow(UiHelp::helpLabel(
-        QStringLiteral("Per-game modes override this policy. OnlineFix overrides are applied to the launch environment "
-                       "only and are never saved into the game's stored environment. Configuration files are backed up "
-                       "before they are changed. Vanta cannot verify that a fix works."),
+        Vanta::tr("Per-game modes override this policy. OnlineFix overrides are applied to the launch environment "
+                  "only and are never saved into the game's stored environment. Configuration files are backed up "
+                  "before they are changed. Vanta cannot verify that a fix works."),
         onlineFix));
     tabs->addTab(scrollPage(onlineFix, tabs), QStringLiteral("OnlineFix"));
 
@@ -212,49 +223,49 @@ void SettingsDialog::buildUi()
     wineLayout->setContentsMargins(0, 0, 0, 0);
     wineLayout->setSpacing(7);
     m_winePathEdit = new QLineEdit(wineRow);
-    m_winePathEdit->setPlaceholderText(QStringLiteral("Optional custom Wine executable or build folder"));
+    m_winePathEdit->setPlaceholderText(Vanta::tr("Optional custom Wine executable or build folder"));
     wineLayout->addWidget(m_winePathEdit, 1);
-    auto *wineBrowse = new QPushButton(QStringLiteral("Browse…"), wineRow);
+    auto *wineBrowse = new QPushButton(Vanta::tr("Browse…"), wineRow);
     wineBrowse->setCursor(Qt::PointingHandCursor);
     UiHelp::makeFlat(wineBrowse);
     connect(wineBrowse, &QPushButton::clicked, this, &SettingsDialog::browseWine);
     wineLayout->addWidget(wineBrowse);
-    runnersForm->addRow(QStringLiteral("Custom Wine"), wineRow);
+    runnersForm->addRow(Vanta::tr("Custom Wine"), wineRow);
 
     m_protonList = new QListWidget(runners);
     m_protonList->setObjectName(QStringLiteral("protonPathList"));
     m_protonList->setMinimumHeight(110);
     m_protonList->setSelectionMode(QAbstractItemView::SingleSelection);
-    runnersForm->addRow(QStringLiteral("Custom Proton paths"), m_protonList);
+    runnersForm->addRow(Vanta::tr("Custom Proton paths"), m_protonList);
 
     auto *protonButtons = new QHBoxLayout;
     protonButtons->setSpacing(7);
-    auto *addProton = new QPushButton(QStringLiteral("Add folder…"), runners);
+    auto *addProton = new QPushButton(Vanta::tr("Add folder…"), runners);
     addProton->setCursor(Qt::PointingHandCursor);
     connect(addProton, &QPushButton::clicked, this, &SettingsDialog::addProtonPath);
     protonButtons->addWidget(addProton);
-    auto *removeProton = new QPushButton(QStringLiteral("Remove"), runners);
+    auto *removeProton = new QPushButton(Vanta::tr("Remove"), runners);
     removeProton->setCursor(Qt::PointingHandCursor);
     connect(removeProton, &QPushButton::clicked, this, &SettingsDialog::removeProtonPath);
     protonButtons->addWidget(removeProton);
     protonButtons->addStretch(1);
     runnersForm->addRow(QString(), protonButtons);
 
-    m_runnersButton = new QPushButton(QStringLiteral("Download or install runners…"), runners);
+    m_runnersButton = new QPushButton(Vanta::tr("Download or install runners…"), runners);
     m_runnersButton->setCursor(Qt::PointingHandCursor);
     connect(m_runnersButton, &QPushButton::clicked, this, &SettingsDialog::openRunnersDialog);
     runnersForm->addRow(QString(), m_runnersButton);
 
     m_wineLogCombo = new QComboBox(runners);
-    m_wineLogCombo->addItem(wineLogLevelName(WineLogLevel::Off), static_cast<int>(WineLogLevel::Off));
-    m_wineLogCombo->addItem(wineLogLevelName(WineLogLevel::Errors), static_cast<int>(WineLogLevel::Errors));
-    m_wineLogCombo->addItem(wineLogLevelName(WineLogLevel::Warnings), static_cast<int>(WineLogLevel::Warnings));
-    m_wineLogCombo->addItem(wineLogLevelName(WineLogLevel::Trace), static_cast<int>(WineLogLevel::Trace));
-    runnersForm->addRow(QStringLiteral("Wine log detail"), m_wineLogCombo);
+    m_wineLogCombo->addItem(wineLogLevelDisplayName(WineLogLevel::Off), static_cast<int>(WineLogLevel::Off));
+    m_wineLogCombo->addItem(wineLogLevelDisplayName(WineLogLevel::Errors), static_cast<int>(WineLogLevel::Errors));
+    m_wineLogCombo->addItem(wineLogLevelDisplayName(WineLogLevel::Warnings), static_cast<int>(WineLogLevel::Warnings));
+    m_wineLogCombo->addItem(wineLogLevelDisplayName(WineLogLevel::Trace), static_cast<int>(WineLogLevel::Trace));
+    runnersForm->addRow(Vanta::tr("Wine log detail"), m_wineLogCombo);
     runnersForm->addRow(UiHelp::helpLabel(
-        QStringLiteral("Controls how much Wine writes to the launch log. “Errors only” keeps real failures visible "
-                       "without the fixme noise. Every launch keeps the full output in the log viewer, so raising "
-                       "this is only useful while diagnosing a problem."),
+        Vanta::tr("Controls how much Wine writes to the launch log. “Errors only” keeps real failures visible "
+                  "without the fixme noise. Every launch keeps the full output in the log viewer, so raising "
+                  "this is only useful while diagnosing a problem."),
         runners));
 
     m_runnerSummary = UiHelp::helpLabel(QString(), runners);
@@ -262,26 +273,26 @@ void SettingsDialog::buildUi()
     runnersForm->addRow(m_runnerSummary);
 
     runnersForm->addRow(UiHelp::helpLabel(
-        QStringLiteral("Vanta also detects runners installed by Steam, Lutris, Heroic and Bottles, including Flatpak "
-                       "installations. Detected runners are available in the game editor without extra setup."),
+        Vanta::tr("Vanta also detects runners installed by Steam, Lutris, Heroic and Bottles, including Flatpak "
+                  "installations. Detected runners are available in the game editor without extra setup."),
         runners));
-    tabs->addTab(scrollPage(runners, tabs), QStringLiteral("Runners"));
+    tabs->addTab(scrollPage(runners, tabs), Vanta::tr("Runners"));
 
     auto *covers = new QWidget;
     auto *coversForm = formFor(covers);
     m_fetchCoversCheck = new QCheckBox(
-        QStringLiteral("Fetch missing cover art automatically when a game is added"), covers);
+        Vanta::tr("Fetch missing cover art automatically when a game is added"), covers);
     coversForm->addRow(QString(), m_fetchCoversCheck);
 
     m_coverApiKeyEdit = new QLineEdit(covers);
     m_coverApiKeyEdit->setPlaceholderText(CoverFetcher::defaultApiKey());
     m_coverApiKeyEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
-    coversForm->addRow(QStringLiteral("SteamGridDB API key"), m_coverApiKeyEdit);
+    coversForm->addRow(Vanta::tr("SteamGridDB API key"), m_coverApiKeyEdit);
     coversForm->addRow(UiHelp::helpLabel(
-        QStringLiteral("Covers come from SteamGridDB. Vanta ships with a working key, so the field can stay "
-                       "empty; paste your own key from steamgriddb.com/profile/preferences/api if you want the "
-                       "lookups to use your account instead. Names are matched fuzzily, so a typo like “Testris” "
-                       "still resolves to “Tetris”."),
+        Vanta::tr("Covers come from SteamGridDB. Vanta ships with a working key, so the field can stay "
+                  "empty; paste your own key from steamgriddb.com/profile/preferences/api if you want the "
+                  "lookups to use your account instead. Names are matched fuzzily, so a typo like “Testris” "
+                  "still resolves to “Tetris”."),
         covers));
 
     auto *coverDirectoryRow = new QHBoxLayout;
@@ -290,15 +301,15 @@ void SettingsDialog::buildUi()
     coverDirectory->setProperty("class", QStringLiteral("muted"));
     coverDirectory->setTextInteractionFlags(Qt::TextSelectableByMouse);
     coverDirectoryRow->addWidget(coverDirectory, 1);
-    auto *openCovers = new QPushButton(QStringLiteral("Open folder"), covers);
+    auto *openCovers = new QPushButton(Vanta::tr("Open folder"), covers);
     openCovers->setCursor(Qt::PointingHandCursor);
     UiHelp::makeFlat(openCovers);
     connect(openCovers, &QPushButton::clicked, this, [] {
         UiHelp::openContainingDirectory(CoverFetcher::coversDirectory());
     });
     coverDirectoryRow->addWidget(openCovers);
-    coversForm->addRow(QStringLiteral("Cover folder"), coverDirectoryRow);
-    tabs->addTab(scrollPage(covers, tabs), QStringLiteral("Covers"));
+    coversForm->addRow(Vanta::tr("Cover folder"), coverDirectoryRow);
+    tabs->addTab(scrollPage(covers, tabs), Vanta::tr("Covers"));
 
     auto *storage = new QWidget;
     auto *storageForm = formFor(storage);
@@ -306,12 +317,12 @@ void SettingsDialog::buildUi()
     m_dataPaths = new QLabel(storage);
     m_dataPaths->setWordWrap(true);
     m_dataPaths->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    m_dataPaths->setText(QStringLiteral("Library: %1\nSettings: %2\nScan cache: %3")
+    m_dataPaths->setText(Vanta::tr("Library: %1\nSettings: %2\nScan cache: %3")
                              .arg(paths.libraryPath(), paths.settingsPath(), paths.scanCachePath()));
-    storageForm->addRow(QStringLiteral("Data files"), m_dataPaths);
+    storageForm->addRow(Vanta::tr("Data files"), m_dataPaths);
     storageForm->addRow(UiHelp::helpLabel(
-        QStringLiteral("Vanta stores everything under the XDG config and cache directories using atomic writes. "
-                       "Library and settings files can be copied to another machine to move your setup."),
+        Vanta::tr("Vanta stores everything under the XDG config and cache directories using atomic writes. "
+                  "Library and settings files can be copied to another machine to move your setup."),
         storage));
 
     auto *importPanel = new QFrame(storage);
@@ -319,29 +330,29 @@ void SettingsDialog::buildUi()
     auto *importLayout = new QVBoxLayout(importPanel);
     importLayout->setContentsMargins(16, 14, 16, 14);
     importLayout->setSpacing(8);
-    importLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("External library porting"), importPanel));
+    importLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("External library porting"), importPanel));
     importLayout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Scan your machine for installed games from Lutris and Heroic Games Launcher, "
-                       "and import them into Vanta automatically."),
+        Vanta::tr("Scan your machine for installed games from Lutris and Heroic Games Launcher, "
+                  "and import them into Vanta automatically."),
         importPanel));
-    m_portButton = new QPushButton(QStringLiteral("Port external libraries…"), importPanel);
+    m_portButton = new QPushButton(Vanta::tr("Port external libraries…"), importPanel);
     m_portButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_portButton);
     connect(m_portButton, &QPushButton::clicked, this, &SettingsDialog::openImportDialog);
     importLayout->addWidget(m_portButton, 0, Qt::AlignLeft);
     storageForm->addRow(importPanel);
 
-    tabs->addTab(scrollPage(storage, tabs), QStringLiteral("Data"));
+    tabs->addTab(scrollPage(storage, tabs), Vanta::tr("Data"));
 
     auto *buttons = new QHBoxLayout;
     buttons->setSpacing(8);
     buttons->addStretch(1);
-    m_cancelButton = new QPushButton(QStringLiteral("Cancel"), this);
+    m_cancelButton = new QPushButton(Vanta::tr("Cancel"), this);
     m_cancelButton->setCursor(Qt::PointingHandCursor);
     m_cancelButton->setAutoDefault(false);
     connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
     buttons->addWidget(m_cancelButton);
-    m_saveButton = new QPushButton(QStringLiteral("Save settings"), this);
+    m_saveButton = new QPushButton(Vanta::tr("Save settings"), this);
     m_saveButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_saveButton);
     m_saveButton->setDefault(true);
@@ -354,6 +365,8 @@ void SettingsDialog::loadFromSettings()
 {
     int index = m_themeCombo->findData(static_cast<int>(m_settings.theme));
     m_themeCombo->setCurrentIndex(index >= 0 ? index : 0);
+    index = m_languageCombo->findData(m_settings.language);
+    m_languageCombo->setCurrentIndex(index >= 0 ? index : 0);
     m_animationsCheck->setChecked(m_settings.animations);
     index = m_coverSizeCombo->findData(static_cast<int>(m_settings.coverSize));
     m_coverSizeCombo->setCurrentIndex(index >= 0 ? index : 1);
@@ -387,6 +400,11 @@ void SettingsDialog::saveAndAccept()
     const int themeIndex = m_themeCombo->currentIndex();
     if (themeIndex >= 0)
         m_settings.theme = static_cast<ThemeChoice>(m_themeCombo->itemData(themeIndex).toInt());
+
+    const int languageIndex = m_languageCombo->currentIndex();
+    if (languageIndex >= 0)
+        m_settings.language = m_languageCombo->itemData(languageIndex).toString();
+
     m_settings.animations = m_animationsCheck->isChecked();
 
     const int coverIndex = m_coverSizeCombo->currentIndex();
@@ -438,7 +456,7 @@ void SettingsDialog::saveAndAccept()
 
 void SettingsDialog::browseWine()
 {
-    const QString file = QFileDialog::getOpenFileName(this, QStringLiteral("Select a Wine executable"),
+    const QString file = QFileDialog::getOpenFileName(this, Vanta::tr("Select a Wine executable"),
                                                       m_winePathEdit->text(), QStringLiteral("All files (*)"));
     if (!file.isEmpty())
         m_winePathEdit->setText(file);
@@ -446,7 +464,7 @@ void SettingsDialog::browseWine()
 
 void SettingsDialog::addProtonPath()
 {
-    const QString directory = QFileDialog::getExistingDirectory(this, QStringLiteral("Select a Proton build folder"),
+    const QString directory = QFileDialog::getExistingDirectory(this, Vanta::tr("Select a Proton build folder"),
                                                                 QString(), QFileDialog::ShowDirsOnly);
     if (directory.isEmpty())
         return;
@@ -495,8 +513,8 @@ void SettingsDialog::refreshRunnerSummary()
     const QList<RunnerEntry> wines = RunnerDetector::wineEntries(probe);
     const QList<RunnerEntry> protons = RunnerDetector::protonEntries(probe);
     QStringList lines;
-    lines.append(QStringLiteral("Detected Wine builds: %1").arg(wines.size()));
-    lines.append(QStringLiteral("Detected Proton builds: %1").arg(protons.size()));
+    lines.append(Vanta::tr("Detected Wine builds: %1").arg(wines.size()));
+    lines.append(Vanta::tr("Detected Proton builds: %1").arg(protons.size()));
     for (const RunnerEntry &entry : wines) {
         lines.append(QStringLiteral("• %1 — %2").arg(entry.name, entry.path));
     }

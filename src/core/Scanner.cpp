@@ -1,5 +1,7 @@
 #include "Scanner.h"
 
+#include "I18n.h"
+
 #include <algorithm>
 
 #include <QDir>
@@ -64,11 +66,11 @@ PeMetadata readPe(const QString &path)
         | (static_cast<quint16>(static_cast<uchar>(header.at(machineOffset + 1))) << 8);
     result.valid = true;
     switch (result.machine) {
-    case kMachineX86: result.architecture = QStringLiteral("32-bit x86"); break;
-    case kMachineX64: result.architecture = QStringLiteral("64-bit x64"); break;
-    case kMachineArm: result.architecture = QStringLiteral("32-bit ARM"); break;
-    case kMachineArm64: result.architecture = QStringLiteral("64-bit ARM64"); break;
-    default: result.architecture = QStringLiteral("Unknown architecture"); break;
+    case kMachineX86: result.architecture = Vanta::tr("32-bit x86"); break;
+    case kMachineX64: result.architecture = Vanta::tr("64-bit x64"); break;
+    case kMachineArm: result.architecture = Vanta::tr("32-bit ARM"); break;
+    case kMachineArm64: result.architecture = Vanta::tr("64-bit ARM64"); break;
+    default: result.architecture = Vanta::tr("Unknown architecture"); break;
     }
     return result;
 }
@@ -83,27 +85,27 @@ bool looksLikeElf(const QString &path)
 
 QString componentNameFor(const QString &lower)
 {
-    if (lower == QStringLiteral("onlinefix64.dll")) return QStringLiteral("OnlineFix 64-bit proxy");
-    if (lower == QStringLiteral("onlinefix32.dll")) return QStringLiteral("OnlineFix 32-bit proxy");
-    if (lower == QStringLiteral("winmm.dll")) return QStringLiteral("winmm DLL proxy");
-    if (lower == QStringLiteral("winhttp.dll")) return QStringLiteral("winhttp DLL proxy");
-    if (lower == QStringLiteral("winmm.txt")) return QStringLiteral("winmm module list");
-    if (lower == QStringLiteral("dlllist.txt")) return QStringLiteral("DLL module list");
-    if (lower == QStringLiteral("onlinefix.ini")) return QStringLiteral("OnlineFix configuration");
-    if (lower == QStringLiteral("steamfix.ini")) return QStringLiteral("SteamFix configuration");
-    if (lower == QStringLiteral("onlinefix.json")) return QStringLiteral("OnlineFix launcher metadata");
-    if (lower.startsWith(QStringLiteral("launch_data.of"))) return QStringLiteral("Photon launcher data");
-    if (lower.startsWith(QStringLiteral("epicfix"))) return QStringLiteral("EpicFix compatibility library");
-    if (lower.startsWith(QStringLiteral("steamfix")) && lower.endsWith(QStringLiteral(".dll"))) return QStringLiteral("SteamFix library");
-    if (lower.startsWith(QStringLiteral("eos")) && lower.endsWith(QStringLiteral(".dll"))) return QStringLiteral("EOS SDK library");
-    if (lower.startsWith(QStringLiteral("steam_api"))) return QStringLiteral("Steam API runtime");
-    if (lower == QStringLiteral("unityplayer.dll")) return QStringLiteral("Unity Player runtime");
-    if (lower == QStringLiteral("doorstop_config.ini")) return QStringLiteral("BepInEx Doorstop configuration");
-    if (lower == QStringLiteral("bepinex.preloader.dll")) return QStringLiteral("BepInEx preloader");
-    if (lower == QStringLiteral("bepinex.core.dll")) return QStringLiteral("BepInEx core");
-    if (lower == QStringLiteral("bepinex.cfg")) return QStringLiteral("BepInEx configuration");
-    if (lower == QStringLiteral(".doorstop_version")) return QStringLiteral("Doorstop version marker");
-    if (lower == QStringLiteral("emp.dll") || lower == QStringLiteral("custom.dll")) return QStringLiteral("DLL proxy");
+    if (lower == QStringLiteral("onlinefix64.dll")) return Vanta::tr("OnlineFix 64-bit proxy");
+    if (lower == QStringLiteral("onlinefix32.dll")) return Vanta::tr("OnlineFix 32-bit proxy");
+    if (lower == QStringLiteral("winmm.dll")) return Vanta::tr("winmm DLL proxy");
+    if (lower == QStringLiteral("winhttp.dll")) return Vanta::tr("winhttp DLL proxy");
+    if (lower == QStringLiteral("winmm.txt")) return Vanta::tr("winmm module list");
+    if (lower == QStringLiteral("dlllist.txt")) return Vanta::tr("DLL module list");
+    if (lower == QStringLiteral("onlinefix.ini")) return Vanta::tr("OnlineFix configuration");
+    if (lower == QStringLiteral("steamfix.ini")) return Vanta::tr("SteamFix configuration");
+    if (lower == QStringLiteral("onlinefix.json")) return Vanta::tr("OnlineFix launcher metadata");
+    if (lower.startsWith(QStringLiteral("launch_data.of"))) return Vanta::tr("Photon launcher data");
+    if (lower.startsWith(QStringLiteral("epicfix"))) return Vanta::tr("EpicFix compatibility library");
+    if (lower.startsWith(QStringLiteral("steamfix")) && lower.endsWith(QStringLiteral(".dll"))) return Vanta::tr("SteamFix library");
+    if (lower.startsWith(QStringLiteral("eos")) && lower.endsWith(QStringLiteral(".dll"))) return Vanta::tr("EOS SDK library");
+    if (lower.startsWith(QStringLiteral("steam_api"))) return Vanta::tr("Steam API runtime");
+    if (lower == QStringLiteral("unityplayer.dll")) return Vanta::tr("Unity Player runtime");
+    if (lower == QStringLiteral("doorstop_config.ini")) return Vanta::tr("BepInEx Doorstop configuration");
+    if (lower == QStringLiteral("bepinex.preloader.dll")) return Vanta::tr("BepInEx preloader");
+    if (lower == QStringLiteral("bepinex.core.dll")) return Vanta::tr("BepInEx core");
+    if (lower == QStringLiteral("bepinex.cfg")) return Vanta::tr("BepInEx configuration");
+    if (lower == QStringLiteral(".doorstop_version")) return Vanta::tr("Doorstop version marker");
+    if (lower == QStringLiteral("emp.dll") || lower == QStringLiteral("custom.dll")) return Vanta::tr("DLL proxy");
     return QString();
 }
 
@@ -149,14 +151,14 @@ int confidenceFor(const QString &lower)
 QString explanationFor(const QString &lower, const QString &category)
 {
     if (category == QStringLiteral("OnlineFix"))
-        return QStringLiteral("Filename signature associated with OnlineFix or SteamFix releases. Presence does not prove the component is functional.");
+        return Vanta::tr("Filename signature associated with OnlineFix or SteamFix releases. Presence does not prove the component is functional.");
     if (category == QStringLiteral("Modding"))
-        return QStringLiteral("BepInEx or Doorstop component. Vanta reports the file only and does not enable mod overrides unless requested.");
+        return Vanta::tr("BepInEx or Doorstop component. Vanta reports the file only and does not enable mod overrides unless requested.");
     if (category == QStringLiteral("Runtime"))
-        return QStringLiteral("Game runtime library. Its presence is informational and does not imply compatibility has been verified.");
+        return Vanta::tr("Game runtime library. Its presence is informational and does not imply compatibility has been verified.");
     if (lower.startsWith(QStringLiteral("win")) && lower.endsWith(QStringLiteral(".dll")))
-        return QStringLiteral("DLL that may act as a Wine proxy. Vanta cannot verify the file's behaviour from its name alone.");
-    return QStringLiteral("Recognizable compatibility-related file. Detection is based on the filename and metadata, not a functional test.");
+        return Vanta::tr("DLL that may act as a Wine proxy. Vanta cannot verify the file's behaviour from its name alone.");
+    return Vanta::tr("Recognizable compatibility-related file. Detection is based on the filename and metadata, not a functional test.");
 }
 
 QString cacheDate(const QDateTime &dateTime)
@@ -466,13 +468,13 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
     const QFileInfo rootInfo(root);
     if (root.isEmpty() || !rootInfo.exists() || !rootInfo.isDir()) {
         result.state = ScanState::ScanError;
-        result.error = root.isEmpty() ? QStringLiteral("No game directory was selected.") : QStringLiteral("The game directory does not exist: %1").arg(root);
-        result.missingPaths.append(root.isEmpty() ? QStringLiteral("Game directory") : root);
+        result.error = root.isEmpty() ? Vanta::tr("No game directory was selected.") : Vanta::tr("The game directory does not exist: %1").arg(root);
+        result.missingPaths.append(root.isEmpty() ? Vanta::tr("Game directory") : root);
         return result;
     }
     if (!directoryIsSafeToScan(root)) {
         result.state = ScanState::ScanError;
-        result.error = QStringLiteral("This directory is too broad to scan safely. Select the game's own folder.");
+        result.error = Vanta::tr("This directory is too broad to scan safely. Select the game's own folder.");
         return result;
     }
     result.directoryModified = rootInfo.lastModified().toMSecsSinceEpoch();
@@ -487,7 +489,7 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
     if (!executablePath.isEmpty()) {
         const QFileInfo executableInfo(executablePath);
         if (!executableInfo.exists() || !executableInfo.isFile())
-            result.missingPaths.append(QStringLiteral("Game executable: %1").arg(executablePath));
+            result.missingPaths.append(Vanta::tr("Game executable: %1").arg(executablePath));
         else if (executableInfo.fileName().endsWith(QStringLiteral(".exe"), Qt::CaseInsensitive)) {
             const PeMetadata pe = readPe(executablePath);
             result.executableArchitecture = pe.architecture;
@@ -497,16 +499,16 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
                 if (!host.contains(QStringLiteral("arm64"), Qt::CaseInsensitive)
                     && !host.contains(QStringLiteral("aarch64"), Qt::CaseInsensitive)) {
                     incompatible = true;
-                    result.warnings.append(QStringLiteral("The selected executable targets ARM, which the configured %1 runner cannot execute on this host.").arg(runnerName(runner)));
+                    result.warnings.append(Vanta::tr("The selected executable targets ARM, which the configured %1 runner cannot execute on this host.").arg(runnerName(runner)));
                 }
             }
             if (pe.valid && pe.machine != kMachineX86 && pe.machine != kMachineX64
                 && pe.machine != kMachineArm && pe.machine != kMachineArm64) {
                 incompatible = true;
-                result.warnings.append(QStringLiteral("The selected executable uses an unsupported PE machine type."));
+                result.warnings.append(Vanta::tr("The selected executable uses an unsupported PE machine type."));
             }
             if (!pe.valid && runnerIsWineLike(runner)) {
-                result.warnings.append(QStringLiteral("The selected executable does not have a readable PE header."));
+                result.warnings.append(Vanta::tr("The selected executable does not have a readable PE header."));
             }
         }
     }
@@ -522,7 +524,7 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
         if (name.isEmpty() && !lower.startsWith(QStringLiteral("win")) )
             return;
         if (name.isEmpty())
-            name = QStringLiteral("DLL proxy candidate");
+            name = Vanta::tr("DLL proxy candidate");
         for (const CompatibilityComponent &existing : result.components) {
             if (existing.absolutePath == info.absoluteFilePath())
                 return;
@@ -586,13 +588,13 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
                 const QString canonical = entry.canonicalFilePath();
                 insideRoot = !canonical.isEmpty() && pathWithin(canonicalRoot, canonical);
                 if (!insideRoot) {
-                    result.warnings.append(QStringLiteral("Skipped a symbolic link pointing outside the game directory: %1").arg(path));
+                    result.warnings.append(Vanta::tr("Skipped a symbolic link pointing outside the game directory: %1").arg(path));
                     continue;
                 }
             }
             if (entry.isDir()) {
                 if (task.depth >= options.maxDepth) {
-                    result.warnings.append(QStringLiteral("Scan depth limit reached at %1").arg(path));
+                    result.warnings.append(Vanta::tr("Scan depth limit reached at %1").arg(path));
                     continue;
                 }
                 queue.enqueue({path, task.depth + 1});
@@ -662,7 +664,7 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
             candidate.path = path;
             candidate.size = entry.size();
             candidate.architecture = isWindowsExecutable ? readPe(path).architecture
-                : (isElf ? QStringLiteral("Linux ELF") : QStringLiteral("Script"));
+                : (isElf ? Vanta::tr("Linux ELF") : Vanta::tr("Script"));
             candidate.depth = depth;
             candidate.score = score;
             // The cap only matters for pathological folders, but it must not be
@@ -672,7 +674,7 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
                 result.executables.append(candidate);
             } else if (!result.executablesTruncated) {
                 result.executablesTruncated = true;
-                result.warnings.append(QStringLiteral("More than 400 executables were found. Only the %1 best matches are listed; set the executable explicitly if the right one is missing.").arg(400));
+                result.warnings.append(Vanta::tr("More than 400 executables were found. Only the %1 best matches are listed; set the executable explicitly if the right one is missing.").arg(400));
             }
         }
     }
@@ -684,7 +686,7 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
     });
     result.suggestedExecutable = suggestedExecutable(root, result.executables);
     if (result.truncated)
-        result.warnings.append(QStringLiteral("The scan stopped after %1 entries. Increase the scan entry limit in Settings if the game folder is larger.").arg(options.entryLimit));
+        result.warnings.append(Vanta::tr("The scan stopped after %1 entries. Increase the scan entry limit in Settings if the game folder is larger.").arg(options.entryLimit));
 
     if (!configuredPrefix.isEmpty()) {
         const QFileInfo prefixInfo(configuredPrefix);
@@ -693,17 +695,17 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
             || QFileInfo::exists(prefixDir.filePath(QStringLiteral("pfx/drive_c")));
         if (!prefixInfo.exists()) {
             prefixInvalid = true;
-            result.prefixStatus = QStringLiteral("Configured Wine prefix is missing: %1").arg(configuredPrefix);
+            result.prefixStatus = Vanta::tr("Configured Wine prefix is missing: %1").arg(configuredPrefix);
             result.missingPaths.append(result.prefixStatus);
         } else if (!hasDrive) {
             prefixInvalid = true;
-            result.prefixStatus = QStringLiteral("Configured Wine prefix has no drive_c: %1").arg(configuredPrefix);
+            result.prefixStatus = Vanta::tr("Configured Wine prefix has no drive_c: %1").arg(configuredPrefix);
             result.warnings.append(result.prefixStatus);
         } else {
-            result.prefixStatus = QStringLiteral("Wine/Proton prefix detected: %1").arg(configuredPrefix);
+            result.prefixStatus = Vanta::tr("Wine/Proton prefix detected: %1").arg(configuredPrefix);
         }
     } else {
-        result.prefixStatus = QStringLiteral("No prefix configured. Vanta will create one beside the executable when needed.");
+        result.prefixStatus = Vanta::tr("No prefix configured. Vanta will create one beside the executable when needed.");
     }
 
     const QString executableDirectory = executablePath.isEmpty() ? root : QFileInfo(executablePath).absolutePath();
@@ -742,7 +744,7 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
     } else if (result.executables.isEmpty() && !executablePath.isEmpty()
                && runner != RunnerType::Flatpak && runner != RunnerType::Custom) {
         result.state = ScanState::MissingRequiredFiles;
-        result.missingPaths.append(QStringLiteral("No launchable game executable was found."));
+        result.missingPaths.append(Vanta::tr("No launchable game executable was found."));
     } else if (prefixInvalid) {
         result.state = ScanState::MissingRequiredFiles;
     } else if (!result.components.isEmpty() || result.onlineFix.detected) {
@@ -763,7 +765,7 @@ ScanResult GameScanner::scan(const QString &executablePath, const QString &gameD
 QString GameScanner::compatibilityCacheLabel(const Game &game)
 {
     if (game.compatibility == ScanState::ComponentsDetected)
-        return game.showsOnlineFix() ? QStringLiteral("OnlineFix detected") : scanStateLabel(game.compatibility);
+        return game.showsOnlineFix() ? Vanta::tr("OnlineFix detected") : scanStateLabel(game.compatibility);
     return scanStateLabel(game.compatibility);
 }
 

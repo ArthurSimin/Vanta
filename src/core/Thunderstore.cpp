@@ -1,5 +1,6 @@
 #include "Thunderstore.h"
 
+#include "I18n.h"
 #include "Version.h"
 
 #include <QHash>
@@ -136,22 +137,22 @@ QString describeFailure(int status, const QByteArray &payload, const QString &er
 
     if (status == 404) {
         if (context == QStringLiteral("packages"))
-            return QStringLiteral("No Thunderstore community was found at that address.");
+            return Vanta::tr("No Thunderstore community was found at that address.");
         if (context == QStringLiteral("package"))
-            return QStringLiteral("Thunderstore has no package at that address.");
-        return QStringLiteral("The package download was not found.");
+            return Vanta::tr("Thunderstore has no package at that address.");
+        return Vanta::tr("The package download was not found.");
     }
     if (status == 403 || status == 429)
-        return QStringLiteral("Thunderstore is rate limiting requests. Try again in a minute.");
+        return Vanta::tr("Thunderstore is rate limiting requests. Try again in a minute.");
     if (serverMessage.contains(QStringLiteral("cache"), Qt::CaseInsensitive)) {
-        return QStringLiteral("Thunderstore did not return a package list for this community. "
-                              "Check the community slug, or try again in a moment.");
+        return Vanta::tr("Thunderstore did not return a package list for this community. "
+                         "Check the community slug, or try again in a moment.");
     }
     if (status >= 500)
-        return QStringLiteral("Thunderstore is having server trouble. Try again later.");
+        return Vanta::tr("Thunderstore is having server trouble. Try again later.");
     if (!errorText.isEmpty())
-        return QStringLiteral("Thunderstore could not be reached: %1").arg(errorText);
-    return QStringLiteral("Thunderstore could not be reached. Check your internet connection.");
+        return Vanta::tr("Thunderstore could not be reached: %1").arg(errorText);
+    return Vanta::tr("Thunderstore could not be reached. Check your internet connection.");
 }
 
 QString normalisedGameName(const QString &gameName)
@@ -383,7 +384,7 @@ QList<ThunderstoreVersion> Thunderstore::resolveDependencies(const ThunderstoreP
                 // visible instead of silent.
                 if (selected.versionNumber.compare(dependency.version, Qt::CaseInsensitive) != 0
                     && notes) {
-                    notes->append(QStringLiteral("%1 %2 is not published here; Vanta installed %3 instead.")
+                    notes->append(Vanta::tr("%1 %2 is not published here; Vanta installed %3 instead.")
                                       .arg(dependency.owner + QLatin1Char('-') + dependency.name,
                                            dependency.version,
                                            selected.versionNumber));
@@ -410,7 +411,7 @@ void Thunderstore::loadPackages()
 {
     const QUrl url = packagesUrl(m_community);
     if (!url.isValid()) {
-        fail(QStringLiteral("packages"), QStringLiteral("Enter a Thunderstore community slug first."));
+        fail(QStringLiteral("packages"), Vanta::tr("Enter a Thunderstore community slug first."));
         return;
     }
     get(url, QStringLiteral("packages"));
@@ -419,7 +420,7 @@ void Thunderstore::loadPackages()
 void Thunderstore::loadPackage(const QString &owner, const QString &name)
 {
     if (owner.trimmed().isEmpty() || name.trimmed().isEmpty()) {
-        fail(QStringLiteral("package"), QStringLiteral("The Thunderstore package address is incomplete."));
+        fail(QStringLiteral("package"), Vanta::tr("The Thunderstore package address is incomplete."));
         return;
     }
     const QUrl url(QStringLiteral("https://thunderstore.io/api/experimental/package/%1/%2/")
@@ -431,13 +432,13 @@ void Thunderstore::download(const ThunderstoreVersion &version, const QString &c
 {
     const QUrl url(version.downloadUrl);
     if (!url.isValid()) {
-        fail(context, QStringLiteral("The package has no download address."));
+        fail(context, Vanta::tr("The package has no download address."));
         return;
     }
     // The address comes from a remote API, so it is restricted to https before a
     // GET is issued with the user's machine as the source.
     if (url.scheme() != QStringLiteral("https")) {
-        fail(context, QStringLiteral("The package download address is not an https URL."));
+        fail(context, Vanta::tr("The package download address is not an https URL."));
         return;
     }
     get(url, context);
@@ -511,19 +512,19 @@ void Thunderstore::handleReply(QNetworkReply *reply)
         QJsonParseError parseError;
         const QJsonDocument document = QJsonDocument::fromJson(payload, &parseError);
         if (parseError.error != QJsonParseError::NoError) {
-            emit failed(context, QStringLiteral("Thunderstore returned a package list that could not be read."));
+            emit failed(context, Vanta::tr("Thunderstore returned a package list that could not be read."));
             return;
         }
         if (document.isObject()) {
             const QString serverMessage = document.object().value(QStringLiteral("error")).toString();
             if (!serverMessage.isEmpty()) {
-                emit failed(context, QStringLiteral("Thunderstore did not return a package list: %1")
+                emit failed(context, Vanta::tr("Thunderstore did not return a package list: %1")
                                          .arg(serverMessage));
                 return;
             }
         }
         if (!document.isArray()) {
-            emit failed(context, QStringLiteral("Thunderstore returned an unexpected package list."));
+            emit failed(context, Vanta::tr("Thunderstore returned an unexpected package list."));
             return;
         }
         QList<ThunderstorePackage> packages;
@@ -544,12 +545,12 @@ void Thunderstore::handleReply(QNetworkReply *reply)
         QJsonParseError parseError;
         const QJsonDocument document = QJsonDocument::fromJson(payload, &parseError);
         if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
-            emit failed(context, QStringLiteral("Thunderstore returned a package that could not be read."));
+            emit failed(context, Vanta::tr("Thunderstore returned a package that could not be read."));
             return;
         }
         const ThunderstorePackage package = packageFromJson(document.object());
         if (!package.isValid()) {
-            emit failed(context, QStringLiteral("Thunderstore returned an incomplete package."));
+            emit failed(context, Vanta::tr("Thunderstore returned an incomplete package."));
             return;
         }
         emit packageLoaded(package);
@@ -558,7 +559,7 @@ void Thunderstore::handleReply(QNetworkReply *reply)
 
     if (context.startsWith(QStringLiteral("download"))) {
         if (payload.isEmpty()) {
-            emit failed(context, QStringLiteral("The downloaded package is empty."));
+            emit failed(context, Vanta::tr("The downloaded package is empty."));
             return;
         }
         emit downloadFinished(context, payload);

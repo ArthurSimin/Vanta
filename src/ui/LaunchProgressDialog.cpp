@@ -1,4 +1,5 @@
 #include "LaunchProgressDialog.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -10,15 +11,15 @@
 #include <QVBoxLayout>
 
 LaunchProgressDialog::LaunchProgressDialog(const QString &gameName, ThemeManager *theme, QWidget *parent)
-    : VantaDialog(QStringLiteral("Launching"), theme, parent)
+    : VantaDialog(Vanta::tr("Launching"), theme, parent)
     , m_theme(theme)
 {
     setObjectName(QStringLiteral("launchProgressDialog"));
     setMinimumSize(560, 340);
     resize(600, 380);
     buildUi();
-    m_headline->setText(gameName.isEmpty() ? QStringLiteral("Preparing launch")
-                                           : QStringLiteral("Preparing %1").arg(gameName));
+    m_headline->setText(gameName.isEmpty() ? Vanta::tr("Preparing launch")
+                                           : Vanta::tr("Preparing %1").arg(gameName));
     refreshIcons();
     if (m_theme)
         connect(m_theme, &ThemeManager::themeChanged, this, &LaunchProgressDialog::refreshIcons);
@@ -41,7 +42,7 @@ void LaunchProgressDialog::buildUi()
 
     m_message = new QLabel(content);
     m_message->setWordWrap(true);
-    m_message->setText(QStringLiteral("Preparing the launch environment…"));
+    m_message->setText(Vanta::tr("Preparing the launch environment…"));
     layout->addWidget(m_message);
 
     m_progress = new QProgressBar(content);
@@ -53,7 +54,7 @@ void LaunchProgressDialog::buildUi()
     auto *detailLayout = new QVBoxLayout(detailPanel);
     detailLayout->setContentsMargins(14, 12, 14, 12);
     detailLayout->setSpacing(6);
-    detailLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("Diagnostics"), detailPanel));
+    detailLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("Diagnostics"), detailPanel));
     m_detail = new QLabel(detailPanel);
     m_detail->setWordWrap(true);
     m_detail->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -66,7 +67,7 @@ void LaunchProgressDialog::buildUi()
     auto *footer = new QHBoxLayout;
     footer->setSpacing(8);
     footer->addStretch(1);
-    m_logsButton = new QPushButton(QStringLiteral("Open log"), this);
+    m_logsButton = new QPushButton(Vanta::tr("Open log"), this);
     m_logsButton->setCursor(Qt::PointingHandCursor);
     m_logsButton->setAutoDefault(false);
     m_logsButton->setVisible(false);
@@ -75,18 +76,18 @@ void LaunchProgressDialog::buildUi()
             emit logRequested(m_logPath);
     });
     footer->addWidget(m_logsButton);
-    m_cancelButton = new QPushButton(QStringLiteral("Cancel"), this);
+    m_cancelButton = new QPushButton(Vanta::tr("Cancel"), this);
     m_cancelButton->setCursor(Qt::PointingHandCursor);
     // Enter must not abort a launch that is already under way. The default
     // button moves to Close once the launch finishes.
     m_cancelButton->setAutoDefault(false);
     connect(m_cancelButton, &QPushButton::clicked, this, [this] {
         m_cancelButton->setEnabled(false);
-        setMessage(QStringLiteral("Cancelling…"));
+        setMessage(Vanta::tr("Cancelling…"));
         emit cancelRequested();
     });
     footer->addWidget(m_cancelButton);
-    m_closeButton = new QPushButton(QStringLiteral("Close"), this);
+    m_closeButton = new QPushButton(Vanta::tr("Close"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
     m_closeButton->setAutoDefault(true);
     m_closeButton->setVisible(false);
@@ -165,7 +166,7 @@ void LaunchProgressDialog::reject()
 {
     if (!m_finished) {
         m_cancelButton->setEnabled(false);
-        setMessage(QStringLiteral("Cancelling…"));
+        setMessage(Vanta::tr("Cancelling…"));
         emit cancelRequested();
         return;
     }

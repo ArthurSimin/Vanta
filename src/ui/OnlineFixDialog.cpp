@@ -1,4 +1,5 @@
 #include "OnlineFixDialog.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "ThemeManager.h"
 
@@ -43,7 +44,7 @@ QLabel *chip(const QString &text, QWidget *parent, bool accent = false)
 
 OnlineFixDialog::OnlineFixDialog(const Game &game, const OnlineFixInfo &info, Mode mode,
                                  ThemeManager *theme, QWidget *parent)
-    : VantaDialog(mode == Mode::LaunchPrompt ? QStringLiteral("OnlineFix launch policy")
+    : VantaDialog(mode == Mode::LaunchPrompt ? Vanta::tr("OnlineFix launch policy")
                                              : QStringLiteral("OnlineFix"),
                   theme, parent)
     , m_game(game)
@@ -88,14 +89,14 @@ void OnlineFixDialog::buildManageUi()
     auto *noticeLayout = new QVBoxLayout(noticePanel);
     noticeLayout->setContentsMargins(16, 14, 16, 14);
     noticeLayout->setSpacing(7);
-    auto *noticeTitle = new QLabel(QStringLiteral("OnlineFix support is provided as-is"), noticePanel);
+    auto *noticeTitle = new QLabel(Vanta::tr("OnlineFix support is provided as-is"), noticePanel);
     noticeTitle->setProperty("class", QStringLiteral("warning"));
     QFont noticeFont = noticeTitle->font();
     noticeFont.setWeight(QFont::DemiBold);
     noticeTitle->setFont(noticeFont);
     noticeLayout->addWidget(noticeTitle);
     noticeLayout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Vanta ports the launcher-side behavior of the OnlineFix Linux project. It can detect "
+        Vanta::tr("Vanta ports the launcher-side behavior of the OnlineFix Linux project. It can detect "
                        "OnlineFix signature files, apply the configuration changes the fix expects (creating backups "
                        "first), and compose the required Wine DLL overrides for a single launch. Vanta does not modify "
                        "game executables, does not download OnlineFix files, and cannot confirm that a fix works. "
@@ -105,10 +106,10 @@ void OnlineFixDialog::buildManageUi()
 
     auto *summaryRow = new QHBoxLayout;
     summaryRow->setSpacing(7);
-    summaryRow->addWidget(chip(m_info.detected ? QStringLiteral("Detected") : QStringLiteral("Not detected"),
+    summaryRow->addWidget(chip(m_info.detected ? Vanta::tr("Detected") : Vanta::tr("Not detected"),
                               content, m_info.detected));
-    summaryRow->addWidget(chip(fixKindName(m_info.kind), content));
-    summaryRow->addWidget(chip(QStringLiteral("%1 file(s)").arg(m_info.files.size()), content));
+    summaryRow->addWidget(chip(fixKindDisplayName(m_info.kind), content));
+    summaryRow->addWidget(chip(Vanta::tr("%1 file(s)").arg(m_info.files.size()), content));
     if (m_info.hasSteamFixIni)
         summaryRow->addWidget(chip(QStringLiteral("steamfix.ini"), content));
     if (m_info.hasOnlineFixIni)
@@ -122,12 +123,12 @@ void OnlineFixDialog::buildManageUi()
         auto *filesLayout = new QVBoxLayout(filesPanel);
         filesLayout->setContentsMargins(16, 14, 16, 14);
         filesLayout->setSpacing(8);
-        filesLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("Detected signature files"), filesPanel));
+        filesLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("Detected signature files"), filesPanel));
         auto *table = new QTableWidget(filesPanel);
         table->setObjectName(QStringLiteral("onlineFixFileTable"));
         table->setColumnCount(3);
-        table->setHorizontalHeaderLabels({QStringLiteral("File"), QStringLiteral("Matched rule"),
-                                          QStringLiteral("Size")});
+        table->setHorizontalHeaderLabels({Vanta::tr("File"), Vanta::tr("Matched rule"),
+                                          Vanta::tr("Size")});
         table->setEditTriggers(QAbstractItemView::NoEditTriggers);
         table->setSelectionBehavior(QAbstractItemView::SelectRows);
         table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -150,7 +151,7 @@ void OnlineFixDialog::buildManageUi()
         filesLayout->addWidget(table);
         if (m_info.files.size() > count) {
             filesLayout->addWidget(UiHelp::helpLabel(
-                QStringLiteral("Showing %1 of %2 detected files.").arg(count).arg(m_info.files.size()),
+                Vanta::tr("Showing %1 of %2 detected files.").arg(count).arg(m_info.files.size()),
                 filesPanel));
         }
         layout->addWidget(filesPanel);
@@ -161,46 +162,46 @@ void OnlineFixDialog::buildManageUi()
     auto *detailsLayout = new QVBoxLayout(detailsPanel);
     detailsLayout->setContentsMargins(16, 14, 16, 14);
     detailsLayout->setSpacing(9);
-    detailsLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("Per-game policy"), detailsPanel));
+    detailsLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("Per-game policy"), detailsPanel));
 
     auto *form = new QFormLayout;
     form->setHorizontalSpacing(14);
     form->setVerticalSpacing(8);
     m_modeCombo = new QComboBox(detailsPanel);
-    m_modeCombo->addItem(QStringLiteral("Auto — apply only when OnlineFix files are detected"),
+    m_modeCombo->addItem(Vanta::tr("Auto — apply only when OnlineFix files are detected"),
                          static_cast<int>(OnlineFixMode::Auto));
-    m_modeCombo->addItem(QStringLiteral("Force — apply launch overrides even when detection is inconclusive"),
+    m_modeCombo->addItem(Vanta::tr("Force — apply launch overrides even when detection is inconclusive"),
                          static_cast<int>(OnlineFixMode::Force));
-    m_modeCombo->addItem(QStringLiteral("Disabled — never apply OnlineFix behavior"),
+    m_modeCombo->addItem(Vanta::tr("Disabled — never apply OnlineFix behavior"),
                          static_cast<int>(OnlineFixMode::Disabled));
     const int modeIndex = m_modeCombo->findData(static_cast<int>(m_game.onlineFixMode));
     m_modeCombo->setCurrentIndex(modeIndex >= 0 ? modeIndex : 0);
-    form->addRow(QStringLiteral("OnlineFix mode"), m_modeCombo);
+    form->addRow(Vanta::tr("OnlineFix mode"), m_modeCombo);
 
     m_realAppIdEdit = new QLineEdit(detailsPanel);
     m_realAppIdEdit->setText(!m_game.realAppId.isEmpty() ? m_game.realAppId : m_info.realAppId);
-    m_realAppIdEdit->setPlaceholderText(QStringLiteral("Optional real application id"));
-    form->addRow(QStringLiteral("Real app id"), m_realAppIdEdit);
+    m_realAppIdEdit->setPlaceholderText(Vanta::tr("Optional real application id"));
+    form->addRow(Vanta::tr("Real app id"), m_realAppIdEdit);
 
     m_fakeAppIdEdit = new QLineEdit(detailsPanel);
     m_fakeAppIdEdit->setText(!m_game.fakeAppId.isEmpty() ? m_game.fakeAppId : m_info.fakeAppId);
-    m_fakeAppIdEdit->setPlaceholderText(QStringLiteral("Optional replacement application id"));
-    form->addRow(QStringLiteral("Fake app id"), m_fakeAppIdEdit);
+    m_fakeAppIdEdit->setPlaceholderText(Vanta::tr("Optional replacement application id"));
+    form->addRow(Vanta::tr("Fake app id"), m_fakeAppIdEdit);
 
     QString fixPath = m_info.fixPath;
     if (fixPath.isEmpty())
         fixPath = m_game.fixPath;
     if (fixPath.isEmpty())
         fixPath = m_game.effectiveDirectory();
-    form->addRow(QStringLiteral("Fix folder"), readOnlyField(fixPath, detailsPanel));
+    form->addRow(Vanta::tr("Fix folder"), readOnlyField(fixPath, detailsPanel));
 
     if (!m_info.photonLauncherDir.isEmpty()) {
-        form->addRow(QStringLiteral("Photon launcher"),
+        form->addRow(Vanta::tr("Photon launcher"),
                      readOnlyField(m_info.photonLauncherDir, detailsPanel));
     }
     detailsLayout->addLayout(form);
     detailsLayout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Auto is the safe default. Force is only useful when detection is inconclusive; it cannot "
+        Vanta::tr("Auto is the safe default. Force is only useful when detection is inconclusive; it cannot "
                        "create fix files, it only applies launch configuration. Disabled prevents both prompts and "
                        "overrides for this game."),
         detailsPanel));
@@ -211,14 +212,14 @@ void OnlineFixDialog::buildManageUi()
     auto *changesLayout = new QVBoxLayout(changesPanel);
     changesLayout->setContentsMargins(16, 14, 16, 14);
     changesLayout->setSpacing(8);
-    changesLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("File changes on launch"), changesPanel));
+    changesLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("File changes on launch"), changesPanel));
     const QStringList planned = OnlineFixPatcher::plannedFiles(m_info);
     auto *plannedList = new QListWidget(changesPanel);
     plannedList->setObjectName(QStringLiteral("detectedFileList"));
     plannedList->setSelectionMode(QAbstractItemView::NoSelection);
     plannedList->setFocusPolicy(Qt::NoFocus);
     if (planned.isEmpty()) {
-        plannedList->addItem(QStringLiteral("No file writes are planned. Launch overrides may still be applied."));
+        plannedList->addItem(Vanta::tr("No file writes are planned. Launch overrides may still be applied."));
     } else {
         for (const QString &path : planned) {
             auto *item = new QListWidgetItem(QDir::toNativeSeparators(path), plannedList);
@@ -228,7 +229,7 @@ void OnlineFixDialog::buildManageUi()
     plannedList->setMinimumHeight(92);
     changesLayout->addWidget(plannedList);
     changesLayout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Every changed configuration file is backed up beside the original before it is written. "
+        Vanta::tr("Every changed configuration file is backed up beside the original before it is written. "
                        "Photon launchers receive a Newtonsoft.Json.dll link when the expected data file and "
                        "Launcher.exe are present. No game executable or DLL is patched."),
         changesPanel));
@@ -244,18 +245,18 @@ void OnlineFixDialog::buildManageUi()
 
     auto *footer = new QHBoxLayout;
     footer->setSpacing(8);
-    m_openFolderButton = new QPushButton(QStringLiteral("Open fix folder"), this);
+    m_openFolderButton = new QPushButton(Vanta::tr("Open fix folder"), this);
     m_openFolderButton->setCursor(Qt::PointingHandCursor);
     m_openFolderButton->setAutoDefault(false);
     connect(m_openFolderButton, &QPushButton::clicked, this, &OnlineFixDialog::openFixFolder);
     footer->addWidget(m_openFolderButton);
     footer->addStretch(1);
-    m_closeButton = new QPushButton(QStringLiteral("Cancel"), this);
+    m_closeButton = new QPushButton(Vanta::tr("Cancel"), this);
     m_closeButton->setCursor(Qt::PointingHandCursor);
     m_closeButton->setAutoDefault(false);
     connect(m_closeButton, &QPushButton::clicked, this, &QDialog::reject);
     footer->addWidget(m_closeButton);
-    m_saveButton = new QPushButton(QStringLiteral("Save policy"), this);
+    m_saveButton = new QPushButton(Vanta::tr("Save policy"), this);
     m_saveButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_saveButton);
     m_saveButton->setDefault(true);
@@ -276,7 +277,7 @@ void OnlineFixDialog::buildPromptUi()
     auto *noticeLayout = new QVBoxLayout(noticePanel);
     noticeLayout->setContentsMargins(16, 14, 16, 14);
     noticeLayout->setSpacing(8);
-    auto *title = new QLabel(QStringLiteral("Apply OnlineFix for this launch?"), noticePanel);
+    auto *title = new QLabel(Vanta::tr("Apply OnlineFix for this launch?"), noticePanel);
     QFont titleFont = title->font();
     titleFont.setPixelSize(17);
     titleFont.setWeight(QFont::DemiBold);
@@ -284,7 +285,7 @@ void OnlineFixDialog::buildPromptUi()
     noticeLayout->addWidget(title);
     noticeLayout->addWidget(UiHelp::helpLabel(detectionSummary(), noticePanel));
     noticeLayout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("If you continue, Vanta will update OnlineFix INI files when needed, create backups first, "
+        Vanta::tr("If you continue, Vanta will update OnlineFix INI files when needed, create backups first, "
                        "and add the required Wine DLL overrides to this launch only. Steam may need to be started "
                        "and signed in before the game launches. OnlineFix support is not guaranteed to work, and "
                        "Vanta never modifies game binaries or downloads fix files."),
@@ -298,7 +299,7 @@ void OnlineFixDialog::buildPromptUi()
         auto *changesLayout = new QVBoxLayout(changes);
         changesLayout->setContentsMargins(16, 14, 16, 14);
         changesLayout->setSpacing(6);
-        changesLayout->addWidget(UiHelp::sectionLabel(QStringLiteral("Configuration files to update"), changes));
+        changesLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("Configuration files to update"), changes));
         for (const QString &path : planned) {
             auto *label = UiHelp::helpLabel(QDir::toNativeSeparators(path), changes);
             label->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -308,7 +309,7 @@ void OnlineFixDialog::buildPromptUi()
     }
 
     layout->addWidget(UiHelp::helpLabel(
-        QStringLiteral("Choose “Launch without OnlineFix” to start the game normally. Vanta will remember only the "
+        Vanta::tr("Choose “Launch without OnlineFix” to start the game normally. Vanta will remember only the "
                        "policy you configure for the game, not any per-launch override."),
         content));
     layout->addStretch(1);
@@ -317,7 +318,7 @@ void OnlineFixDialog::buildPromptUi()
 
     auto *footer = new QHBoxLayout;
     footer->setSpacing(8);
-    m_cancelButton = new QPushButton(QStringLiteral("Cancel"), this);
+    m_cancelButton = new QPushButton(Vanta::tr("Cancel"), this);
     m_cancelButton->setCursor(Qt::PointingHandCursor);
     // Enter belongs to the primary action. Cancel was the first button created
     // here, so Qt made it the implicit default and Enter aborted the launch.
@@ -325,7 +326,7 @@ void OnlineFixDialog::buildPromptUi()
     connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
     footer->addWidget(m_cancelButton);
     footer->addStretch(1);
-    m_skipButton = new QPushButton(QStringLiteral("Launch without OnlineFix"), this);
+    m_skipButton = new QPushButton(Vanta::tr("Launch without OnlineFix"), this);
     m_skipButton->setCursor(Qt::PointingHandCursor);
     m_skipButton->setAutoDefault(false);
     connect(m_skipButton, &QPushButton::clicked, this, [this] {
@@ -333,7 +334,7 @@ void OnlineFixDialog::buildPromptUi()
         accept();
     });
     footer->addWidget(m_skipButton);
-    m_applyButton = new QPushButton(QStringLiteral("Apply and launch"), this);
+    m_applyButton = new QPushButton(Vanta::tr("Apply and launch"), this);
     m_applyButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_applyButton);
     m_applyButton->setDefault(true);
@@ -349,21 +350,21 @@ QString OnlineFixDialog::detectionSummary() const
 {
     if (!m_info.detected) {
         if (m_game.onlineFixMode == OnlineFixMode::Force) {
-            return QStringLiteral("OnlineFix mode is set to Force, but no signature files were detected. Vanta can "
+            return Vanta::tr("OnlineFix mode is set to Force, but no signature files were detected. Vanta can "
                                   "still add the standard DXVK override chain to this launch, but it cannot create "
                                   "OnlineFix files or make an absent fix work.");
         }
-        return QStringLiteral("No OnlineFix signature files were detected for this game.");
+        return Vanta::tr("No OnlineFix signature files were detected for this game.");
     }
-    QString text = QStringLiteral("%1 OnlineFix signature file(s) were detected (%2).")
+    QString text = Vanta::tr("%1 OnlineFix signature file(s) were detected (%2).")
                        .arg(m_info.files.size())
-                       .arg(fixKindName(m_info.kind));
+                       .arg(fixKindDisplayName(m_info.kind));
     if (!m_info.realAppId.isEmpty() || !m_info.fakeAppId.isEmpty()) {
-        text += QStringLiteral(" App IDs: real %1, fake %2.")
-                    .arg(m_info.realAppId.isEmpty() ? QStringLiteral("unknown") : m_info.realAppId,
-                         m_info.fakeAppId.isEmpty() ? QStringLiteral("unknown") : m_info.fakeAppId);
+        text += Vanta::tr(" App IDs: real %1, fake %2.")
+                    .arg(m_info.realAppId.isEmpty() ? Vanta::tr("unknown") : m_info.realAppId,
+                         m_info.fakeAppId.isEmpty() ? Vanta::tr("unknown") : m_info.fakeAppId);
     }
-    text += QStringLiteral(" Detection never proves that the fix is functional.");
+    text += Vanta::tr(" Detection never proves that the fix is functional.");
     return text;
 }
 

@@ -1,6 +1,7 @@
 #include "AddEditDialog.h"
 #include "CoverFetcher.h"
 #include "CoverPickerDialog.h"
+#include "I18n.h"
 #include "IconFactory.h"
 #include "LaunchPlan.h"
 #include "RunnerDetector.h"
@@ -80,7 +81,7 @@ QFormLayout *formFor(QWidget *content)
 
 AddEditDialog::AddEditDialog(const Game &game, bool adding, const AppSettings &settings,
                              ThemeManager *theme, QWidget *parent)
-    : VantaDialog(adding ? QStringLiteral("Add game") : QStringLiteral("Edit game"), theme, parent)
+    : VantaDialog(adding ? Vanta::tr("Add game") : Vanta::tr("Edit game"), theme, parent)
     , m_game(game)
     , m_adding(adding)
     , m_settings(settings)
@@ -107,12 +108,12 @@ AddEditDialog::AddEditDialog(const Game &game, bool adding, const AppSettings &s
     auto *buttons = new QHBoxLayout;
     buttons->setSpacing(8);
     buttons->addStretch(1);
-    auto *cancel = new QPushButton(QStringLiteral("Cancel"), this);
+    auto *cancel = new QPushButton(Vanta::tr("Cancel"), this);
     cancel->setCursor(Qt::PointingHandCursor);
     cancel->setAutoDefault(false);
     connect(cancel, &QPushButton::clicked, this, &QDialog::reject);
     buttons->addWidget(cancel);
-    m_saveButton = new QPushButton(adding ? QStringLiteral("Add game") : QStringLiteral("Save changes"), this);
+    m_saveButton = new QPushButton(adding ? Vanta::tr("Add game") : Vanta::tr("Save changes"), this);
     m_saveButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makePrimary(m_saveButton);
     m_saveButton->setDefault(true);
@@ -130,7 +131,7 @@ AddEditDialog::AddEditDialog(const Game &game, bool adding, const AppSettings &s
                 if (m_coverStatus) {
                     m_coverStatus->setProperty("class", QStringLiteral("fieldHelp"));
                     m_coverStatus->setText(
-                        QStringLiteral("Matched “%1” (%2% similar). Loading the available artwork…")
+                        Vanta::tr("Matched “%1” (%2% similar). Loading the available artwork…")
                             .arg(matchedName)
                             .arg(score));
                     m_coverStatus->style()->unpolish(m_coverStatus);
@@ -153,7 +154,7 @@ AddEditDialog::AddEditDialog(const Game &game, bool adding, const AppSettings &s
                 if (picker.exec() != QDialog::Accepted) {
                     if (m_coverStatus) {
                         m_coverStatus->setProperty("class", QStringLiteral("fieldHelp"));
-                        m_coverStatus->setText(QStringLiteral("No artwork was selected."));
+                        m_coverStatus->setText(Vanta::tr("No artwork was selected."));
                         m_coverStatus->style()->unpolish(m_coverStatus);
                         m_coverStatus->style()->polish(m_coverStatus);
                     }
@@ -165,7 +166,7 @@ AddEditDialog::AddEditDialog(const Game &game, bool adding, const AppSettings &s
                 m_fetchCoverButton->setEnabled(false);
                 if (m_coverStatus) {
                     m_coverStatus->setProperty("class", QStringLiteral("fieldHelp"));
-                    m_coverStatus->setText(QStringLiteral("Downloading the selected artwork…"));
+                    m_coverStatus->setText(Vanta::tr("Downloading the selected artwork…"));
                     m_coverStatus->style()->unpolish(m_coverStatus);
                     m_coverStatus->style()->polish(m_coverStatus);
                 }
@@ -176,7 +177,7 @@ AddEditDialog::AddEditDialog(const Game &game, bool adding, const AppSettings &s
         m_fetchCoverButton->setEnabled(true);
         if (m_coverStatus) {
             m_coverStatus->setProperty("class", QStringLiteral("success"));
-            m_coverStatus->setText(QStringLiteral("Cover saved to %1").arg(QDir::toNativeSeparators(coverPath)));
+            m_coverStatus->setText(Vanta::tr("Cover saved to %1").arg(QDir::toNativeSeparators(coverPath)));
             m_coverStatus->style()->unpolish(m_coverStatus);
             m_coverStatus->style()->polish(m_coverStatus);
         }
@@ -216,36 +217,42 @@ void AddEditDialog::buildGeneralTab()
     auto *form = formFor(content);
 
     m_nameEdit = new QLineEdit(content);
-    m_nameEdit->setPlaceholderText(QStringLiteral("Game title"));
-    form->addRow(QStringLiteral("Name"), m_nameEdit);
+    m_nameEdit->setPlaceholderText(Vanta::tr("Game title"));
+    form->addRow(Vanta::tr("Name"), m_nameEdit);
 
     m_sourceCombo = new QComboBox(content);
-    m_sourceCombo->addItem(QStringLiteral("Manual"), QStringLiteral("Manual"));
-    m_sourceCombo->addItem(QStringLiteral("Steam"), QStringLiteral("Steam"));
-    m_sourceCombo->addItem(QStringLiteral("GOG"), QStringLiteral("GOG"));
-    m_sourceCombo->addItem(QStringLiteral("Epic Games Store"), QStringLiteral("Epic Games Store"));
-    m_sourceCombo->addItem(QStringLiteral("EA App"), QStringLiteral("EA App"));
-    m_sourceCombo->addItem(QStringLiteral("Ubisoft Connect"), QStringLiteral("Ubisoft Connect"));
-    m_sourceCombo->addItem(QStringLiteral("Other"), QStringLiteral("Other"));
-    form->addRow(QStringLiteral("Source"), m_sourceCombo);
+    // The item data is the stored token and the label is its translated form,
+    // so picking a source in a translated interface still saves "Manual".
+    const QStringList sources = {
+        QStringLiteral("Manual"),
+        QStringLiteral("Steam"),
+        QStringLiteral("GOG"),
+        QStringLiteral("Epic Games Store"),
+        QStringLiteral("EA App"),
+        QStringLiteral("Ubisoft Connect"),
+        QStringLiteral("Other"),
+    };
+    for (const QString &source : sources)
+        m_sourceCombo->addItem(sourceDisplayName(source), source);
+    form->addRow(Vanta::tr("Source"), m_sourceCombo);
 
     // Only an executable is needed: the game folder is always its parent folder,
     // so asking for both was redundant.
     QPushButton *executableButton = nullptr;
-    form->addRow(QStringLiteral("Executable"),
+    form->addRow(Vanta::tr("Executable"),
                  pathRow(&m_executableEdit, &executableButton,
-                         QStringLiteral("Path to the game executable"),
-                         QStringLiteral("Browse…"), content));
+                         Vanta::tr("Path to the game executable"),
+                         Vanta::tr("Browse…"), content));
     connect(executableButton, &QPushButton::clicked, this, &AddEditDialog::browseExecutable);
 
     m_argumentsEdit = new QLineEdit(content);
-    m_argumentsEdit->setPlaceholderText(QStringLiteral("Optional arguments passed after the executable"));
-    form->addRow(QStringLiteral("Game arguments"), m_argumentsEdit);
+    m_argumentsEdit->setPlaceholderText(Vanta::tr("Optional arguments passed after the executable"));
+    form->addRow(Vanta::tr("Game arguments"), m_argumentsEdit);
 
     QPushButton *workingButton = nullptr;
-    form->addRow(QStringLiteral("Working folder"),
+    form->addRow(Vanta::tr("Working folder"),
                  pathRow(&m_workingDirectoryEdit, &workingButton,
-                         QStringLiteral("Defaults to the executable's folder"), QStringLiteral("Browse…"), content));
+                         Vanta::tr("Defaults to the executable's folder"), Vanta::tr("Browse…"), content));
     connect(workingButton, &QPushButton::clicked, this, &AddEditDialog::browseWorkingDirectory);
 
     m_detectedRunner = UiHelp::helpLabel(QString(), content);
@@ -257,23 +264,23 @@ void AddEditDialog::buildGeneralTab()
     coverLayout->setContentsMargins(0, 0, 0, 0);
     coverLayout->setSpacing(7);
     m_coverEdit = new QLineEdit(coverRow);
-    m_coverEdit->setPlaceholderText(QStringLiteral("Optional PNG, JPEG, WebP or SVG cover"));
+    m_coverEdit->setPlaceholderText(Vanta::tr("Optional PNG, JPEG, WebP or SVG cover"));
     coverLayout->addWidget(m_coverEdit, 1);
-    m_fetchCoverButton = new QPushButton(QStringLiteral("SteamGridDB…"), coverRow);
+    m_fetchCoverButton = new QPushButton(Vanta::tr("SteamGridDB…"), coverRow);
     m_fetchCoverButton->setCursor(Qt::PointingHandCursor);
     m_fetchCoverButton->setToolTip(
-        QStringLiteral("Search SteamGridDB and choose which artwork to use"));
+        Vanta::tr("Search SteamGridDB and choose which artwork to use"));
     m_fetchCoverButton->setAutoDefault(false);
     UiHelp::makeFlat(m_fetchCoverButton);
     m_fetchCoverButton->setMinimumWidth(122);
     coverLayout->addWidget(m_fetchCoverButton);
-    auto *coverButton = new QPushButton(QStringLiteral("Browse…"), coverRow);
+    auto *coverButton = new QPushButton(Vanta::tr("Browse…"), coverRow);
     coverButton->setCursor(Qt::PointingHandCursor);
     coverButton->setAutoDefault(false);
     UiHelp::makeFlat(coverButton);
     coverButton->setMinimumWidth(82);
     coverLayout->addWidget(coverButton);
-    form->addRow(QStringLiteral("Cover image"), coverRow);
+    form->addRow(Vanta::tr("Cover image"), coverRow);
     connect(coverButton, &QPushButton::clicked, this, &AddEditDialog::browseCover);
     connect(m_fetchCoverButton, &QPushButton::clicked, this, &AddEditDialog::fetchCover);
 
@@ -281,13 +288,13 @@ void AddEditDialog::buildGeneralTab()
     m_coverStatus->setVisible(false);
     form->addRow(QString(), m_coverStatus);
 
-    m_favoriteCheck = new QCheckBox(QStringLiteral("Mark this game as a favorite"), content);
+    m_favoriteCheck = new QCheckBox(Vanta::tr("Mark this game as a favorite"), content);
     form->addRow(QString(), m_favoriteCheck);
 
     form->addRow(UiHelp::helpLabel(
-        QStringLiteral("Vanta never downloads games. Point it at a folder or executable you already own or manage."),
+        Vanta::tr("Vanta never downloads games. Point it at a folder or executable you already own or manage."),
         content));
-    m_tabs->addTab(makeScrollArea(content, m_tabs), QStringLiteral("General"));
+    m_tabs->addTab(makeScrollArea(content, m_tabs), Vanta::tr("General"));
 }
 
 void AddEditDialog::buildRunnerTab()
@@ -296,23 +303,23 @@ void AddEditDialog::buildRunnerTab()
     auto *form = formFor(content);
 
     m_runnerCombo = new QComboBox(content);
-    m_runnerCombo->addItem(runnerName(RunnerType::Native), static_cast<int>(RunnerType::Native));
-    m_runnerCombo->addItem(runnerName(RunnerType::Wine), static_cast<int>(RunnerType::Wine));
-    m_runnerCombo->addItem(runnerName(RunnerType::Proton), static_cast<int>(RunnerType::Proton));
-    m_runnerCombo->addItem(runnerName(RunnerType::Flatpak), static_cast<int>(RunnerType::Flatpak));
-    m_runnerCombo->addItem(runnerName(RunnerType::Custom), static_cast<int>(RunnerType::Custom));
-    form->addRow(QStringLiteral("Runner"), m_runnerCombo);
+    m_runnerCombo->addItem(runnerDisplayName(RunnerType::Native), static_cast<int>(RunnerType::Native));
+    m_runnerCombo->addItem(runnerDisplayName(RunnerType::Wine), static_cast<int>(RunnerType::Wine));
+    m_runnerCombo->addItem(runnerDisplayName(RunnerType::Proton), static_cast<int>(RunnerType::Proton));
+    m_runnerCombo->addItem(runnerDisplayName(RunnerType::Flatpak), static_cast<int>(RunnerType::Flatpak));
+    m_runnerCombo->addItem(runnerDisplayName(RunnerType::Custom), static_cast<int>(RunnerType::Custom));
+    form->addRow(Vanta::tr("Runner"), m_runnerCombo);
 
     m_platformCombo = new QComboBox(content);
-    m_platformCombo->addItem(platformName(Platform::Linux), static_cast<int>(Platform::Linux));
-    m_platformCombo->addItem(platformName(Platform::Windows), static_cast<int>(Platform::Windows));
-    form->addRow(QStringLiteral("Platform"), m_platformCombo);
+    m_platformCombo->addItem(platformDisplayName(Platform::Linux), static_cast<int>(Platform::Linux));
+    m_platformCombo->addItem(platformDisplayName(Platform::Windows), static_cast<int>(Platform::Windows));
+    form->addRow(Vanta::tr("Platform"), m_platformCombo);
 
     m_runnerBuildCombo = new QComboBox(content);
     m_runnerBuildCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-    m_runnerBuildCombo->setToolTip(QStringLiteral(
+    m_runnerBuildCombo->setToolTip(Vanta::tr(
         "Pick one of the Wine or Proton builds Vanta found on this system, or choose a custom path."));
-    form->addRow(QStringLiteral("Build"), m_runnerBuildCombo);
+    form->addRow(Vanta::tr("Build"), m_runnerBuildCombo);
     m_runnerBuildLabel = qobject_cast<QLabel *>(form->labelForField(m_runnerBuildCombo));
     connect(m_runnerBuildCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             [this] { onBuildChanged(); });
@@ -322,19 +329,19 @@ void AddEditDialog::buildRunnerTab()
     runnerLayout->setContentsMargins(0, 0, 0, 0);
     runnerLayout->setSpacing(7);
     m_runnerPathEdit = new QLineEdit(runnerRow);
-    m_runnerBrowseButton = new QPushButton(QStringLiteral("Browse…"), runnerRow);
+    m_runnerBrowseButton = new QPushButton(Vanta::tr("Browse…"), runnerRow);
     m_runnerBrowseButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makeFlat(m_runnerBrowseButton);
     runnerLayout->addWidget(m_runnerPathEdit, 1);
     runnerLayout->addWidget(m_runnerBrowseButton);
-    form->addRow(QStringLiteral("Runner path"), runnerRow);
+    form->addRow(Vanta::tr("Runner path"), runnerRow);
     connect(m_runnerBrowseButton, &QPushButton::clicked, this, &AddEditDialog::browseRunnerPath);
 
     QPushButton *prefixButton = nullptr;
-    form->addRow(QStringLiteral("Prefix folder"),
+    form->addRow(Vanta::tr("Prefix folder"),
                  pathRow(&m_prefixEdit, &prefixButton,
-                         QStringLiteral("Optional; defaults to a Vanta Prefix folder beside the game"),
-                         QStringLiteral("Browse…"), content));
+                         Vanta::tr("Optional; defaults to a Vanta Prefix folder beside the game"),
+                         Vanta::tr("Browse…"), content));
     m_prefixBrowseButton = prefixButton;
     connect(prefixButton, &QPushButton::clicked, this, &AddEditDialog::browsePrefix);
 
@@ -342,32 +349,32 @@ void AddEditDialog::buildRunnerTab()
     auto *optionsLayout = new QVBoxLayout(options);
     optionsLayout->setContentsMargins(0, 0, 0, 0);
     optionsLayout->setSpacing(5);
-    m_wineD3DCheck = new QCheckBox(QStringLiteral("Use WineD3D instead of DXVK (Proton)"), options);
-    m_nativeWaylandCheck = new QCheckBox(QStringLiteral("Enable Proton native Wayland"), options);
-    m_steamOverlayCheck = new QCheckBox(QStringLiteral("Enable Steam overlay environment"), options);
-    m_steamRuntimeCheck = new QCheckBox(QStringLiteral("Wrap Proton with SteamLinuxRuntime"), options);
-    m_bepInExCheck = new QCheckBox(QStringLiteral("BepInEx compatibility (winhttp=n,b when detected)"), options);
+    m_wineD3DCheck = new QCheckBox(Vanta::tr("Use WineD3D instead of DXVK (Proton)"), options);
+    m_nativeWaylandCheck = new QCheckBox(Vanta::tr("Enable Proton native Wayland"), options);
+    m_steamOverlayCheck = new QCheckBox(Vanta::tr("Enable Steam overlay environment"), options);
+    m_steamRuntimeCheck = new QCheckBox(Vanta::tr("Wrap Proton with SteamLinuxRuntime"), options);
+    m_bepInExCheck = new QCheckBox(Vanta::tr("BepInEx compatibility (winhttp=n,b when detected)"), options);
     optionsLayout->addWidget(m_wineD3DCheck);
     optionsLayout->addWidget(m_nativeWaylandCheck);
     optionsLayout->addWidget(m_steamOverlayCheck);
     optionsLayout->addWidget(m_steamRuntimeCheck);
     optionsLayout->addWidget(m_bepInExCheck);
-    form->addRow(QStringLiteral("Options"), options);
+    form->addRow(Vanta::tr("Options"), options);
 
     m_overridesEdit = new QLineEdit(content);
     m_overridesEdit->setPlaceholderText(QStringLiteral("winmm=n;d3d11=n,b"));
-    form->addRow(QStringLiteral("DLL overrides"), m_overridesEdit);
+    form->addRow(Vanta::tr("DLL overrides"), m_overridesEdit);
     form->addRow(UiHelp::helpLabel(
-        QStringLiteral("Stored overrides are appended after Vanta's forced DXVK chain. OnlineFix modules are added only for the launch and are never written here."),
+        Vanta::tr("Stored overrides are appended after Vanta's forced DXVK chain. OnlineFix modules are added only for the launch and are never written here."),
         content));
 
     m_preArgumentsEdit = new QLineEdit(content);
-    m_preArgumentsEdit->setPlaceholderText(QStringLiteral("Optional wrapper, for example: gamescope -W 1920 -H 1080 --"));
-    form->addRow(QStringLiteral("Wrapper arguments"), m_preArgumentsEdit);
+    m_preArgumentsEdit->setPlaceholderText(Vanta::tr("Optional wrapper, for example: gamescope -W 1920 -H 1080 --"));
+    form->addRow(Vanta::tr("Wrapper arguments"), m_preArgumentsEdit);
 
     m_runnerHelp = UiHelp::helpLabel(QString(), content);
     form->addRow(m_runnerHelp);
-    m_tabs->addTab(makeScrollArea(content, m_tabs), QStringLiteral("Runner"));
+    m_tabs->addTab(makeScrollArea(content, m_tabs), Vanta::tr("Runner"));
 }
 
 void AddEditDialog::buildOnlineFixTab()
@@ -376,12 +383,12 @@ void AddEditDialog::buildOnlineFixTab()
     auto *form = formFor(content);
 
     m_onlineFixModeCombo = new QComboBox(content);
-    m_onlineFixModeCombo->addItem(onlineFixModeName(OnlineFixMode::Auto), static_cast<int>(OnlineFixMode::Auto));
-    m_onlineFixModeCombo->addItem(onlineFixModeName(OnlineFixMode::Force), static_cast<int>(OnlineFixMode::Force));
-    m_onlineFixModeCombo->addItem(onlineFixModeName(OnlineFixMode::Disabled), static_cast<int>(OnlineFixMode::Disabled));
-    form->addRow(QStringLiteral("Mode"), m_onlineFixModeCombo);
+    m_onlineFixModeCombo->addItem(onlineFixModeDisplayName(OnlineFixMode::Auto), static_cast<int>(OnlineFixMode::Auto));
+    m_onlineFixModeCombo->addItem(onlineFixModeDisplayName(OnlineFixMode::Force), static_cast<int>(OnlineFixMode::Force));
+    m_onlineFixModeCombo->addItem(onlineFixModeDisplayName(OnlineFixMode::Disabled), static_cast<int>(OnlineFixMode::Disabled));
+    form->addRow(Vanta::tr("Mode"), m_onlineFixModeCombo);
     form->addRow(UiHelp::helpLabel(
-        QStringLiteral("Auto applies the launch configuration only when OnlineFix signatures are detected. Force applies app IDs and the override chain for Wine or Proton even when no files are found. Disabled never applies it."),
+        Vanta::tr("Auto applies the launch configuration only when OnlineFix signatures are detected. Force applies app IDs and the override chain for Wine or Proton even when no files are found. Disabled never applies it."),
         content));
 
     auto *panel = new QFrame(content);
@@ -396,7 +403,7 @@ void AddEditDialog::buildOnlineFixTab()
     m_detectionDetails->setProperty("class", QStringLiteral("muted"));
     m_detectionDetails->setWordWrap(true);
     m_detectionHint = UiHelp::helpLabel(QString(), panel);
-    auto *detectButton = new QPushButton(QStringLiteral("Detect now"), panel);
+    auto *detectButton = new QPushButton(Vanta::tr("Detect now"), panel);
     detectButton->setCursor(Qt::PointingHandCursor);
     UiHelp::makeFlat(detectButton);
     panelLayout->addWidget(m_detectionStatus);
@@ -404,24 +411,24 @@ void AddEditDialog::buildOnlineFixTab()
     panelLayout->addWidget(m_detectionHint);
     panelLayout->addWidget(detectButton, 0, Qt::AlignLeft);
     connect(detectButton, &QPushButton::clicked, this, [this] { refreshDetection(true); });
-    form->addRow(QStringLiteral("Detection"), panel);
+    form->addRow(Vanta::tr("Detection"), panel);
 
     m_realAppIdEdit = new QLineEdit(content);
-    m_realAppIdEdit->setPlaceholderText(QStringLiteral("Optional; read from the fix configuration"));
-    form->addRow(QStringLiteral("Real app ID"), m_realAppIdEdit);
+    m_realAppIdEdit->setPlaceholderText(Vanta::tr("Optional; read from the fix configuration"));
+    form->addRow(Vanta::tr("Real app ID"), m_realAppIdEdit);
     m_fakeAppIdEdit = new QLineEdit(content);
-    m_fakeAppIdEdit->setPlaceholderText(QStringLiteral("Optional; used for the Steam overlay game ID"));
-    form->addRow(QStringLiteral("Fake app ID"), m_fakeAppIdEdit);
+    m_fakeAppIdEdit->setPlaceholderText(Vanta::tr("Optional; used for the Steam overlay game ID"));
+    form->addRow(Vanta::tr("Fake app ID"), m_fakeAppIdEdit);
 
     m_fixPathEdit = new QLineEdit(content);
-    m_fixPathEdit->setPlaceholderText(QStringLiteral("Detected automatically when a SteamFix library is present"));
-    form->addRow(QStringLiteral("Fix folder"), m_fixPathEdit);
+    m_fixPathEdit->setPlaceholderText(Vanta::tr("Detected automatically when a SteamFix library is present"));
+    form->addRow(Vanta::tr("Fix folder"), m_fixPathEdit);
     m_photonDirectoryEdit = new QLineEdit(content);
-    m_photonDirectoryEdit->setPlaceholderText(QStringLiteral("Detected automatically beside a Photon Launcher.exe"));
-    form->addRow(QStringLiteral("Photon folder"), m_photonDirectoryEdit);
+    m_photonDirectoryEdit->setPlaceholderText(Vanta::tr("Detected automatically beside a Photon Launcher.exe"));
+    form->addRow(Vanta::tr("Photon folder"), m_photonDirectoryEdit);
 
     form->addRow(UiHelp::helpLabel(
-        QStringLiteral("OnlineFix configuration is launch-only. Vanta backs up OnlineFix INI files before editing them and never claims that detected files make a copy functional. A Steam precondition can be required in Settings."),
+        Vanta::tr("OnlineFix configuration is launch-only. Vanta backs up OnlineFix INI files before editing them and never claims that detected files make a copy functional. A Steam precondition can be required in Settings."),
         content));
     m_tabs->addTab(makeScrollArea(content, m_tabs), QStringLiteral("OnlineFix"));
 }
@@ -434,11 +441,11 @@ void AddEditDialog::buildEnvironmentTab()
     m_environmentEdit->setProperty("monospace", true);
     m_environmentEdit->setPlaceholderText(QStringLiteral("KEY=VALUE\nMANGOHUD=1\nDXVK_HUD=fps"));
     m_environmentEdit->setMinimumHeight(220);
-    form->addRow(QStringLiteral("Environment"), m_environmentEdit);
+    form->addRow(Vanta::tr("Environment"), m_environmentEdit);
     form->addRow(UiHelp::helpLabel(
-        QStringLiteral("One KEY=VALUE pair per line. Blank lines and lines starting with # are ignored. These values are inherited by the runner and the game."),
+        Vanta::tr("One KEY=VALUE pair per line. Blank lines and lines starting with # are ignored. These values are inherited by the runner and the game."),
         content));
-    m_tabs->addTab(makeScrollArea(content, m_tabs), QStringLiteral("Environment"));
+    m_tabs->addTab(makeScrollArea(content, m_tabs), Vanta::tr("Environment"));
 }
 
 void AddEditDialog::loadFromGame()
@@ -509,26 +516,26 @@ void AddEditDialog::updateRunnerUi()
 
     switch (runner) {
     case RunnerType::Native:
-        m_runnerPathEdit->setPlaceholderText(QStringLiteral("Not used for native launches"));
-        m_runnerHelp->setText(QStringLiteral("The executable is started directly on Linux. Windows .exe files need Wine or Proton."));
+        m_runnerPathEdit->setPlaceholderText(Vanta::tr("Not used for native launches"));
+        m_runnerHelp->setText(Vanta::tr("The executable is started directly on Linux. Windows .exe files need Wine or Proton."));
         break;
     case RunnerType::Wine:
-        m_runnerPathEdit->setPlaceholderText(QStringLiteral("Wine executable; leave blank for system wine"));
-        m_prefixEdit->setPlaceholderText(QStringLiteral("Optional; the default prefix is <game folder>/Vanta Prefix/pfx"));
-        m_runnerHelp->setText(QStringLiteral("Wine receives WINEPREFIX pointing at the prefix's pfx folder and a forced DXVK override chain."));
+        m_runnerPathEdit->setPlaceholderText(Vanta::tr("Wine executable; leave blank for system wine"));
+        m_prefixEdit->setPlaceholderText(Vanta::tr("Optional; the default prefix is <game folder>/Vanta Prefix/pfx"));
+        m_runnerHelp->setText(Vanta::tr("Wine receives WINEPREFIX pointing at the prefix's pfx folder and a forced DXVK override chain."));
         break;
     case RunnerType::Proton:
-        m_runnerPathEdit->setPlaceholderText(QStringLiteral("Proton folder or its proton script"));
-        m_prefixEdit->setPlaceholderText(QStringLiteral("Optional; the default is <game folder>/Vanta Prefix"));
-        m_runnerHelp->setText(QStringLiteral("Proton runs with the prefix folder as STEAM_COMPAT_DATA_PATH. Its pfx subfolder is used for teardown."));
+        m_runnerPathEdit->setPlaceholderText(Vanta::tr("Proton folder or its proton script"));
+        m_prefixEdit->setPlaceholderText(Vanta::tr("Optional; the default is <game folder>/Vanta Prefix"));
+        m_runnerHelp->setText(Vanta::tr("Proton runs with the prefix folder as STEAM_COMPAT_DATA_PATH. Its pfx subfolder is used for teardown."));
         break;
     case RunnerType::Flatpak:
-        m_runnerPathEdit->setPlaceholderText(QStringLiteral("Flatpak application ID, for example com.example.Game"));
-        m_runnerHelp->setText(QStringLiteral("Vanta runs the game with flatpak run <application ID>. Game arguments are appended."));
+        m_runnerPathEdit->setPlaceholderText(Vanta::tr("Flatpak application ID, for example com.example.Game"));
+        m_runnerHelp->setText(Vanta::tr("Vanta runs the game with flatpak run <application ID>. Game arguments are appended."));
         break;
     case RunnerType::Custom:
-        m_runnerPathEdit->setPlaceholderText(QStringLiteral("Launcher executable and optional arguments, for example: mangohud"));
-        m_runnerHelp->setText(QStringLiteral("The custom command is executed with the optional executable and game arguments appended."));
+        m_runnerPathEdit->setPlaceholderText(Vanta::tr("Launcher executable and optional arguments, for example: mangohud"));
+        m_runnerHelp->setText(Vanta::tr("The custom command is executed with the optional executable and game arguments appended."));
         break;
     }
 
@@ -537,19 +544,19 @@ void AddEditDialog::updateRunnerUi()
     // Windows-only override for a game that will never use it.
     if (native) {
         m_bepInExCheck->setEnabled(true);
-        m_bepInExCheck->setText(QStringLiteral("BepInEx compatibility (doorstop launcher when detected)"));
-        m_bepInExCheck->setToolTip(QStringLiteral(
+        m_bepInExCheck->setText(Vanta::tr("BepInEx compatibility (doorstop launcher when detected)"));
+        m_bepInExCheck->setToolTip(Vanta::tr(
             "A native Linux game loads BepInEx through the run_bepinex.sh doorstop launcher. "
             "Vanta uses that script when it is present next to the game."));
     } else if (wineLike) {
         m_bepInExCheck->setEnabled(true);
-        m_bepInExCheck->setText(QStringLiteral("BepInEx compatibility (winhttp=n,b when detected)"));
-        m_bepInExCheck->setToolTip(QStringLiteral(
+        m_bepInExCheck->setText(Vanta::tr("BepInEx compatibility (winhttp=n,b when detected)"));
+        m_bepInExCheck->setToolTip(Vanta::tr(
             "Adds the winhttp=n,b DLL override for the launch when BepInEx files are detected."));
     } else {
         m_bepInExCheck->setEnabled(false);
-        m_bepInExCheck->setText(QStringLiteral("BepInEx compatibility (not available for this runner)"));
-        m_bepInExCheck->setToolTip(QStringLiteral(
+        m_bepInExCheck->setText(Vanta::tr("BepInEx compatibility (not available for this runner)"));
+        m_bepInExCheck->setToolTip(Vanta::tr(
             "BepInEx can only be loaded for Native, Wine and Proton launches."));
     }
 }
@@ -564,28 +571,28 @@ void AddEditDialog::refreshDetection(bool applyDetectedValues)
     // The game folder is always the executable's folder; there is no separate field.
     const QString directory = executableDirectory;
     const OnlineFixInfo info = OnlineFixDetector::detect(executableDirectory, directory);
-    m_detectionHint->setText(QStringLiteral("Detection is based on filenames and INI values. It does not prove online functionality."));
+    m_detectionHint->setText(Vanta::tr("Detection is based on filenames and INI values. It does not prove online functionality."));
 
     if (!info.detected) {
-        m_detectionStatus->setText(QStringLiteral("No OnlineFix signatures detected"));
+        m_detectionStatus->setText(Vanta::tr("No OnlineFix signatures detected"));
         m_detectionDetails->setText(directory.isEmpty()
-            ? QStringLiteral("Choose the game executable to inspect its folder.")
-            : QStringLiteral("Inspection looked at the executable folder. OnlineFix files are never fabricated or downloaded."));
+            ? Vanta::tr("Choose the game executable to inspect its folder.")
+            : Vanta::tr("Inspection looked at the executable folder. OnlineFix files are never fabricated or downloaded."));
         return;
     }
 
-    m_detectionStatus->setText(QStringLiteral("OnlineFix detected: %1").arg(fixKindName(info.kind)));
+    m_detectionStatus->setText(Vanta::tr("OnlineFix detected: %1").arg(fixKindDisplayName(info.kind)));
     QStringList details;
-    details.append(QStringLiteral("%1 matching file(s), %2 override module(s).")
+    details.append(Vanta::tr("%1 matching file(s), %2 override module(s).")
                        .arg(info.files.size()).arg(info.extraModules.size()));
     if (!info.realAppId.isEmpty())
-        details.append(QStringLiteral("Real app ID: %1").arg(info.realAppId));
+        details.append(Vanta::tr("Real app ID: %1").arg(info.realAppId));
     if (!info.fakeAppId.isEmpty())
-        details.append(QStringLiteral("Fake app ID: %1").arg(info.fakeAppId));
+        details.append(Vanta::tr("Fake app ID: %1").arg(info.fakeAppId));
     if (!info.fixPath.isEmpty())
-        details.append(QStringLiteral("SteamFix folder: %1").arg(info.fixPath));
+        details.append(Vanta::tr("SteamFix folder: %1").arg(info.fixPath));
     if (!info.photonLauncherDir.isEmpty())
-        details.append(QStringLiteral("Photon launcher folder: %1").arg(info.photonLauncherDir));
+        details.append(Vanta::tr("Photon launcher folder: %1").arg(info.photonLauncherDir));
     m_detectionDetails->setText(details.join(QLatin1Char('\n')));
 
     if (applyDetectedValues) {
@@ -615,7 +622,7 @@ void AddEditDialog::populateBuildCombo(RunnerType runner)
     // the system wine at start time. Giving it a named entry keeps the combo
     // from showing "Custom path..." for a perfectly normal configuration.
     if (runner == RunnerType::Wine)
-        m_runnerBuildCombo->addItem(QStringLiteral("System Wine (chosen at launch)"), QString());
+        m_runnerBuildCombo->addItem(Vanta::tr("System Wine (chosen at launch)"), QString());
     for (const RunnerEntry &entry : entries) {
         QString label = entry.name;
         if (runner == RunnerType::Proton) {
@@ -627,10 +634,10 @@ void AddEditDialog::populateBuildCombo(RunnerType runner)
         }
         m_runnerBuildCombo->addItem(label, entry.path);
     }
-    m_runnerBuildCombo->addItem(QStringLiteral("Custom path…"), QLatin1String(kCustomBuild));
+    m_runnerBuildCombo->addItem(Vanta::tr("Custom path…"), QLatin1String(kCustomBuild));
     if (entries.isEmpty())
         m_runnerBuildCombo->setItemText(m_runnerBuildCombo->count() - 1,
-                                        QStringLiteral("Custom path… (no builds were detected)"));
+                                        Vanta::tr("Custom path… (no builds were detected)"));
 
     int index = m_runnerBuildCombo->findData(currentPath);
     if (index < 0 && previous != QLatin1String(kCustomBuild))
@@ -669,7 +676,7 @@ void AddEditDialog::browseExecutable()
     const QString start = m_executableEdit->text().isEmpty()
         ? QDir::homePath() : QFileInfo(m_executableEdit->text()).absolutePath();
     const QString file = QFileDialog::getOpenFileName(
-        this, QStringLiteral("Choose game executable"), start,
+        this, Vanta::tr("Choose game executable"), start,
         QStringLiteral("Windows executables (*.exe);;All files (*)"));
     if (file.isEmpty())
         return;
@@ -716,7 +723,7 @@ void AddEditDialog::applyDetectedRunner(const QString &executable)
         selectPlatform(Platform::Windows);
         if (m_detectedRunner) {
             m_detectedRunner->setText(
-                QStringLiteral("Windows executable detected — Proton selected. Change the runner in the Runner tab if needed."));
+                Vanta::tr("Windows executable detected — Proton selected. Change the runner in the Runner tab if needed."));
             m_detectedRunner->setVisible(true);
         }
     } else {
@@ -726,7 +733,7 @@ void AddEditDialog::applyDetectedRunner(const QString &executable)
         selectPlatform(Platform::Linux);
         if (m_detectedRunner) {
             m_detectedRunner->setText(
-                QStringLiteral("Native Linux executable detected — Native selected."));
+                Vanta::tr("Native Linux executable detected — Native selected."));
             m_detectedRunner->setVisible(true);
         }
     }
@@ -737,7 +744,7 @@ void AddEditDialog::browseWorkingDirectory()
 {
     const QString start = m_workingDirectoryEdit->text().isEmpty()
         ? QFileInfo(m_executableEdit->text().trimmed()).absolutePath() : m_workingDirectoryEdit->text();
-    const QString directory = QFileDialog::getExistingDirectory(this, QStringLiteral("Choose working folder"), start);
+    const QString directory = QFileDialog::getExistingDirectory(this, Vanta::tr("Choose working folder"), start);
     if (!directory.isEmpty())
         m_workingDirectoryEdit->setText(directory);
 }
@@ -747,7 +754,7 @@ void AddEditDialog::browseCover()
     const QString start = m_coverEdit->text().isEmpty()
         ? QFileInfo(m_executableEdit->text().trimmed()).absolutePath() : m_coverEdit->text();
     const QString file = QFileDialog::getOpenFileName(
-        this, QStringLiteral("Choose cover image"), start,
+        this, Vanta::tr("Choose cover image"), start,
         QStringLiteral("Images (*.png *.jpg *.jpeg *.webp *.bmp *.svg);;All files (*)"));
     if (!file.isEmpty())
         m_coverEdit->setText(file);
@@ -759,7 +766,7 @@ void AddEditDialog::fetchCover()
     if (name.isEmpty()) {
         if (m_coverStatus) {
             m_coverStatus->setProperty("class", QStringLiteral("danger"));
-            m_coverStatus->setText(QStringLiteral("Give the game a name first so SteamGridDB can be searched."));
+            m_coverStatus->setText(Vanta::tr("Give the game a name first so SteamGridDB can be searched."));
             m_coverStatus->setVisible(true);
             m_coverStatus->style()->unpolish(m_coverStatus);
             m_coverStatus->style()->polish(m_coverStatus);
@@ -773,7 +780,7 @@ void AddEditDialog::fetchCover()
 
     if (m_coverStatus) {
         m_coverStatus->setProperty("class", QStringLiteral("fieldHelp"));
-        m_coverStatus->setText(QStringLiteral("Searching SteamGridDB for “%1”…").arg(name));
+        m_coverStatus->setText(Vanta::tr("Searching SteamGridDB for “%1”…").arg(name));
         m_coverStatus->setVisible(true);
         m_coverStatus->style()->unpolish(m_coverStatus);
         m_coverStatus->style()->polish(m_coverStatus);
@@ -790,13 +797,13 @@ void AddEditDialog::browseRunnerPath()
     const auto runner = static_cast<RunnerType>(m_runnerCombo->currentData().toInt());
     if (runner == RunnerType::Proton) {
         const QString start = m_runnerPathEdit->text().isEmpty() ? QDir::homePath() : m_runnerPathEdit->text();
-        const QString directory = QFileDialog::getExistingDirectory(this, QStringLiteral("Choose Proton folder"), start);
+        const QString directory = QFileDialog::getExistingDirectory(this, Vanta::tr("Choose Proton folder"), start);
         if (!directory.isEmpty())
             m_runnerPathEdit->setText(directory);
         return;
     }
     const QString start = m_runnerPathEdit->text().isEmpty() ? QDir::homePath() : m_runnerPathEdit->text();
-    const QString file = QFileDialog::getOpenFileName(this, QStringLiteral("Choose runner executable"), start);
+    const QString file = QFileDialog::getOpenFileName(this, Vanta::tr("Choose runner executable"), start);
     if (!file.isEmpty())
         m_runnerPathEdit->setText(file);
 }
@@ -805,7 +812,7 @@ void AddEditDialog::browsePrefix()
 {
     const QString start = m_prefixEdit->text().isEmpty()
         ? QFileInfo(m_executableEdit->text().trimmed()).absolutePath() : m_prefixEdit->text();
-    const QString directory = QFileDialog::getExistingDirectory(this, QStringLiteral("Choose prefix folder"), start);
+    const QString directory = QFileDialog::getExistingDirectory(this, Vanta::tr("Choose prefix folder"), start);
     if (!directory.isEmpty())
         m_prefixEdit->setText(directory);
 }
@@ -823,7 +830,7 @@ void AddEditDialog::validateAndAccept()
     m_errorLabel->setVisible(false);
     const QString name = m_nameEdit->text().trimmed();
     if (name.isEmpty()) {
-        showError(QStringLiteral("Give the game a name."), 0);
+        showError(Vanta::tr("Give the game a name."), 0);
         m_nameEdit->setFocus();
         return;
     }
@@ -834,14 +841,14 @@ void AddEditDialog::validateAndAccept()
     const auto runner = static_cast<RunnerType>(m_runnerCombo->currentData().toInt());
 
     if (executable.isEmpty()) {
-        showError(QStringLiteral("Choose the game executable."), 0);
+        showError(Vanta::tr("Choose the game executable."), 0);
         m_executableEdit->setFocus();
         return;
     }
     {
         const QFileInfo info(executable);
         if (!info.exists() || !info.isFile()) {
-            showError(QStringLiteral("The executable does not exist: %1").arg(executable), 0);
+            showError(Vanta::tr("The executable does not exist: %1").arg(executable), 0);
             return;
         }
         executable = info.absoluteFilePath();
@@ -858,11 +865,11 @@ void AddEditDialog::validateAndAccept()
             executable.endsWith(QStringLiteral(".exe"), Qt::CaseInsensitive)
             || GameScanner::isWindowsExecutable(executable);
         if (runner == RunnerType::Native && windowsExecutable) {
-            showError(QStringLiteral("A Windows .exe cannot run through the Native runner. Choose Wine or Proton in the Runner tab."), 1);
+            showError(Vanta::tr("A Windows .exe cannot run through the Native runner. Choose Wine or Proton in the Runner tab."), 1);
             return;
         }
         if (runner == RunnerType::Native && !windowsExecutable && !executableInfo.isExecutable()) {
-            showError(QStringLiteral("The native executable is not marked executable."), 0);
+            showError(Vanta::tr("The native executable is not marked executable."), 0);
             return;
         }
     }
@@ -870,14 +877,14 @@ void AddEditDialog::validateAndAccept()
     if (!workingDirectory.isEmpty()) {
         const QFileInfo workingInfo(workingDirectory);
         if (!workingInfo.exists() || !workingInfo.isDir()) {
-            showError(QStringLiteral("The working folder does not exist: %1").arg(workingDirectory), 0);
+            showError(Vanta::tr("The working folder does not exist: %1").arg(workingDirectory), 0);
             return;
         }
     }
 
     const QString cover = m_coverEdit->text().trimmed();
     if (!cover.isEmpty() && !QFileInfo(cover).isFile()) {
-        showError(QStringLiteral("The cover image does not exist: %1").arg(cover), 0);
+        showError(Vanta::tr("The cover image does not exist: %1").arg(cover), 0);
         return;
     }
 
@@ -885,39 +892,39 @@ void AddEditDialog::validateAndAccept()
     if (runner == RunnerType::Wine && !runnerPath.isEmpty()) {
         const QFileInfo runnerInfo(runnerPath);
         if (!runnerInfo.exists() && QStandardPaths::findExecutable(runnerPath).isEmpty()) {
-            showError(QStringLiteral("The Wine executable does not exist: %1").arg(runnerPath), 1);
+            showError(Vanta::tr("The Wine executable does not exist: %1").arg(runnerPath), 1);
             return;
         }
     } else if (runner == RunnerType::Proton) {
         QString reason;
         if (!RunnerDetector::validateProton(runnerPath, &reason)) {
-            showError(reason.isEmpty() ? QStringLiteral("Choose a Proton folder or proton script.") : reason, 1);
+            showError(reason.isEmpty() ? Vanta::tr("Choose a Proton folder or proton script.") : reason, 1);
             return;
         }
     } else if (runner == RunnerType::Flatpak && runnerPath.isEmpty()) {
-        showError(QStringLiteral("Enter the Flatpak application ID, for example com.example.Game."), 1);
+        showError(Vanta::tr("Enter the Flatpak application ID, for example com.example.Game."), 1);
         return;
     } else if (runner == RunnerType::Custom) {
         const QStringList custom = QProcess::splitCommand(runnerPath);
         if (custom.isEmpty()) {
-            showError(QStringLiteral("Enter a custom launcher command."), 1);
+            showError(Vanta::tr("Enter a custom launcher command."), 1);
             return;
         }
         const QString first = custom.first();
         if (QFileInfo(first).isAbsolute()) {
             if (!QFileInfo(first).isFile()) {
-                showError(QStringLiteral("The custom launcher does not exist: %1").arg(first), 1);
+                showError(Vanta::tr("The custom launcher does not exist: %1").arg(first), 1);
                 return;
             }
         } else if (QStandardPaths::findExecutable(first).isEmpty()) {
-            showError(QStringLiteral("The custom launcher was not found on PATH: %1").arg(first), 1);
+            showError(Vanta::tr("The custom launcher was not found on PATH: %1").arg(first), 1);
             return;
         }
     }
 
     const QString prefix = m_prefixEdit->text().trimmed();
     if (!prefix.isEmpty() && QFileInfo::exists(prefix) && !QFileInfo(prefix).isDir()) {
-        showError(QStringLiteral("The prefix path is not a folder: %1").arg(prefix), 1);
+        showError(Vanta::tr("The prefix path is not a folder: %1").arg(prefix), 1);
         return;
     }
 
@@ -932,11 +939,11 @@ void AddEditDialog::validateAndAccept()
     const QString fakeAppId = m_fakeAppIdEdit->text().trimmed();
     const QRegularExpression digits(QStringLiteral("^\\d*$"));
     if (!realAppId.isEmpty() && !digits.match(realAppId).hasMatch()) {
-        showError(QStringLiteral("The real app ID must contain digits only."), 2);
+        showError(Vanta::tr("The real app ID must contain digits only."), 2);
         return;
     }
     if (!fakeAppId.isEmpty() && !digits.match(fakeAppId).hasMatch()) {
-        showError(QStringLiteral("The fake app ID must contain digits only."), 2);
+        showError(Vanta::tr("The fake app ID must contain digits only."), 2);
         return;
     }
 
@@ -948,14 +955,14 @@ void AddEditDialog::validateAndAccept()
     }
     for (auto it = environment.constBegin(); it != environment.constEnd(); ++it) {
         if (LaunchPlanBuilder::isControlledEnvironmentKey(it.key())) {
-            showError(QStringLiteral("%1 is controlled by Vanta and cannot be stored per game. Set it through the Runner options instead.").arg(it.key()), 3);
+            showError(Vanta::tr("%1 is controlled by Vanta and cannot be stored per game. Set it through the Runner options instead.").arg(it.key()), 3);
             return;
         }
     }
 
     Game game = m_game;
     game.name = name;
-    game.source = m_sourceCombo->currentText().trimmed();
+    game.source = m_sourceCombo->currentData().toString().trimmed();
     if (game.source.isEmpty())
         game.source = QStringLiteral("Manual");
     game.gameDirectory = directory;

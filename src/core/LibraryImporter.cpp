@@ -1,4 +1,5 @@
 #include "LibraryImporter.h"
+#include "I18n.h"
 #include "Library.h"
 #include "RunnerDetector.h"
 
@@ -366,7 +367,7 @@ QList<ImportedGameCandidate> LibraryImporter::scanLutris()
                 continue;
 
             Game game = Game::create();
-            game.name = row.name.isEmpty() ? (row.slug.isEmpty() ? QStringLiteral("Lutris Game") : row.slug) : row.name;
+            game.name = row.name.isEmpty() ? (row.slug.isEmpty() ? Vanta::tr("Lutris Game") : row.slug) : row.name;
             game.source = QStringLiteral("Lutris");
             game.executable = exe;
             game.gameDirectory = !row.directory.isEmpty() ? row.directory : QFileInfo(exe).absolutePath();

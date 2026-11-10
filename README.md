@@ -456,6 +456,13 @@ Build and contribution conventions are documented in [AGENTS.md](AGENTS.md).
 GitHub Actions builds every push with both GCC and Clang and fails on any
 compiler warning.
 
+## Translations
+
+The interface is translated into Russian, Portuguese (Brazil), Portuguese and
+Spanish, with catalogs for more languages in progress. Translations are
+community-maintained; see [docs/TRANSLATIONS.md](docs/TRANSLATIONS.md) for how
+to improve one or add a language.
+
 ## License
 
 Vanta is licensed under the **GNU Affero General Public License v3.0**. See

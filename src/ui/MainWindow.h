@@ -36,7 +36,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(const QStringList &startupWarnings = QStringList(), QWidget *parent = nullptr);
     ~MainWindow() override;
 
 protected:
@@ -165,6 +165,9 @@ private:
     // rebuilt without re-reading settings on every toggle.
     bool m_hideNeedsAttention = false;
     QStringList m_hiddenRunners;
+    // Warnings from the early settings load in main(), kept so a corrupt
+    // settings file quarantined before MainWindow existed is still reported.
+    QStringList m_startupWarnings;
     bool m_scannedOnce = false;
     QSet<QString> m_running;
     QString m_selectedGameId;

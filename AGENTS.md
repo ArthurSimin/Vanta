@@ -320,6 +320,41 @@ Notes that are easy to get wrong:
   explicitly (`zlib1g`) and the pacman package lists `zlib`; the RPM relies on
   its soname generator as it does for Qt.
 
+## Releasing updates
+
+A release is not finished when the tag is pushed. Every new version must be
+published to every channel Vanta ships on, and every place that writes the
+version must be updated in the same release. A tag while the website, the
+README or the AUR package still name the old number leaves users on a stale
+build and makes the update check disagree with what they can install.
+
+Update all of these:
+
+- **The tag.** `v<MAJOR>.<MINOR>.<PATCH>` is the single source of truth; the
+  release workflow derives the binary and package versions from it. Never
+  renumber a published tag.
+- **The GitHub release.** The workflow publishes the `.deb`, the `.rpm`, the
+  pacman package, the portable tarball and `SHA256SUMS`. Confirm the release
+  carries all five before announcing it.
+- **The website** (`website/index.html`). The version appears in more than one
+  place — the release pill, the release table row, and the "Get Vanta" and
+  "Download" lines. Update every one; a stale number there is the easiest to
+  miss.
+- **The AUR package** (`vanta`). In a clone of
+  `ssh://aur@aur.archlinux.org/vanta.git`, raise `pkgver`, reset `pkgrel` to
+  `1`, refresh `sha256sums` from
+  `https://github.com/ArthurSimin/Vanta/archive/refs/tags/v<version>.tar.gz`,
+  regenerate `.SRCINFO` with `makepkg --printsrcinfo > .SRCINFO`, rebuild once
+  with `makepkg -f`, then commit and push. The package builds the tagged source,
+  so it tracks the release rather than a specific binary.
+- **The source fallbacks.** `set(VANTA_VERSION ...)` in `CMakeLists.txt` and the
+  `VANTA_VERSION` fallback in `src/Version.h` must match the new tag, so a build
+  outside the release workflow still reports the right number. Keep the two in
+  step as the Versioning section requires.
+
+Two things need no edit. The one-command installer reads the newest release for
+itself, and the README release badge is a live shield that follows the tag.
+
 ## Storage rules
 
 - All state lives under XDG paths, resolved once in `Storage`:

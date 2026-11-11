@@ -126,6 +126,18 @@ curl -fsSL https://raw.githubusercontent.com/ArthurSimin/Vanta/main/scripts/inst
 curl -fsSL https://raw.githubusercontent.com/ArthurSimin/Vanta/main/scripts/install.sh | sh -s -- --help
 ```
 
+Arch, Manjaro and CachyOS users can skip the script and install from the AUR
+with any AUR helper:
+
+```bash
+yay -S vanta
+# or
+paru -S vanta
+```
+
+That package builds the current release from source, so there is no download
+step and your helper keeps it updated with the rest of your system.
+
 If you would rather download a package yourself, the table below lists the
 format for each distribution.
 

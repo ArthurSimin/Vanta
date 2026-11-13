@@ -88,6 +88,8 @@ set(VANTA_SOURCES
     src/core/LibraryImporter.h
     src/core/OnlineFix.cpp
     src/core/OnlineFix.h
+    src/core/Prerequisites.cpp
+    src/core/Prerequisites.h
     src/core/RunnerDetector.cpp
     src/core/RunnerDetector.h
     src/core/RunnerInstaller.cpp

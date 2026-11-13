@@ -13,6 +13,7 @@
 #include "LogsDialog.h"
 #include "ModManagerDialog.h"
 #include "OnlineFixDialog.h"
+#include "Prerequisites.h"
 #include "RunnerInstallDialog.h"
 #include "SettingsDialog.h"
 #include "Sidebar.h"
@@ -492,6 +493,10 @@ void MainWindow::connectSignals()
         updateRunningState();
     });
     connect(&m_launcher, &GameLauncher::gameFinished, this, &MainWindow::handleGameFinished);
+
+    m_runtimeRunner = new RuntimeInstallerRunner(this);
+    connect(m_runtimeRunner, &RuntimeInstallerRunner::finished, this,
+            &MainWindow::handleRuntimeInstallerFinished);
 
     connect(&m_updateChecker, &UpdateChecker::updateAvailable, this, &MainWindow::handleUpdateAvailable);
     connect(&m_updateChecker, &UpdateChecker::upToDate, this, [this](const QString &) {
@@ -1939,6 +1944,21 @@ void MainWindow::handleGameFinished(const QString &gameId, qint64 elapsedSeconds
     if (crashed) {
         const QString name = found ? game.name : Vanta::tr("The game");
         setStatusMessage(Vanta::tr("The game exited unexpectedly (code %1).").arg(exitCode), 12000);
+        // A folder copied into the library never had Steam run the game's
+        // installscript, so the prefix can lack a runtime the game links
+        // against. When the output points at one and the game ships its
+        // installer, offering to run it is more useful than the log question.
+        if (found) {
+            const QVector<RuntimeKind> missing = Prerequisites::missingRuntimes(diagnostic);
+            if (!missing.isEmpty()) {
+                const QVector<RuntimeInstaller> installers =
+                    Prerequisites::installersFor(game.effectiveDirectory(), missing);
+                if (!installers.isEmpty()) {
+                    offerMissingRuntimes(game, missing, installers);
+                    return;
+                }
+            }
+        }
         if (logPath.isEmpty()) {
             showDiagnostics(Vanta::tr("Game exited unexpectedly"),
                             Vanta::tr("%1 exited with code %2. Diagnostics from the launch are below.")
@@ -1957,6 +1977,143 @@ void MainWindow::handleGameFinished(const QString &gameId, qint64 elapsedSeconds
         return;
     }
     setStatusMessage(Vanta::tr("Game closed."));
+}
+
+void MainWindow::offerMissingRuntimes(const Game &game, const QVector<RuntimeKind> &detected,
+                                      const QVector<RuntimeInstaller> &installers)
+{
+    // The runtime the output points at is marked, and the installers the folder
+    // ships for the others are listed without that mark, so the offer says what
+    // was read and what else is available instead of implying all of it is
+    // known to be missing.
+    QStringList lines;
+    for (const RuntimeInstaller &installer : installers) {
+        const QString entry = Vanta::tr("%1 — %2")
+                                  .arg(runtimeDisplayName(installer.kind),
+                                       QFileInfo(installer.path).fileName());
+        lines.append(detected.contains(installer.kind)
+                         ? Vanta::tr("%1 (the output points at this)").arg(entry)
+                         : entry);
+    }
+    const auto reply = QMessageBox::question(
+        this, Vanta::tr("Missing software"),
+        Vanta::tr("Vanta read the output of the failed launch and it points at software the "
+                  "game's prefix is missing. The game's folder ships installers that can add "
+                  "it:\n\n%1\n\nRun them in the game's prefix now?")
+            .arg(lines.join(QLatin1Char('\n'))),
+        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    if (reply != QMessageBox::Yes)
+        return;
+
+    m_runtimeGameId = game.id;
+    m_pendingRuntimeInstallers = installers;
+    m_runtimeInstallerIndex = 0;
+    m_runtimeInstallerFailed = false;
+    m_runtimeCancelled = false;
+    m_runtimeInstallerLog.clear();
+    startNextRuntimeInstaller();
+}
+
+void MainWindow::startNextRuntimeInstaller()
+{
+    if (m_runtimeCancelled)
+        return;
+    if (m_runtimeInstallerIndex >= m_pendingRuntimeInstallers.size()) {
+        if (m_runtimeDialog) {
+            if (m_runtimeInstallerFailed)
+                m_runtimeDialog->showFailure(
+                    Vanta::tr("At least one installer did not finish. What each installer printed is "
+                              "above; Vanta cannot tell whether the game starts now."));
+            else
+                m_runtimeDialog->showSuccess(Vanta::tr("The installers finished. Try launching the game again."));
+        }
+        setStatusMessage(m_runtimeInstallerFailed ? Vanta::tr("The installers did not all finish.")
+                                                  : Vanta::tr("The installers finished."));
+        m_pendingRuntimeInstallers.clear();
+        m_runtimeGameId.clear();
+        return;
+    }
+
+    bool found = false;
+    const Game game = m_library.gameById(m_runtimeGameId, &found);
+    if (!found) {
+        if (m_runtimeDialog)
+            m_runtimeDialog->showFailure(Vanta::tr("The game is no longer in the library."));
+        m_pendingRuntimeInstallers.clear();
+        m_runtimeGameId.clear();
+        return;
+    }
+
+    const RuntimeInstaller installer = m_pendingRuntimeInstallers.at(m_runtimeInstallerIndex);
+    if (!m_runtimeDialog) {
+        m_runtimeDialog = new LaunchProgressDialog(game.name, &m_theme, this);
+        connect(m_runtimeDialog, &LaunchProgressDialog::cancelRequested, this, [this] {
+            // Cancelling stops the whole run: the remaining installers are
+            // dropped rather than queued behind a prefix the user asked to
+            // leave alone.
+            m_runtimeCancelled = true;
+            m_pendingRuntimeInstallers.clear();
+            if (m_runtimeRunner)
+                m_runtimeRunner->cancel();
+            if (m_runtimeDialog)
+                m_runtimeDialog->showFailure(Vanta::tr("Installation cancelled."));
+        });
+        // The dialog outlives the run until the user closes it, so it is
+        // destroyed on close instead of being reused by the next failure.
+        connect(m_runtimeDialog, &QDialog::finished, this, [this] {
+            if (m_runtimeDialog) {
+                m_runtimeDialog->deleteLater();
+                m_runtimeDialog.clear();
+            }
+        });
+        m_runtimeDialog->show();
+    }
+
+    m_runtimeDialog->setMessage(Vanta::tr("Installing %1...").arg(runtimeDisplayName(installer.kind)));
+    m_runtimeDialog->setIndeterminate();
+    // The detail accumulates, so the next installer does not erase what the
+    // previous one printed.
+    if (!m_runtimeInstallerLog.isEmpty())
+        m_runtimeInstallerLog += QLatin1Char('\n');
+    m_runtimeInstallerLog +=
+        Vanta::tr("Running %1 in the game's prefix. This can take a few minutes.")
+            .arg(QFileInfo(installer.path).fileName());
+    m_runtimeDialog->setDetail(m_runtimeInstallerLog);
+
+    QString error;
+    if (!m_runtimeRunner->start(game, m_library.settings(), installer, &error)) {
+        m_runtimeInstallerFailed = true;
+        ++m_runtimeInstallerIndex;
+        // The error joins the accumulated log rather than replacing it, so a
+        // failure to start one installer does not erase what the previous one
+        // printed.
+        if (!m_runtimeInstallerLog.isEmpty())
+            m_runtimeInstallerLog += QLatin1Char('\n');
+        m_runtimeInstallerLog += error;
+        if (m_runtimeDialog)
+            m_runtimeDialog->setDetail(m_runtimeInstallerLog);
+        startNextRuntimeInstaller();
+    }
+}
+
+void MainWindow::handleRuntimeInstallerFinished(bool ok, int exitCode, const QString &summary,
+                                                const QString &output)
+{
+    Q_UNUSED(exitCode);
+    if (m_runtimeCancelled)
+        return;
+    if (!ok)
+        m_runtimeInstallerFailed = true;
+    if (m_runtimeDialog) {
+        if (!m_runtimeInstallerLog.isEmpty())
+            m_runtimeInstallerLog += QLatin1Char('\n');
+        m_runtimeInstallerLog += summary;
+        if (!output.isEmpty())
+            m_runtimeInstallerLog += QLatin1Char('\n') + output;
+        m_runtimeDialog->setDetail(m_runtimeInstallerLog);
+    }
+    ++m_runtimeInstallerIndex;
+    startNextRuntimeInstaller();
 }
 
 void MainWindow::updateRunningState()

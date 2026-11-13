@@ -42,6 +42,12 @@ public:
     static LaunchPlan build(const Game &game, const AppSettings &settings,
                             const OnlineFixInfo &onlineFixInfo, bool onlineFixActive,
                             bool bepinexDetected, QString *error = nullptr);
+    // Builds the command that runs a Windows installer (an .msi or .exe the game
+    // shipped) inside the game's own prefix, so the software lands where the
+    // game will look for it. Used for missing runtimes such as XNA or .NET.
+    static LaunchPlan buildInstallerRun(const Game &game, const AppSettings &settings,
+                                        const QString &installerPath, bool msi,
+                                        const QStringList &arguments, QString *error = nullptr);
     static QString effectivePrefix(const Game &game);
     static QString effectiveWinePrefix(const Game &game);
     static QString wineServerFor(const Game &game, const QString &protonProgram);

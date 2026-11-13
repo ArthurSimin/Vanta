@@ -2,6 +2,7 @@
 
 #include "Game.h"
 #include "OnlineFix.h"
+#include "Prerequisites.h"
 #include "Scanner.h"
 #include "Storage.h"
 #include "Library.h"
@@ -112,6 +113,14 @@ private:
                             const QString &logPath);
     void showDiagnostics(const QString &title, const QString &message, const QString &detail);
 
+    // Offers to run the installers a game ships for a runtime its prefix is
+    // missing. The queue runs one installer at a time and reports each attempt.
+    void offerMissingRuntimes(const Game &game, const QVector<RuntimeKind> &detected,
+                              const QVector<RuntimeInstaller> &installers);
+    void startNextRuntimeInstaller();
+    void handleRuntimeInstallerFinished(bool ok, int exitCode, const QString &summary,
+                                        const QString &output);
+
     void scanGame(const QString &gameId, bool force);
     void scanLibrary(bool force);
     void toggleFavorite(const QString &gameId);
@@ -176,6 +185,17 @@ private:
     QString m_selectedGameId;
 
     QPointer<LaunchProgressDialog> m_launchDialog;
+    QPointer<LaunchProgressDialog> m_runtimeDialog;
+    RuntimeInstallerRunner *m_runtimeRunner = nullptr;
+    QString m_runtimeGameId;
+    // Everything the installers have printed so far, so starting the next one
+    // does not hide why an earlier one failed. It is the only place the
+    // installer output appears; there is no log file behind it.
+    QString m_runtimeInstallerLog;
+    QVector<RuntimeInstaller> m_pendingRuntimeInstallers;
+    int m_runtimeInstallerIndex = 0;
+    bool m_runtimeInstallerFailed = false;
+    bool m_runtimeCancelled = false;
     QPointer<SteamPrecondition> m_steamPrecondition;
     CoverFetcher *m_coverFetcher = nullptr;
     QString m_pendingGameId;

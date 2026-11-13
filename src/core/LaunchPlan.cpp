@@ -498,6 +498,96 @@ LaunchPlan LaunchPlanBuilder::build(const Game &game, const AppSettings &setting
     return plan;
 }
 
+LaunchPlan LaunchPlanBuilder::buildInstallerRun(const Game &game, const AppSettings &settings,
+                                               const QString &installerPath, bool msi,
+                                               const QStringList &arguments, QString *error)
+{
+    LaunchPlan plan;
+    plan.runner = game.runner;
+    plan.environment = QProcessEnvironment::systemEnvironment();
+    auto setEnvironment = [&plan](const QString &key, const QString &value) {
+        plan.environment.insert(key, value);
+        plan.environmentOverrides.insert(key, value);
+    };
+
+    if (!runnerIsWineLike(game.runner)) {
+        if (error)
+            *error = Vanta::tr("Installing software in a prefix needs a Wine or Proton game.");
+        return {};
+    }
+    const QFileInfo installerInfo(installerPath);
+    if (!installerInfo.exists() || !installerInfo.isFile()) {
+        if (error)
+            *error = Vanta::tr("The installer is missing: %1").arg(installerPath);
+        return {};
+    }
+
+    // A Windows installer is given a Windows-style path: the Z: drive maps the
+    // Linux root, which is what Steam itself passes to a game's installscript.
+    QString windowsPath = installerInfo.absoluteFilePath();
+    windowsPath.replace(QLatin1Char('/'), QLatin1Char('\\'));
+    windowsPath.prepend(QStringLiteral("Z:"));
+
+    plan.prefixBase = effectivePrefix(game);
+    plan.winePrefix = QDir(plan.prefixBase).filePath(QStringLiteral("pfx"));
+    plan.workingDirectory = installerInfo.absolutePath();
+
+    QStringList command;
+    QString runnerError;
+    if (game.runner == RunnerType::Proton) {
+        const QString proton = resolveCommand(game.runnerPath, QStringLiteral("proton"), true, &runnerError);
+        if (proton.isEmpty()) {
+            if (error)
+                *error = runnerError.isEmpty() ? Vanta::tr("Proton was not found.") : runnerError;
+            return {};
+        }
+        command << proton << QStringLiteral("run");
+        if (msi) {
+            // A bare "msiexec" is not resolved and exits 0 without installing
+            // anything, so the system binary is addressed through C:. The
+            // package itself needs a Windows path for msiexec to open it.
+            command << QStringLiteral("C:\\windows\\system32\\msiexec.exe") << QStringLiteral("/package")
+                    << windowsPath;
+        } else {
+            // An EXE is handed over the way a game is: as a Unix path, which the
+            // runner converts itself.
+            command << installerInfo.absoluteFilePath();
+        }
+        command << arguments;
+        setEnvironment(QStringLiteral("STEAM_COMPAT_DATA_PATH"), plan.prefixBase);
+        setEnvironment(QStringLiteral("STEAM_COMPAT_CLIENT_INSTALL_PATH"), SteamIntegration::steamInstallRoot());
+        setEnvironment(QStringLiteral("WINEDEBUG"), wineDebugValue(settings.wineLogLevel));
+    } else {
+        const QString configuredWine = game.runnerPath.trimmed().isEmpty()
+            ? settings.customWinePath : game.runnerPath;
+        const QString wine = resolveWineCommand(configuredWine, &runnerError);
+        if (wine.isEmpty()) {
+            if (error)
+                *error = runnerError.isEmpty() ? Vanta::tr("Wine was not found.") : runnerError;
+            return {};
+        }
+        command << wine;
+        if (msi) {
+            // The same full path as the Proton branch: Wine resolves it inside
+            // the prefix, and it keeps one documented form for both runners.
+            command << QStringLiteral("C:\\windows\\system32\\msiexec.exe") << QStringLiteral("/package")
+                    << windowsPath;
+        } else {
+            command << installerInfo.absoluteFilePath();
+        }
+        command << arguments;
+        setEnvironment(QStringLiteral("WINEPREFIX"), plan.winePrefix);
+        setEnvironment(QStringLiteral("WINEDEBUG"), wineDebugValue(settings.wineLogLevel));
+    }
+
+    plan.program = command.first();
+    command.removeFirst();
+    plan.arguments = command;
+    plan.diagnostics.append(QStringLiteral("Runner: %1").arg(runnerName(game.runner)));
+    plan.diagnostics.append(QStringLiteral("Prefix base: %1").arg(plan.prefixBase));
+    return plan;
+}
+
 QString LaunchPlan::summary() const
 {
     QStringList lines;

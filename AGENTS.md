@@ -117,6 +117,7 @@ src/
     RunnerInstaller.*   Installs and uninstalls Wine/GE-Proton
     LibraryImporter.*   Read-only Lutris/Heroic discovery and porting
     OnlineFix.*         Signature detection and confirmed INI writes
+    Prerequisites.*     Missing Windows runtimes and the installers a game ships
     SteamPrecondition.* Steam-closed prompts before an OnlineFix launch
     BepInEx.*           Installation detection, plugin listing, safe toggle
     ModInstaller.*      ZIP reading, install planning, backups, atomic writes
@@ -215,6 +216,37 @@ Two rules keep the viewer honest:
 default `Errors only` is `-all,err+all`: Wine's `err` channel stays visible while
 `fixme` chatter — hundreds of lines per launch — is suppressed. Do not restore
 the old unconditional `WINEDEBUG=-all`, because it leaves the viewer empty.
+
+### Missing runtimes
+
+A game folder copied into the library never had Steam run the game's
+`installscript.vdf`, so a Wine prefix created for it can lack a runtime the game
+links against — XNA for Terraria, for example — and the game stops with an
+assembly that cannot be loaded. `Prerequisites` reads the failed launch's output
+for the signature of a missing runtime, and when the game's own folder ships
+installers for a runtime (`xnafx*_redist.msi`, `dotNetFx*.exe`, `ndp*.exe`)
+Vanta offers to run them in the game's prefix.
+
+Rules that keep this honest:
+
+- Detection is a signature match, not a diagnosis. The offer names the runtime
+  the output points at and lists what the folder ships; it never states that a
+  runtime is definitely missing, and it never claims the game will work
+  afterwards.
+- Only installers the game itself ships are run. Vanta never downloads a
+  prerequisite.
+- The runtime the output points at is offered first and marked as such. The
+  folder's other bundled installers follow, because a copied game can be missing
+  more than the failure named, and the user asks for them explicitly.
+- At most one installer runs per runtime. A game that ships both a plain and a
+  combined .NET package gets the combined one, so the same runtime is not
+  installed twice.
+- The installer runs in the game's own prefix through the same runner the game
+  uses, so it lands where the game looks for it.
+- An MSI goes through `msiexec.exe`, addressed as
+  `C:\windows\system32\msiexec.exe` with the package on the `Z:` drive. A bare
+  `msiexec` is not resolved by the runner and exits 0 without installing
+  anything.
 
 ### Update notifications
 

@@ -7,6 +7,7 @@
 #include <QLayoutItem>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QTimer>
 
 GameGridView::GameGridView(ThemeManager *theme, QWidget *parent)
     : QScrollArea(parent)
@@ -44,6 +45,22 @@ void GameGridView::clearCards()
 
 void GameGridView::setGames(const QList<Game> &games)
 {
+    // A refresh that leaves the library order unchanged — editing a game, a
+    // scan updating its metadata, toggling a favourite — must not throw the
+    // user back to the top. A genuinely different list (a filter, a search, an
+    // add or a remove) still starts at the top.
+    QStringList order;
+    order.reserve(games.size());
+    for (const Game &game : games)
+        order.append(game.id);
+    const bool sameOrder = order == m_order;
+    // A queued restore may not have run yet: a filter change and the
+    // settingsChanged it triggers both call back here in the same turn of the
+    // event loop. Its offset is the baseline then, because the scrollbar still
+    // holds the value that restore is about to replace.
+    const int baseline = m_pendingScroll >= 0 ? m_pendingScroll : verticalScrollBar()->value();
+    m_order = order;
+
     clearCards();
     for (const Game &game : games) {
         auto *card = new GameCard(m_theme, m_content);
@@ -69,7 +86,22 @@ void GameGridView::setGames(const QList<Game> &games)
     }
     m_columns = 0;
     relayout();
-    verticalScrollBar()->setValue(0);
+    // relayout() posts a layout request, so the scroll range is only final on
+    // the next turn of the event loop; restoring the offset immediately could
+    // clamp against a stale maximum. At most one restore is queued, and it
+    // reads the stored target when it runs so a later refresh can still correct
+    // it.
+    m_pendingScroll = sameOrder ? baseline : 0;
+    if (!m_restoreScheduled) {
+        m_restoreScheduled = true;
+        QTimer::singleShot(0, this, [this] {
+            m_restoreScheduled = false;
+            const int target = m_pendingScroll;
+            m_pendingScroll = -1;
+            if (target >= 0)
+                verticalScrollBar()->setValue(target);
+        });
+    }
 }
 
 void GameGridView::setSelectedGame(const QString &gameId)

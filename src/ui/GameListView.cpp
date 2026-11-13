@@ -7,7 +7,9 @@
 #include <QHeaderView>
 #include <QPainter>
 #include <QPixmap>
+#include <QScrollBar>
 #include <QTableWidgetItem>
+#include <QTimer>
 
 GameListView::GameListView(ThemeManager *theme, QWidget *parent)
     : QTableWidget(parent)
@@ -94,6 +96,20 @@ QString GameListView::compatibilityText(const Game &game) const
 
 void GameListView::setGames(const QList<Game> &games)
 {
+    // See GameGridView::setGames: a refresh that keeps the same games in the
+    // same order must not reset the scroll position. Rebuilding the table
+    // collapses its row count, which snaps the view back to the top, so the
+    // offset is reapplied once the new rows have been laid out.
+    QStringList order;
+    order.reserve(games.size());
+    for (const Game &game : games)
+        order.append(game.id);
+    const bool sameOrder = order == m_order;
+    // See GameGridView::setGames: a queued restore is the baseline while it is
+    // still pending, because the scrollbar has not been moved to it yet.
+    const int baseline = m_pendingScroll >= 0 ? m_pendingScroll : verticalScrollBar()->value();
+    m_order = order;
+
     const QString selected = selectedGameId();
     m_populating = true;
     m_games = games;
@@ -153,6 +169,19 @@ void GameListView::setGames(const QList<Game> &games)
         }
     }
     m_populating = false;
+    // At most one restore is queued, and it reads the stored target when it
+    // runs, so a refresh that arrives before it fires can still correct it.
+    m_pendingScroll = sameOrder ? baseline : 0;
+    if (!m_restoreScheduled) {
+        m_restoreScheduled = true;
+        QTimer::singleShot(0, this, [this] {
+            m_restoreScheduled = false;
+            const int target = m_pendingScroll;
+            m_pendingScroll = -1;
+            if (target >= 0)
+                verticalScrollBar()->setValue(target);
+        });
+    }
 }
 
 void GameListView::setRunningGames(const QStringList &gameIds)

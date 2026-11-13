@@ -49,6 +49,14 @@ private:
     QList<GameCard *> m_orderedCards;
     QString m_selectedId;
     QStringList m_runningIds;
+    // The game ids of the last populated list, in display order, so an
+    // unchanged refresh can keep the scroll position instead of resetting it.
+    QStringList m_order;
+    // A restore that has been queued but has not run yet is the baseline for a
+    // refresh that arrives in the meantime, so two refreshes in one turn of the
+    // event loop still land on one offset. -1 means nothing is pending.
+    int m_pendingScroll = -1;
+    bool m_restoreScheduled = false;
     CoverSize m_coverSize = CoverSize::Medium;
     bool m_showBadges = true;
     bool m_animations = true;

@@ -49,6 +49,9 @@ private:
     QList<GameCard *> m_orderedCards;
     QString m_selectedId;
     QStringList m_runningIds;
+    // The game ids of the last populated list, in display order, so an
+    // unchanged refresh can keep the scroll position instead of resetting it.
+    QStringList m_order;
     CoverSize m_coverSize = CoverSize::Medium;
     bool m_showBadges = true;
     bool m_animations = true;

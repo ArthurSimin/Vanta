@@ -38,4 +38,7 @@ private:
     bool m_populating = false;
     QList<Game> m_games;
     QStringList m_runningIds;
+    // The game ids of the last populated list, in display order, so an
+    // unchanged refresh can keep the scroll position instead of resetting it.
+    QStringList m_order;
 };

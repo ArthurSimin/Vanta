@@ -121,49 +121,49 @@
         <translation>%1. Comprueba tu conexión a internet.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="564"/>
-        <location filename="../src/core/CoverFetcher.cpp" line="605"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="627"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="668"/>
         <source>No SteamGridDB API key is configured.</source>
         <translation>No hay ninguna clave de API de SteamGridDB configurada.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="639"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="702"/>
         <source>SteamGridDB could not be searched</source>
         <translation>No se pudo buscar en SteamGridDB</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="647"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="710"/>
         <source>SteamGridDB returned no results for “%1”.</source>
         <translation>SteamGridDB no devolvió resultados para “%1”.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="670"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="733"/>
         <source>No SteamGridDB match was close enough to “%1”.</source>
         <translation>Ningún resultado de SteamGridDB se aproximó lo suficiente a “%1”.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="707"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="770"/>
         <source>SteamGridDB has no grid list for the matched game</source>
         <translation>SteamGridDB no tiene una lista de grid para el juego encontrado</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="734"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="797"/>
         <source>SteamGridDB has no portrait grid for this game yet.</source>
         <translation>SteamGridDB aún no tiene un grid vertical para este juego.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="798"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="861"/>
         <source>The cover image could not be downloaded.</source>
         <translation>No se pudo descargar la imagen de portada.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="807"/>
-        <location filename="../src/core/CoverFetcher.cpp" line="812"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="870"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="875"/>
         <source>The cover image could not be saved to %1.</source>
         <translation>No se pudo guardar la imagen de portada en %1.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="817"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="880"/>
         <source>The downloaded cover image was empty.</source>
         <translation>La imagen de portada descargada estaba vacía.</translation>
     </message>

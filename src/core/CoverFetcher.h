@@ -35,7 +35,9 @@ struct CoverArt
 // downloads the one the user picks.
 //
 // Automatic fetching asks the Steam store for the app id first and takes the
-// game's own library_600x900 art. SteamGridDB is the fallback when Steam has no
+// game's own portrait library art. The store-browse API supplies the current
+// asset path, because newer releases no longer serve the legacy
+// library_600x900.jpg URL. SteamGridDB is the fallback when Steam has no
 // matching app or no library art for it.
 //
 // The artwork picker asks the same Steam store first and offers the game's
@@ -96,6 +98,7 @@ private:
 
     void searchByName(const QString &gameId, const QString &gameName);
     void searchSteam(const QString &gameId, const QString &gameName);
+    void resolveSteamArt(const QString &gameId, const QString &gameName, int appId);
     void advanceWithoutSteam(const QString &gameId, const QString &gameName);
     void fetchSteamArtCandidate(const QString &gameId, const QString &gameName, int appId,
                                 const QString &coverUrl);

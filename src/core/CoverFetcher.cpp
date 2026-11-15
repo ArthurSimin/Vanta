@@ -225,7 +225,35 @@ int bestSteamAppId(const QString &gameName, const QByteArray &payload)
     return appId;
 }
 
-QString steamLibraryArtUrl(int appId)
+// Resolves the portrait library art from Steam's store-browse response. The old
+// /steam/apps/<id>/library_600x900.jpg path is not served for newer releases:
+// their assets live under a content hash, and the response reports both the
+// hash and the file name, which differs between older and newer apps.
+QString steamLibraryArtUrl(const QByteArray &payload)
+{
+    const QJsonArray items = QJsonDocument::fromJson(payload).object()
+                                 .value(QStringLiteral("response")).toObject()
+                                 .value(QStringLiteral("store_items")).toArray();
+    if (items.isEmpty())
+        return QString();
+    const QJsonObject assets = items.first().toObject()
+                                   .value(QStringLiteral("assets")).toObject();
+    const QString format = assets.value(QStringLiteral("asset_url_format")).toString();
+    // Prefer the 2x portrait art (600x900); older apps may only declare the 1x
+    // name.
+    QString file = assets.value(QStringLiteral("library_capsule_2x")).toString();
+    if (file.isEmpty())
+        file = assets.value(QStringLiteral("library_capsule")).toString();
+    if (format.isEmpty() || file.isEmpty())
+        return QString();
+    QString path = format;
+    path.replace(QStringLiteral("${FILENAME}"), file);
+    return QStringLiteral("https://shared.akamai.steamstatic.com/store_item_assets/") + path;
+}
+
+// The guess kept for a store-browse failure. It still resolves for older
+// releases, which is why it stays as a fallback rather than the primary source.
+QString legacySteamLibraryArtUrl(int appId)
 {
     return QStringLiteral("https://steamcdn-a.akamaihd.net/steam/apps/%1/library_600x900.jpg")
         .arg(appId);
@@ -535,7 +563,42 @@ void CoverFetcher::searchSteam(const QString &gameId, const QString &gameName)
             return;
         }
 
-        const QString coverUrl = steamLibraryArtUrl(appId);
+        resolveSteamArt(gameId, gameName, appId);
+    });
+}
+
+// Asks the store-browse API for the app's current asset paths. The artwork URL
+// cannot be guessed any more: newer releases serve it from a hashed path, and
+// the legacy library_600x900.jpg path answers 404.
+void CoverFetcher::resolveSteamArt(const QString &gameId, const QString &gameName, int appId)
+{
+    QUrl url(QStringLiteral("https://api.steampowered.com/IStoreBrowseService/GetItems/v1/"));
+    const QString input = QStringLiteral(
+        "{\"ids\":[{\"appid\":%1}],\"context\":{\"language\":\"english\","
+        "\"country_code\":\"US\",\"steam_realm\":1},"
+        "\"data_request\":{\"include_assets\":true}}")
+        .arg(appId);
+    QUrlQuery query;
+    query.addQueryItem(QStringLiteral("input_json"), input);
+    url.setQuery(query);
+
+    m_reply = m_network->get(makePublicRequest(url));
+    connect(m_reply, &QNetworkReply::finished, this, [this, gameId, gameName, appId] {
+        QNetworkReply *reply = m_reply;
+        if (!reply)
+            return;
+        const QByteArray payload = reply->readAll();
+        const QNetworkReply::NetworkError error = reply->error();
+        cleanupReply();
+
+        QString coverUrl;
+        if (error == QNetworkReply::NoError)
+            coverUrl = steamLibraryArtUrl(payload);
+        // The legacy path still resolves for older releases, so it covers a
+        // store-browse failure without blocking the SteamGridDB fallback.
+        if (coverUrl.isEmpty())
+            coverUrl = legacySteamLibraryArtUrl(appId);
+
         if (m_mode == Mode::ListArtworks) {
             // Confirm the art exists before offering it in the picker, then
             // list the SteamGridDB options beside it.

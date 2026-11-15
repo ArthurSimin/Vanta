@@ -2,6 +2,7 @@
 #include "I18n.h"
 #include "IconFactory.h"
 #include "LaunchPlan.h"
+#include "OnlineFixSpinner.h"
 #include "ThemeManager.h"
 
 #include <QAbstractItemView>
@@ -297,7 +298,15 @@ void GameDetailsDialog::buildUi()
         auto *fixLayout = new QVBoxLayout(fixPanel);
         fixLayout->setContentsMargins(16, 14, 16, 14);
         fixLayout->setSpacing(7);
-        fixLayout->addWidget(UiHelp::sectionLabel(Vanta::tr("OnlineFix files"), fixPanel));
+        auto *fixHeader = new QHBoxLayout;
+        fixHeader->setContentsMargins(0, 0, 0, 0);
+        fixHeader->setSpacing(8);
+        m_fixSpinner = new OnlineFixSpinner(fixPanel);
+        m_fixSpinner->setFixedSize(22, 22);
+        fixHeader->addWidget(m_fixSpinner, 0, Qt::AlignVCenter);
+        fixHeader->addWidget(UiHelp::sectionLabel(Vanta::tr("OnlineFix files"), fixPanel), 1,
+                             Qt::AlignVCenter);
+        fixLayout->addLayout(fixHeader);
         const FixKind kind = m_hasScan ? m_scan.onlineFix.kind : m_game.fixKind;
         fixLayout->addWidget(UiHelp::helpLabel(
             Vanta::tr("Detected: %1. Detection never means the fix is functional. Vanta only writes OnlineFix "
@@ -401,7 +410,12 @@ void GameDetailsDialog::refreshIcons()
     Icons::setButtonIcon(m_playButton, Glyph::Play, QColor(Qt::white), 17);
     Icons::setButtonIcon(m_stopButton, Glyph::Stop, colors.danger, 17);
     Icons::setButtonIcon(m_editButton, Glyph::Pencil, colors.text, 16);
-    Icons::setButtonIcon(m_onlineFixButton, Glyph::Shield, colors.text, 16);
+    m_onlineFixButton->setIcon(Icons::onlineFixIcon(colors.text, 16));
+    m_onlineFixButton->setIconSize(QSize(16, 16));
+    if (m_fixSpinner) {
+        m_fixSpinner->setColor(colors.text);
+        m_fixSpinner->setAnimated(m_theme->animationsEnabled());
+    }
     Icons::setButtonIcon(m_modsButton, Glyph::Download, colors.text, 16);
     Icons::setButtonIcon(m_logsButton, Glyph::Terminal, colors.text, 16);
     Icons::setButtonIcon(m_scanButton, Glyph::Scan, colors.text, 16);

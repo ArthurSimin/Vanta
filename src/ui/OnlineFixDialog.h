@@ -7,6 +7,7 @@
 class QComboBox;
 class QLineEdit;
 class QPushButton;
+class OnlineFixSpinner;
 class ThemeManager;
 
 class OnlineFixDialog : public VantaDialog
@@ -41,6 +42,7 @@ private:
     ThemeManager *m_theme = nullptr;
 
     QComboBox *m_modeCombo = nullptr;
+    OnlineFixSpinner *m_spinner = nullptr;
     QLineEdit *m_realAppIdEdit = nullptr;
     QLineEdit *m_fakeAppIdEdit = nullptr;
     QPushButton *m_openFolderButton = nullptr;

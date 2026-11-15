@@ -5,6 +5,7 @@
 #include "Scanner.h"
 
 class QPushButton;
+class OnlineFixSpinner;
 class ThemeManager;
 
 class GameDetailsDialog : public VantaDialog
@@ -54,6 +55,7 @@ private:
     QPushButton *m_stopButton = nullptr;
     QPushButton *m_editButton = nullptr;
     QPushButton *m_onlineFixButton = nullptr;
+    OnlineFixSpinner *m_fixSpinner = nullptr;
     QPushButton *m_modsButton = nullptr;
     QPushButton *m_logsButton = nullptr;
     QPushButton *m_scanButton = nullptr;

@@ -142,6 +142,8 @@ set(VANTA_SOURCES
     src/ui/MainWindow.h
     src/ui/OnlineFixDialog.cpp
     src/ui/OnlineFixDialog.h
+    src/ui/OnlineFixSpinner.cpp
+    src/ui/OnlineFixSpinner.h
     src/ui/RunnerInstallDialog.cpp
     src/ui/RunnerInstallDialog.h
     src/ui/SettingsDialog.cpp

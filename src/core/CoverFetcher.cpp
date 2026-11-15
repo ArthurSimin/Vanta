@@ -107,6 +107,59 @@ QStringList numberWords(const QStringList &words)
     return numbers;
 }
 
+// Words that describe a re-release of the same game rather than a different
+// title. Anything else the query does not carry is a distinguishing word.
+bool isReleaseQualifier(const QString &word)
+{
+    static const QStringList qualifiers = {
+        QStringLiteral("game"), QStringLiteral("edition"), QStringLiteral("goty"),
+        QStringLiteral("definitive"), QStringLiteral("remastered"), QStringLiteral("complete"),
+        QStringLiteral("deluxe"), QStringLiteral("ultimate"), QStringLiteral("enhanced"),
+        QStringLiteral("special"), QStringLiteral("anniversary"), QStringLiteral("year"),
+        QStringLiteral("classic"), QStringLiteral("hd")};
+    return qualifiers.contains(word);
+}
+
+// Decides whether a Steam search result names the same release as the library
+// entry. Similarity ranks options well, but it is too permissive to decide
+// this on its own: "Dawn of War II" keeps every word of "Dawn of War", and
+// "Neon Geometry Dash" keeps every word of "Geometry Dash", while both still
+// score highly. Automatic fetching therefore requires the two titles to name
+// the same words, allowing only re-release qualifiers on the candidate side.
+bool sameSteamRelease(const QString &query, const QString &candidate)
+{
+    const QStringList queryWords = wordsOf(normalise(query));
+    const QStringList candidateWords = wordsOf(normalise(candidate));
+    if (queryWords.isEmpty() || candidateWords.isEmpty())
+        return false;
+
+    // Every word the candidate adds must describe a re-release. This is what
+    // keeps a sequel or a spin-off from taking the original's place.
+    for (const QString &word : candidateWords) {
+        if (isReleaseQualifier(word))
+            continue;
+        qreal best = 0.0;
+        for (const QString &queryWord : queryWords)
+            best = qMax(best, wordSimilarity(word, queryWord));
+        if (best < 0.82)
+            return false;
+    }
+
+    // The candidate must still carry every meaningful word of the query, so a
+    // shorter prequel never stands in for a numbered entry. One typo is
+    // tolerated, so a misspelt library name still matches its store entry.
+    for (const QString &word : queryWords) {
+        if (isReleaseQualifier(word))
+            continue;
+        qreal best = 0.0;
+        for (const QString &candidateWord : candidateWords)
+            best = qMax(best, wordSimilarity(word, candidateWord));
+        if (best < 0.82)
+            return false;
+    }
+    return true;
+}
+
 // Network errors stringify as the full request URL, which is useless in a dialog.
 // Report the meaningful cause instead.
 QString describeFailure(int status, const QString &fallback)
@@ -130,6 +183,14 @@ QString describeFailure(int status, const QString &fallback)
     if (status > 0)
         return Vanta::tr("%1 (HTTP %2).").arg(fallback).arg(status);
     return Vanta::tr("%1. Check your internet connection.").arg(fallback);
+}
+
+bool looksLikeImage(const QByteArray &payload)
+{
+    return payload.startsWith("\x89PNG\r\n\x1a\n")
+        || payload.startsWith("\xff\xd8\xff")
+        || payload.startsWith("GIF8")
+        || (payload.startsWith("RIFF") && payload.mid(8, 4) == QByteArray("WEBP"));
 }
 }
 
@@ -275,6 +336,16 @@ QNetworkRequest CoverFetcher::makeRequest(const QUrl &url) const
     return request;
 }
 
+QNetworkRequest CoverFetcher::makePublicRequest(const QUrl &url) const
+{
+    QNetworkRequest request(url);
+    request.setRawHeader("Accept", "application/json,image/*");
+    request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Vanta/1.0"));
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                         QNetworkRequest::NoLessSafeRedirectPolicy);
+    return request;
+}
+
 void CoverFetcher::cleanupReply()
 {
     if (!m_reply)
@@ -306,10 +377,6 @@ void CoverFetcher::fetchCover(const QString &gameId, const QString &gameName)
 {
     if (gameId.isEmpty() || gameName.trimmed().isEmpty())
         return;
-    if (!hasApiKey()) {
-        emit failed(gameId, Vanta::tr("No SteamGridDB API key is configured."));
-        return;
-    }
     if (m_reply) {
         for (const auto &item : m_fetchQueue) {
             if (item.first == gameId)
@@ -325,7 +392,9 @@ void CoverFetcher::fetchCover(const QString &gameId, const QString &gameName)
     m_pendingGameId = gameId;
     m_pendingGameName = gameName.trimmed();
     emit started(gameId);
-    searchByName(gameId, m_pendingGameName);
+    // Steam's own art needs no API key, so it is tried before the key check that
+    // only the SteamGridDB fallback depends on.
+    searchSteam(gameId, m_pendingGameName);
 }
 
 void CoverFetcher::listCoverArt(const QString &gameId, const QString &gameName)
@@ -397,6 +466,78 @@ void CoverFetcher::emitFinished(const QString &gameId, const QString &coverPath)
     if (m_mode == Mode::SaveFirst) {
         queueNextFetch();
     }
+}
+
+void CoverFetcher::searchSteam(const QString &gameId, const QString &gameName)
+{
+    QUrl url(QStringLiteral("https://store.steampowered.com/api/storesearch/"));
+    QUrlQuery query;
+    query.addQueryItem(QStringLiteral("term"), gameName);
+    query.addQueryItem(QStringLiteral("l"), QStringLiteral("english"));
+    query.addQueryItem(QStringLiteral("cc"), QStringLiteral("US"));
+    url.setQuery(query);
+
+    m_reply = m_network->get(makePublicRequest(url));
+    connect(m_reply, &QNetworkReply::finished, this, [this, gameId, gameName] {
+        QNetworkReply *reply = m_reply;
+        if (!reply)
+            return;
+        const QByteArray payload = reply->readAll();
+        const QNetworkReply::NetworkError error = reply->error();
+        cleanupReply();
+
+        // A failed search is not reported on its own: Steam is the preferred
+        // source, not a requirement, and SteamGridDB still gets a chance.
+        if (error == QNetworkReply::NoError) {
+            const QJsonArray items = QJsonDocument::fromJson(payload).object()
+                                         .value(QStringLiteral("items")).toArray();
+            int appId = 0;
+            int bestScore = 0;
+            for (const QJsonValue &value : items) {
+                const QJsonObject entry = value.toObject();
+                // The same endpoint lists packages and bundles; only an app has
+                // the library artwork this lookup is after.
+                if (entry.value(QStringLiteral("type")).toString() != QStringLiteral("app"))
+                    continue;
+                const int id = entry.value(QStringLiteral("id")).toInt();
+                const QString name = entry.value(QStringLiteral("name")).toString();
+                if (id <= 0 || name.isEmpty())
+                    continue;
+                // A sequel or a spin-off can outrank the original on
+                // similarity alone, so it is skipped rather than allowed to
+                // block a later valid result.
+                if (!sameSteamRelease(gameName, name))
+                    continue;
+                // Equal scores keep the earlier result, which is Steam's own
+                // relevance order.
+                const int score = similarity(gameName, name);
+                if (score > bestScore) {
+                    bestScore = score;
+                    appId = id;
+                }
+            }
+            // sameSteamRelease() already rejected every title that names a
+            // different game, so the best remaining candidate is the one to
+            // use. A miss defers to SteamGridDB.
+            if (appId > 0) {
+                const QString coverUrl =
+                    QStringLiteral("https://steamcdn-a.akamaihd.net/steam/apps/%1/library_600x900.jpg")
+                        .arg(appId);
+                downloadImage(gameId, coverUrl, true);
+                return;
+            }
+        }
+        searchGridsFallback(gameId, gameName);
+    });
+}
+
+void CoverFetcher::searchGridsFallback(const QString &gameId, const QString &gameName)
+{
+    if (!hasApiKey()) {
+        emitFailed(gameId, Vanta::tr("No SteamGridDB API key is configured."));
+        return;
+    }
+    searchByName(gameId, gameName);
 }
 
 void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
@@ -539,7 +680,7 @@ void CoverFetcher::downloadThumbnail(const QString &gridId, const QString &thumb
     });
 }
 
-void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl)
+void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl, bool fallBackToGrids)
 {
     QNetworkRequest request{QUrl(imageUrl)};
     request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Vanta/1.0"));
@@ -547,7 +688,7 @@ void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl)
                          QNetworkRequest::NoLessSafeRedirectPolicy);
 
     m_reply = m_network->get(request);
-    connect(m_reply, &QNetworkReply::finished, this, [this, gameId] {
+    connect(m_reply, &QNetworkReply::finished, this, [this, gameId, fallBackToGrids] {
         QNetworkReply *reply = m_reply;
         if (!reply)
             return;
@@ -555,7 +696,13 @@ void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl)
         const QNetworkReply::NetworkError error = reply->error();
         cleanupReply();
 
-        if (error != QNetworkReply::NoError || payload.isEmpty()) {
+        if (error != QNetworkReply::NoError || payload.isEmpty() || !looksLikeImage(payload)) {
+            if (fallBackToGrids) {
+                // Steam answers 404 when a game has no library art, so this is a
+                // normal miss rather than a failure to show the user.
+                searchGridsFallback(gameId, m_pendingGameName);
+                return;
+            }
             emitFailed(gameId, Vanta::tr("The cover image could not be downloaded."));
             return;
         }

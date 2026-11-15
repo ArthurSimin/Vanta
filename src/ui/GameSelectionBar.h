@@ -45,6 +45,7 @@ signals:
 
 private:
     void updateContent();
+    void updateFixChip();
     void updatePrimaryButton();
     void animateReveal(bool visible);
 

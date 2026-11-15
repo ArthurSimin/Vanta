@@ -56,6 +56,12 @@ QIcon themedIcon(Glyph glyph, const QColor &color, int size = 20);
 QIcon sourceIcon(const QString &source, const QColor &color, int size = 20);
 void setButtonIcon(QAbstractButton *button, Glyph glyph, const QColor &color, int size = 18);
 QPixmap logoPixmap(int height, qreal devicePixelRatio = 0.0);
+QPixmap onlineFixPixmap(int size, const QColor &color, qreal devicePixelRatio = 0.0);
+// The logo's two layers, so a caller can rotate the gear while the globe and
+// wrench stay still. Both are tinted to `color` like the rest of the glyphs.
+QPixmap onlineFixGearPixmap(int size, const QColor &color, qreal devicePixelRatio = 0.0);
+QPixmap onlineFixTopPixmap(int size, const QColor &color, qreal devicePixelRatio = 0.0);
+QIcon onlineFixIcon(const QColor &color, int size = 20);
 QPixmap coverPixmap(const QString &path, const QSize &pixelSize);
 QPixmap roundedCover(const QString &path, const QSize &size, const QString &initials,
                      const QColor &accentSoft, const QColor &accent, qreal radius = 8.0);

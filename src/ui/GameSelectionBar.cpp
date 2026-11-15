@@ -87,16 +87,15 @@ GameSelectionBar::GameSelectionBar(ThemeManager *theme, QWidget *parent)
     m_fixToggle->setCheckable(true);
     m_fixToggle->setChecked(true);
     m_fixToggle->setCursor(Qt::PointingHandCursor);
-    m_fixToggle->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    m_fixToggle->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_fixToggle->setFixedHeight(22);
     QFont chipFont = m_fixToggle->font();
     chipFont.setPixelSize(10);
     chipFont.setBold(true);
     m_fixToggle->setFont(chipFont);
     m_fixToggle->setVisible(false);
-    connect(m_fixToggle, &QToolButton::toggled, this, [this](bool on) {
-        m_fixToggle->setText(on ? QStringLiteral("OnlineFix") : Vanta::tr("OnlineFix off"));
-    });
+    connect(m_fixToggle, &QToolButton::toggled, this, [this] { updateFixChip(); });
+    updateFixChip();
     titleRow->addWidget(m_fixToggle, 0, Qt::AlignVCenter);
     titleRow->addStretch(1);
     texts->addLayout(titleRow);
@@ -259,8 +258,7 @@ void GameSelectionBar::updateContent()
     m_name->setText(m_game.name);
 
     m_fixToggle->setVisible(m_game.showsOnlineFix());
-    m_fixToggle->setText(m_fixToggle->isChecked() ? QStringLiteral("OnlineFix")
-                                                  : Vanta::tr("OnlineFix off"));
+    updateFixChip();
 
     QStringList parts;
     // While the game is open the stored last-played time is stale, and on a
@@ -291,6 +289,15 @@ void GameSelectionBar::updateContent()
     } else {
         m_cover->clear();
     }
+}
+
+void GameSelectionBar::updateFixChip()
+{
+    const bool on = m_fixToggle->isChecked();
+    m_fixToggle->setText(on ? QStringLiteral("OnlineFix") : Vanta::tr("OnlineFix off"));
+    const ThemeColors colors = m_theme ? m_theme->colors() : ThemeColors();
+    m_fixToggle->setIcon(Icons::onlineFixIcon(on ? colors.accent : colors.muted, 16));
+    m_fixToggle->setIconSize(QSize(16, 16));
 }
 
 void GameSelectionBar::updatePrimaryButton()

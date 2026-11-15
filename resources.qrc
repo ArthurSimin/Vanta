@@ -5,6 +5,7 @@
     <file alias="vanta-logo.svg">resources/icons/vanta-logo.svg</file>
     <file alias="check.svg">resources/icons/check.svg</file>
     <file alias="radio-dot.svg">resources/icons/radio-dot.svg</file>
+    <file alias="settings.svg">resources/icons/settings.svg</file>
   </qresource>
   <qresource prefix="/icons/brand">
     <file alias="steam.svg">resources/icons/brand/steam.svg</file>
@@ -13,6 +14,8 @@
     <file alias="ea.svg">resources/icons/brand/ea.svg</file>
     <file alias="ubisoft.svg">resources/icons/brand/ubisoft.svg</file>
     <file alias="proton.svg">resources/icons/brand/proton.svg</file>
+    <file alias="onlinefix-gear.svg">resources/icons/brand/onlinefix-gear.svg</file>
+    <file alias="onlinefix-top.svg">resources/icons/brand/onlinefix-top.svg</file>
   </qresource>
   <qresource prefix="/i18n">
     <file alias="vanta_es.qm">resources/i18n/vanta_es.qm</file>

@@ -15,6 +15,19 @@
 #include <QtMath>
 
 namespace {
+const char kOnlineFixGearResource[] = ":/icons/brand/onlinefix-gear.svg";
+const char kOnlineFixTopResource[] = ":/icons/brand/onlinefix-top.svg";
+
+qreal effectiveDpr(qreal dpr)
+{
+    if (dpr <= 0.0) {
+        dpr = qApp ? qApp->devicePixelRatio() : 1.0;
+        if (dpr <= 0.0)
+            dpr = 1.0;
+    }
+    return dpr;
+}
+
 void drawBase(QPainter &painter, const QRectF &rect, const QColor &color)
 {
     QPen pen(color, qMax(1.4, rect.width() * 0.085));
@@ -132,15 +145,18 @@ void drawGlyph(QPainter &painter, Glyph glyph, const QRectF &rect, const QColor 
         painter.drawEllipse(QPointF(x + w * 0.5, y + h * 0.71), w * 0.025, w * 0.025);
         break;
     }
-    case Glyph::Settings:
-        painter.drawEllipse(QRectF(x + w * 0.32, y + h * 0.32, w * 0.36, h * 0.36));
-        for (int index = 0; index < 8; ++index) {
-            const qreal angle = index * M_PI / 4.0;
-            const QPointF inner(x + w * 0.5 + qCos(angle) * w * 0.25, y + h * 0.5 + qSin(angle) * h * 0.25);
-            const QPointF outer(x + w * 0.5 + qCos(angle) * w * 0.42, y + h * 0.5 + qSin(angle) * h * 0.42);
-            painter.drawLine(inner, outer);
+    case Glyph::Settings: {
+        // The gear ships as a filled asset instead of stroked primitives so its
+        // exact shape matches the design file. SourceIn keeps the alpha and
+        // swaps the black fill for the caller's colour.
+        QSvgRenderer renderer(QStringLiteral(":/icons/settings.svg"));
+        if (renderer.isValid()) {
+            renderer.render(&painter, rect);
+            painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            painter.fillRect(rect, color);
         }
         break;
+    }
     case Glyph::Info:
         painter.drawEllipse(QRectF(x + w * 0.14, y + h * 0.14, w * 0.72, h * 0.72));
         painter.setBrush(color);
@@ -300,6 +316,50 @@ void drawGlyph(QPainter &painter, Glyph glyph, const QRectF &rect, const QColor 
     painter.restore();
 }
 
+QPixmap renderTintedSvg(const QString &resource, const QColor &color, int size, qreal dpr)
+{
+    if (resource.isEmpty() || size <= 0)
+        return {};
+    QSvgRenderer renderer(resource);
+    if (!renderer.isValid())
+        return {};
+
+    const int pixels = qMax(1, qRound(size * dpr));
+    QPixmap pixmap(pixels, pixels);
+    pixmap.fill(Qt::transparent);
+    pixmap.setDevicePixelRatio(dpr);
+    {
+        QPainter painter(&pixmap);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+        renderer.render(&painter, QRectF(0, 0, size, size));
+        // SourceIn keeps the asset's alpha and replaces every colour with `color`.
+        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        painter.fillRect(QRectF(0, 0, size, size), color);
+    }
+    return pixmap;
+}
+
+// Layer renders are cached by colour and size: the spinner asks for the same
+// two layers on every frame, and the icon builder asks for a dozen sizes.
+QPixmap onlineFixLayerPixmap(const QString &resource, const QColor &color, int size, qreal dpr)
+{
+    if (size <= 0)
+        return {};
+    const QString key = QStringLiteral("vanta-onlinefix-layer-%1-%2-%3-%4")
+                            .arg(resource)
+                            .arg(size)
+                            .arg(dpr)
+                            .arg(color.rgba());
+    QPixmap cached;
+    if (QPixmapCache::find(key, &cached))
+        return cached;
+    const QPixmap pixmap = renderTintedSvg(resource, color, size, dpr);
+    if (!pixmap.isNull())
+        QPixmapCache::insert(key, pixmap);
+    return pixmap;
+}
+
 QPixmap renderGlyph(Glyph glyph, const QColor &color, int size, qreal dpr)
 {
     const int pixels = qMax(1, qRound(size * dpr));
@@ -374,24 +434,7 @@ QPixmap renderBrand(const QString &source, const QColor &color, int size, qreal 
     const QString resource = brandResource(source);
     if (resource.isEmpty() || size <= 0)
         return {};
-    QSvgRenderer renderer(resource);
-    if (!renderer.isValid())
-        return {};
-
-    const int pixels = qMax(1, qRound(size * dpr));
-    QPixmap pixmap(pixels, pixels);
-    pixmap.fill(Qt::transparent);
-    pixmap.setDevicePixelRatio(dpr);
-    {
-        QPainter painter(&pixmap);
-        painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-        renderer.render(&painter, QRectF(0, 0, size, size));
-        // SourceIn keeps the logo's alpha and replaces every colour with `color`.
-        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        painter.fillRect(QRectF(0, 0, size, size), color);
-    }
-    return pixmap;
+    return renderTintedSvg(resource, color, size, dpr);
 }
 }
 
@@ -455,6 +498,63 @@ QPixmap Icons::logoPixmap(int height, qreal devicePixelRatio)
     renderer.render(&painter, QRectF(QPointF(0, 0), QSizeF(logical)));
     painter.end();
     return pixmap;
+}
+
+QPixmap Icons::onlineFixGearPixmap(int size, const QColor &color, qreal devicePixelRatio)
+{
+    return onlineFixLayerPixmap(QString::fromLatin1(kOnlineFixGearResource), color, size,
+                                effectiveDpr(devicePixelRatio));
+}
+
+QPixmap Icons::onlineFixTopPixmap(int size, const QColor &color, qreal devicePixelRatio)
+{
+    return onlineFixLayerPixmap(QString::fromLatin1(kOnlineFixTopResource), color, size,
+                                effectiveDpr(devicePixelRatio));
+}
+
+QPixmap Icons::onlineFixPixmap(int size, const QColor &color, qreal devicePixelRatio)
+{
+    if (size <= 0)
+        return {};
+    const qreal dpr = effectiveDpr(devicePixelRatio);
+    const QString key = QStringLiteral("vanta-onlinefix-logo-%1-%2-%3")
+                            .arg(size)
+                            .arg(dpr)
+                            .arg(color.rgba());
+    QPixmap cached;
+    if (QPixmapCache::find(key, &cached))
+        return cached;
+
+    const QPixmap gear = onlineFixGearPixmap(size, color, dpr);
+    const QPixmap top = onlineFixTopPixmap(size, color, dpr);
+    if (gear.isNull() || top.isNull())
+        return {};
+
+    const int pixels = qMax(1, qRound(size * dpr));
+    QPixmap pixmap(pixels, pixels);
+    pixmap.fill(Qt::transparent);
+    pixmap.setDevicePixelRatio(dpr);
+    {
+        QPainter painter(&pixmap);
+        painter.drawPixmap(0, 0, gear);
+        painter.drawPixmap(0, 0, top);
+    }
+    QPixmapCache::insert(key, pixmap);
+    return pixmap;
+}
+
+QIcon Icons::onlineFixIcon(const QColor &color, int size)
+{
+    Q_UNUSED(size);
+    QIcon result;
+    for (const int iconSize : {16, 18, 20, 24, 32, 48}) {
+        for (const qreal dpr : {1.0, 2.0}) {
+            const QPixmap pixmap = onlineFixPixmap(iconSize, color, dpr);
+            if (!pixmap.isNull())
+                result.addPixmap(pixmap);
+        }
+    }
+    return result;
 }
 
 QPixmap Icons::coverPixmap(const QString &path, const QSize &pixelSize)

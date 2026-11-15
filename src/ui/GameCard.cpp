@@ -355,9 +355,15 @@ void GameCard::paintEvent(QPaintEvent *event)
             leftX = missingRect.right() + 4;
         }
         if (m_game.showsOnlineFix()) {
-            const QString text = QStringLiteral("OnlineFix");
-            const QRect fixRect(leftX, bottomY, badgeMetrics.horizontalAdvance(text) + 14, 24);
-            drawBadge(painter, fixRect, text, colors.accent, Qt::white);
+            // Icon-only, sharing the scan shield's contrast so the mark stays
+            // readable over any cover art.
+            const QRect fixRect(leftX, bottomY, 24, 24);
+            painter.save();
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(QColor(9, 5, 16, 190));
+            painter.drawRoundedRect(fixRect, 7, 7);
+            Icons::onlineFixIcon(Qt::white, 18).paint(&painter, fixRect.adjusted(3, 3, -3, -3));
+            painter.restore();
         }
     }
 

@@ -1,6 +1,7 @@
 #include "OnlineFixDialog.h"
 #include "I18n.h"
 #include "IconFactory.h"
+#include "OnlineFixSpinner.h"
 #include "ThemeManager.h"
 
 #include <QAbstractItemView>
@@ -94,7 +95,14 @@ void OnlineFixDialog::buildManageUi()
     QFont noticeFont = noticeTitle->font();
     noticeFont.setWeight(QFont::DemiBold);
     noticeTitle->setFont(noticeFont);
-    noticeLayout->addWidget(noticeTitle);
+    auto *noticeHeader = new QHBoxLayout;
+    noticeHeader->setContentsMargins(0, 0, 0, 0);
+    noticeHeader->setSpacing(9);
+    m_spinner = new OnlineFixSpinner(noticePanel);
+    m_spinner->setFixedSize(26, 26);
+    noticeHeader->addWidget(m_spinner, 0, Qt::AlignVCenter);
+    noticeHeader->addWidget(noticeTitle, 1, Qt::AlignVCenter);
+    noticeLayout->addLayout(noticeHeader);
     noticeLayout->addWidget(UiHelp::helpLabel(
         Vanta::tr("Vanta ports the launcher-side behavior of the OnlineFix Linux project. It can detect "
                        "OnlineFix signature files, apply the configuration changes the fix expects (creating backups "
@@ -406,6 +414,10 @@ void OnlineFixDialog::refreshIcons()
     if (!m_theme)
         return;
     const ThemeColors &colors = m_theme->colors();
+    if (m_spinner) {
+        m_spinner->setColor(colors.text);
+        m_spinner->setAnimated(m_theme->animationsEnabled());
+    }
     if (m_openFolderButton)
         Icons::setButtonIcon(m_openFolderButton, Glyph::Folder, colors.text, 16);
     if (m_saveButton)

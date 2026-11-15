@@ -31,8 +31,13 @@ struct CoverArt
     int upvotes = 0;
 };
 
-// Resolves a game name to SteamGridDB, lists the available artwork and downloads
-// the one the user picks.
+// Resolves a game name to cover artwork, lists the available artwork and
+// downloads the one the user picks.
+//
+// Automatic fetching asks the Steam store for the app id first and takes the
+// game's own library_600x900 art. SteamGridDB is the fallback when Steam has no
+// matching app or no library art for it, and remains the source the artwork
+// picker uses for customisation.
 //
 // Name resolution is deliberately forgiving: an exact case-insensitive match wins
 // outright, otherwise the closest candidate is chosen by token-aligned similarity,
@@ -86,12 +91,15 @@ private:
     enum class Mode { SaveFirst, ListArtworks };
 
     void searchByName(const QString &gameId, const QString &gameName);
+    void searchSteam(const QString &gameId, const QString &gameName);
+    void searchGridsFallback(const QString &gameId, const QString &gameName);
     void requestGrids(const QString &gameId, const QString &steamGridId, const QString &matchedName);
-    void downloadImage(const QString &gameId, const QString &imageUrl);
+    void downloadImage(const QString &gameId, const QString &imageUrl, bool fallBackToGrids = false);
     void queueNextFetch();
     void emitFailed(const QString &gameId, const QString &message);
     void emitFinished(const QString &gameId, const QString &coverPath);
     QNetworkRequest makeRequest(const QUrl &url) const;
+    QNetworkRequest makePublicRequest(const QUrl &url) const;
     void cleanupReply();
     void cleanupThumbReplies();
     static QString sanitizeFileName(const QString &value);

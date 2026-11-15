@@ -124,7 +124,7 @@ src/
     Thunderstore.*      Community lookup, package listing, dependency resolution
     LaunchLogs.*        Per-launch log store under the XDG data directory
     IniFile.*           INI parsing that preserves formatting
-    CoverFetcher.*      SteamGridDB search, artwork listing, downloads
+    CoverFetcher.*      Steam and SteamGridDB search, artwork listing, downloads
     UpdateChecker.*     GitHub latest-release lookup, version comparison
     ThemeManager.*      ThemeColors, palettes and the QSS
     I18n.*              Translation context, language list, catalog loading

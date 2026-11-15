@@ -12,9 +12,10 @@ class QListWidget;
 class QPushButton;
 class ThemeManager;
 
-// Lets the user pick which SteamGridDB artwork to use instead of silently taking
-// the first result. Thumbnails stream in as they arrive so the dialog stays
-// responsive on a slow connection.
+// Lets the user pick which artwork to use instead of silently taking the first
+// result. The game's Steam library art leads the list when the store matches the
+// release, with the SteamGridDB grids beside it. Thumbnails stream in as they
+// arrive so the dialog stays responsive on a slow connection.
 class CoverPickerDialog : public VantaDialog
 {
     Q_OBJECT

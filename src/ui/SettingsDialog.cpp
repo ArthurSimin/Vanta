@@ -290,10 +290,12 @@ void SettingsDialog::buildUi()
     m_coverApiKeyEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
     coversForm->addRow(Vanta::tr("SteamGridDB API key"), m_coverApiKeyEdit);
     coversForm->addRow(UiHelp::helpLabel(
-        Vanta::tr("Covers come from SteamGridDB. Vanta ships with a working key, so the field can stay "
-                  "empty; paste your own key from steamgriddb.com/profile/preferences/api if you want the "
-                  "lookups to use your account instead. Names are matched fuzzily, so a typo like “Testris” "
-                  "still resolves to “Tetris”."),
+        Vanta::tr("Covers are taken from the game's own Steam library art when Vanta can match the "
+                  "release, and from SteamGridDB otherwise. Vanta ships with a working SteamGridDB key, "
+                  "so the field can stay empty; paste your own key from "
+                  "steamgriddb.com/profile/preferences/api if you want the lookups to use your account "
+                  "instead. Names are matched fuzzily, so a typo like “Testris” still resolves to "
+                  "“Tetris”."),
         covers));
 
     auto *coverDirectoryRow = new QHBoxLayout;

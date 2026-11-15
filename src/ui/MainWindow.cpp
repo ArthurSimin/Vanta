@@ -1111,7 +1111,7 @@ void MainWindow::chooseCoverArt(const QString &gameId)
     m_pendingPickGameId = gameId;
     m_pendingPickName = game.name;
     m_coverFetcher->setApiKey(m_library.settings().steamGridDbApiKey);
-    setStatusMessage(Vanta::tr("Searching SteamGridDB for “%1”…").arg(game.name));
+    setStatusMessage(Vanta::tr("Looking for cover art for “%1”…").arg(game.name));
     m_coverFetcher->listCoverArt(gameId, game.name);
 }
 

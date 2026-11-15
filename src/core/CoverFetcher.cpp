@@ -192,6 +192,44 @@ bool looksLikeImage(const QByteArray &payload)
         || payload.startsWith("GIF8")
         || (payload.startsWith("RIFF") && payload.mid(8, 4) == QByteArray("WEBP"));
 }
+
+// Steam's search endpoint lists apps, packages and bundles, and only an app has
+// the library artwork a cover lookup is after. Of the apps that name the same
+// release, the best-scoring one is returned, or 0 when none qualifies.
+int bestSteamAppId(const QString &gameName, const QByteArray &payload)
+{
+    const QJsonArray items = QJsonDocument::fromJson(payload).object()
+                                 .value(QStringLiteral("items")).toArray();
+    int appId = 0;
+    int bestScore = 0;
+    for (const QJsonValue &value : items) {
+        const QJsonObject entry = value.toObject();
+        if (entry.value(QStringLiteral("type")).toString() != QStringLiteral("app"))
+            continue;
+        const int id = entry.value(QStringLiteral("id")).toInt();
+        const QString name = entry.value(QStringLiteral("name")).toString();
+        if (id <= 0 || name.isEmpty())
+            continue;
+        // A sequel or a spin-off can outrank the original on similarity alone,
+        // so it is skipped rather than allowed to block a later valid result.
+        if (!sameSteamRelease(gameName, name))
+            continue;
+        // Equal scores keep the earlier result, which is Steam's own relevance
+        // order.
+        const int score = CoverFetcher::similarity(gameName, name);
+        if (score > bestScore) {
+            bestScore = score;
+            appId = id;
+        }
+    }
+    return appId;
+}
+
+QString steamLibraryArtUrl(int appId)
+{
+    return QStringLiteral("https://steamcdn-a.akamaihd.net/steam/apps/%1/library_600x900.jpg")
+        .arg(appId);
+}
 }
 
 CoverFetcher::CoverFetcher(QObject *parent)
@@ -371,6 +409,7 @@ void CoverFetcher::cancel()
     cleanupThumbReplies();
     m_pendingGameId.clear();
     m_pendingGameName.clear();
+    m_steamArt = CoverArt();
 }
 
 void CoverFetcher::fetchCover(const QString &gameId, const QString &gameName)
@@ -400,19 +439,18 @@ void CoverFetcher::fetchCover(const QString &gameId, const QString &gameName)
 void CoverFetcher::listCoverArt(const QString &gameId, const QString &gameName)
 {
     m_mode = Mode::ListArtworks;
+    m_steamArt = CoverArt();
     if (gameId.isEmpty() || gameName.trimmed().isEmpty())
         return;
     if (m_reply) {
         cleanupReply();
     }
-    if (!hasApiKey()) {
-        emit failed(gameId, Vanta::tr("No SteamGridDB API key is configured."));
-        return;
-    }
     m_pendingGameId = gameId;
     m_pendingGameName = gameName.trimmed();
     emit started(gameId);
-    searchByName(gameId, m_pendingGameName);
+    // Steam's library art needs no key, so the store is asked first and its
+    // cover, when there is one, is offered alongside the SteamGridDB grids.
+    searchSteam(gameId, m_pendingGameName);
 }
 
 void CoverFetcher::downloadCoverArt(const QString &gameId, const CoverArt &art)
@@ -488,47 +526,36 @@ void CoverFetcher::searchSteam(const QString &gameId, const QString &gameName)
 
         // A failed search is not reported on its own: Steam is the preferred
         // source, not a requirement, and SteamGridDB still gets a chance.
-        if (error == QNetworkReply::NoError) {
-            const QJsonArray items = QJsonDocument::fromJson(payload).object()
-                                         .value(QStringLiteral("items")).toArray();
-            int appId = 0;
-            int bestScore = 0;
-            for (const QJsonValue &value : items) {
-                const QJsonObject entry = value.toObject();
-                // The same endpoint lists packages and bundles; only an app has
-                // the library artwork this lookup is after.
-                if (entry.value(QStringLiteral("type")).toString() != QStringLiteral("app"))
-                    continue;
-                const int id = entry.value(QStringLiteral("id")).toInt();
-                const QString name = entry.value(QStringLiteral("name")).toString();
-                if (id <= 0 || name.isEmpty())
-                    continue;
-                // A sequel or a spin-off can outrank the original on
-                // similarity alone, so it is skipped rather than allowed to
-                // block a later valid result.
-                if (!sameSteamRelease(gameName, name))
-                    continue;
-                // Equal scores keep the earlier result, which is Steam's own
-                // relevance order.
-                const int score = similarity(gameName, name);
-                if (score > bestScore) {
-                    bestScore = score;
-                    appId = id;
-                }
-            }
-            // sameSteamRelease() already rejected every title that names a
-            // different game, so the best remaining candidate is the one to
-            // use. A miss defers to SteamGridDB.
-            if (appId > 0) {
-                const QString coverUrl =
-                    QStringLiteral("https://steamcdn-a.akamaihd.net/steam/apps/%1/library_600x900.jpg")
-                        .arg(appId);
-                downloadImage(gameId, coverUrl, true);
-                return;
-            }
+        int appId = 0;
+        if (error == QNetworkReply::NoError)
+            appId = bestSteamAppId(gameName, payload);
+
+        if (appId <= 0) {
+            advanceWithoutSteam(gameId, gameName);
+            return;
         }
-        searchGridsFallback(gameId, gameName);
+
+        const QString coverUrl = steamLibraryArtUrl(appId);
+        if (m_mode == Mode::ListArtworks) {
+            // Confirm the art exists before offering it in the picker, then
+            // list the SteamGridDB options beside it.
+            fetchSteamArtCandidate(gameId, gameName, appId, coverUrl);
+            return;
+        }
+        downloadImage(gameId, coverUrl, true);
     });
+}
+
+// Steam produced no usable cover. Automatic fetching still falls back to
+// SteamGridDB; the picker lists SteamGridDB grids and, when no key is usable,
+// keeps whatever a previous stage already holds rather than failing outright.
+void CoverFetcher::advanceWithoutSteam(const QString &gameId, const QString &gameName)
+{
+    if (m_mode == Mode::ListArtworks) {
+        continueListingGrids(gameId, gameName);
+        return;
+    }
+    searchGridsFallback(gameId, gameName);
 }
 
 void CoverFetcher::searchGridsFallback(const QString &gameId, const QString &gameName)
@@ -538,6 +565,57 @@ void CoverFetcher::searchGridsFallback(const QString &gameId, const QString &gam
         return;
     }
     searchByName(gameId, gameName);
+}
+
+// The picker's Steam option: verify the library art actually exists, because
+// Steam answers 404 for a release that has none, then move on to the grids.
+void CoverFetcher::fetchSteamArtCandidate(const QString &gameId, const QString &gameName,
+                                          int appId, const QString &coverUrl)
+{
+    m_reply = m_network->get(makePublicRequest(QUrl(coverUrl)));
+    connect(m_reply, &QNetworkReply::finished, this, [this, gameId, gameName, appId, coverUrl] {
+        QNetworkReply *reply = m_reply;
+        if (!reply)
+            return;
+        const QByteArray payload = reply->readAll();
+        const QNetworkReply::NetworkError error = reply->error();
+        cleanupReply();
+
+        // A missing image is a normal miss, not a failure: the picker simply
+        // opens without a Steam entry.
+        if (error == QNetworkReply::NoError && looksLikeImage(payload)) {
+            m_steamArt = CoverArt();
+            m_steamArt.gridId = QStringLiteral("steam-") + QString::number(appId);
+            m_steamArt.fullUrl = coverUrl;
+            m_steamArt.thumbUrl = coverUrl;
+            // The store is the source, not an artist; label it as such.
+            m_steamArt.author = QStringLiteral("Steam");
+        }
+        continueListingGrids(gameId, gameName);
+    });
+}
+
+void CoverFetcher::continueListingGrids(const QString &gameId, const QString &gameName)
+{
+    if (!hasApiKey()) {
+        // Without a key SteamGridDB cannot contribute, but a Steam cover may
+        // already be in hand and offering it beats failing the picker.
+        if (offerSteamArtOnly(gameId, gameName))
+            return;
+        emitFailed(gameId, Vanta::tr("No SteamGridDB API key is configured."));
+        return;
+    }
+    searchByName(gameId, gameName);
+}
+
+// True when the picker can still be opened with the Steam cover alone. Used on
+// every SteamGridDB failure path so a store match is never discarded.
+bool CoverFetcher::offerSteamArtOnly(const QString &gameId, const QString &matchedName)
+{
+    if (m_mode != Mode::ListArtworks || m_steamArt.fullUrl.isEmpty())
+        return false;
+    emit artworksListed(gameId, matchedName, {m_steamArt});
+    return true;
 }
 
 void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
@@ -555,6 +633,8 @@ void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
         cleanupReply();
 
         if (error != QNetworkReply::NoError) {
+            if (offerSteamArtOnly(gameId, gameName))
+                return;
             emitFailed(gameId, describeFailure(
                 status, Vanta::tr("SteamGridDB could not be searched")));
             return;
@@ -562,6 +642,8 @@ void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
 
         const QJsonObject root = QJsonDocument::fromJson(payload).object();
         if (!root.value(QStringLiteral("success")).toBool()) {
+            if (offerSteamArtOnly(gameId, gameName))
+                return;
             emitFailed(gameId, Vanta::tr("SteamGridDB returned no results for “%1”.").arg(gameName));
             return;
         }
@@ -583,6 +665,8 @@ void CoverFetcher::searchByName(const QString &gameId, const QString &gameName)
         }
 
         if (best.gameId.isEmpty() || best.score < 45) {
+            if (offerSteamArtOnly(gameId, gameName))
+                return;
             emitFailed(gameId, Vanta::tr("No SteamGridDB match was close enough to “%1”.").arg(gameName));
             return;
         }
@@ -617,6 +701,8 @@ void CoverFetcher::requestGrids(const QString &gameId, const QString &steamGridI
         cleanupReply();
 
         if (error != QNetworkReply::NoError) {
+            if (offerSteamArtOnly(gameId, matchedName))
+                return;
             emitFailed(gameId, describeFailure(
                 status, Vanta::tr("SteamGridDB has no grid list for the matched game")));
             return;
@@ -643,11 +729,17 @@ void CoverFetcher::requestGrids(const QString &gameId, const QString &steamGridI
         }
 
         if (artworks.isEmpty()) {
+            if (offerSteamArtOnly(gameId, matchedName))
+                return;
             emitFailed(gameId, Vanta::tr("SteamGridDB has no portrait grid for this game yet."));
             return;
         }
 
         if (mode == Mode::ListArtworks) {
+            // The Steam cover, when there is one, leads the choices so the
+            // picker opens on the same art automatic fetching would use.
+            if (!m_steamArt.fullUrl.isEmpty())
+                artworks.prepend(m_steamArt);
             emit artworksListed(gameId, matchedName, artworks);
             return;
         }

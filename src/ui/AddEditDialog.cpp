@@ -266,10 +266,10 @@ void AddEditDialog::buildGeneralTab()
     m_coverEdit = new QLineEdit(coverRow);
     m_coverEdit->setPlaceholderText(Vanta::tr("Optional PNG, JPEG, WebP or SVG cover"));
     coverLayout->addWidget(m_coverEdit, 1);
-    m_fetchCoverButton = new QPushButton(Vanta::tr("SteamGridDB…"), coverRow);
+    m_fetchCoverButton = new QPushButton(Vanta::tr("Find cover art…"), coverRow);
     m_fetchCoverButton->setCursor(Qt::PointingHandCursor);
     m_fetchCoverButton->setToolTip(
-        Vanta::tr("Search SteamGridDB and choose which artwork to use"));
+        Vanta::tr("Look for cover art on Steam and SteamGridDB, then choose which artwork to use"));
     m_fetchCoverButton->setAutoDefault(false);
     UiHelp::makeFlat(m_fetchCoverButton);
     m_fetchCoverButton->setMinimumWidth(122);
@@ -780,7 +780,7 @@ void AddEditDialog::fetchCover()
 
     if (m_coverStatus) {
         m_coverStatus->setProperty("class", QStringLiteral("fieldHelp"));
-        m_coverStatus->setText(Vanta::tr("Searching SteamGridDB for “%1”…").arg(name));
+        m_coverStatus->setText(Vanta::tr("Looking for cover art for “%1”…").arg(name));
         m_coverStatus->setVisible(true);
         m_coverStatus->style()->unpolish(m_coverStatus);
         m_coverStatus->style()->polish(m_coverStatus);

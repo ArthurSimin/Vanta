@@ -91,79 +91,79 @@
         <translation>Não foi possível renomear %1 para %2: %3</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="117"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="170"/>
         <source>SteamGridDB rejected the API key.</source>
         <translation>O SteamGridDB rejeitou a chave da API.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="119"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="172"/>
         <source>SteamGridDB has no entry for this game.</source>
         <translation>O SteamGridDB não tem nenhuma entrada para este jogo.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="121"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="174"/>
         <source>SteamGridDB is rate limiting this API key. Try again in a minute.</source>
         <translation>O SteamGridDB está a limitar esta chave de API. Tente novamente dentro de um minuto.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="126"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="179"/>
         <source>SteamGridDB is having server trouble. Try again later.</source>
         <translation>O SteamGridDB está com problemas no servidor. Tente novamente mais tarde.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="131"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="184"/>
         <source>%1 (HTTP %2).</source>
         <translation>%1 (HTTP %2).</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="132"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="185"/>
         <source>%1. Check your internet connection.</source>
         <translation>%1. Verifique a sua ligação à Internet.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="310"/>
-        <location filename="../src/core/CoverFetcher.cpp" line="340"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="564"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="605"/>
         <source>No SteamGridDB API key is configured.</source>
         <translation>Não está configurada nenhuma chave de API do SteamGridDB.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="418"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="639"/>
         <source>SteamGridDB could not be searched</source>
         <translation>Não foi possível pesquisar no SteamGridDB</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="424"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="647"/>
         <source>SteamGridDB returned no results for “%1”.</source>
         <translation>O SteamGridDB não devolveu resultados para “%1”.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="445"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="670"/>
         <source>No SteamGridDB match was close enough to “%1”.</source>
         <translation>Nenhuma correspondência do SteamGridDB foi suficientemente próxima de “%1”.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="480"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="707"/>
         <source>SteamGridDB has no grid list for the matched game</source>
         <translation>O SteamGridDB não tem lista de grelhas para o jogo correspondente</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="505"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="734"/>
         <source>SteamGridDB has no portrait grid for this game yet.</source>
         <translation>O SteamGridDB ainda não tem uma grelha em formato retrato para este jogo.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="559"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="798"/>
         <source>The cover image could not be downloaded.</source>
         <translation>Não foi possível transferir a imagem de capa.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="568"/>
-        <location filename="../src/core/CoverFetcher.cpp" line="573"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="807"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="812"/>
         <source>The cover image could not be saved to %1.</source>
         <translation>Não foi possível guardar a imagem de capa em %1.</translation>
     </message>
     <message>
-        <location filename="../src/core/CoverFetcher.cpp" line="578"/>
+        <location filename="../src/core/CoverFetcher.cpp" line="817"/>
         <source>The downloaded cover image was empty.</source>
         <translation>A imagem de capa transferida estava vazia.</translation>
     </message>
@@ -1302,7 +1302,7 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     </message>
     <message>
         <location filename="../src/core/Scanner.cpp" line="768"/>
-        <location filename="../src/ui/GameListView.cpp" line="90"/>
+        <location filename="../src/ui/GameListView.cpp" line="92"/>
         <source>OnlineFix detected</source>
         <translation>OnlineFix detetado</translation>
     </message>
@@ -1547,7 +1547,7 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     </message>
     <message>
         <location filename="../src/core/Types.cpp" line="206"/>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="199"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="207"/>
         <source>Photon launcher</source>
         <translation>Iniciador Photon</translation>
     </message>
@@ -1570,13 +1570,13 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     </message>
     <message>
         <location filename="../src/core/Types.cpp" line="221"/>
-        <location filename="../src/ui/GameListView.cpp" line="60"/>
+        <location filename="../src/ui/GameListView.cpp" line="62"/>
         <source>Last played</source>
         <translation>Jogado pela última vez</translation>
     </message>
     <message>
         <location filename="../src/core/Types.cpp" line="222"/>
-        <location filename="../src/ui/GameListView.cpp" line="60"/>
+        <location filename="../src/ui/GameListView.cpp" line="62"/>
         <source>Playtime</source>
         <translation>Tempo de jogo</translation>
     </message>
@@ -1727,7 +1727,7 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     <message>
         <location filename="../src/ui/AboutDialog.cpp" line="127"/>
         <location filename="../src/ui/Common.cpp" line="196"/>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="356"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="365"/>
         <location filename="../src/ui/LaunchProgressDialog.cpp" line="90"/>
         <location filename="../src/ui/LogsDialog.cpp" line="111"/>
         <location filename="../src/ui/ModManagerDialog.cpp" line="218"/>
@@ -1754,10 +1754,10 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
         <location filename="../src/ui/CoverPickerDialog.cpp" line="126"/>
         <location filename="../src/ui/LaunchProgressDialog.cpp" line="79"/>
         <location filename="../src/ui/LibraryImportDialog.cpp" line="80"/>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="254"/>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="321"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="262"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="329"/>
         <location filename="../src/ui/RunnerInstallDialog.cpp" line="347"/>
-        <location filename="../src/ui/SettingsDialog.cpp" line="351"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="353"/>
         <location filename="../src/ui/SteamPromptDialog.cpp" line="79"/>
         <location filename="../src/ui/ThunderstoreDialog.cpp" line="315"/>
         <source>Cancel</source>
@@ -1802,7 +1802,7 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     </message>
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="242"/>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="203"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="204"/>
         <source>Executable</source>
         <translation>Executável</translation>
     </message>
@@ -1833,7 +1833,7 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     </message>
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="253"/>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="205"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="206"/>
         <source>Working folder</source>
         <translation>Pasta de trabalho</translation>
     </message>
@@ -1849,13 +1849,13 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     </message>
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="269"/>
-        <source>SteamGridDB…</source>
-        <translation>SteamGridDB...</translation>
+        <source>Find cover art…</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="272"/>
-        <source>Search SteamGridDB and choose which artwork to use</source>
-        <translation>Pesquisar no SteamGridDB e escolher a arte a utilizar</translation>
+        <source>Look for cover art on Steam and SteamGridDB, then choose which artwork to use</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="283"/>
@@ -1880,14 +1880,14 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="311"/>
         <location filename="../src/ui/AddEditDialog.cpp" line="377"/>
-        <location filename="../src/ui/GameListView.cpp" line="59"/>
+        <location filename="../src/ui/GameListView.cpp" line="61"/>
         <location filename="../src/ui/LibraryImportDialog.cpp" line="50"/>
         <source>Runner</source>
         <translation>Runner</translation>
     </message>
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="316"/>
-        <location filename="../src/ui/GameListView.cpp" line="59"/>
+        <location filename="../src/ui/GameListView.cpp" line="61"/>
         <source>Platform</source>
         <translation>Plataforma</translation>
     </message>
@@ -1903,7 +1903,7 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     </message>
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="337"/>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="207"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="208"/>
         <source>Runner path</source>
         <translation>Caminho do runner</translation>
     </message>
@@ -2015,7 +2015,7 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     </message>
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="425"/>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="196"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="204"/>
         <source>Fix folder</source>
         <translation>Pasta do fix</translation>
     </message>
@@ -2228,8 +2228,8 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="783"/>
         <location filename="../src/ui/MainWindow.cpp" line="1114"/>
-        <source>Searching SteamGridDB for “%1”…</source>
-        <translation>A procurar “%1” no SteamGridDB...</translation>
+        <source>Looking for cover art for “%1”…</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/AddEditDialog.cpp" line="800"/>
@@ -2394,275 +2394,275 @@ Em alternativa, instale a versão portátil do Wine nesta caixa de diálogo.</tr
         <translation>Em falta</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameCard.cpp" line="383"/>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="129"/>
+        <location filename="../src/ui/GameCard.cpp" line="389"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="130"/>
         <source>Running</source>
         <translation>Em execução</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="47"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="48"/>
         <source>Game details</source>
         <translation>Detalhes do jogo</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="115"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="116"/>
         <source>Untitled game</source>
         <translation>Jogo sem título</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="127"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="128"/>
         <source>Favorite</source>
         <translation>Favorito</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="133"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="134"/>
         <source>Playtime: %1    ·    Last played: %2    ·    Added: %3</source>
         <translation>Tempo de jogo: %1    ·    Última vez jogado: %2    ·    Adicionado: %3</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="144"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="145"/>
         <location filename="../src/ui/MainWindow.cpp" line="1478"/>
         <source>Play</source>
         <translation>Jogar</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="154"/>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="315"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="155"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="322"/>
         <location filename="../src/ui/MainWindow.cpp" line="1478"/>
         <source>Stop</source>
         <translation>Parar</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="161"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="162"/>
         <source>Edit</source>
         <translation>Editar</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="167"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="168"/>
         <location filename="../src/ui/MainWindow.cpp" line="1495"/>
         <source>OnlineFix…</source>
         <translation>OnlineFix...</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="173"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="174"/>
         <location filename="../src/ui/MainWindow.cpp" line="1498"/>
         <source>Mods…</source>
         <translation>Mods...</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="180"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="181"/>
         <source>Scan</source>
         <translation>Analisar</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="198"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="199"/>
         <location filename="../src/ui/MainWindow.cpp" line="777"/>
         <source>Installation</source>
         <translation>Instalação</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="204"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="205"/>
         <source>Game folder</source>
         <translation>Pasta do jogo</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="208"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="209"/>
         <source>Prefix</source>
         <translation>Prefixo</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="211"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="212"/>
         <source>Arguments</source>
         <translation>Argumentos</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="221"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="222"/>
         <source>Compatibility scan</source>
         <translation>Análise de compatibilidade</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="236"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="237"/>
         <source>Selected executable: %1 (%2)</source>
         <translation>Executável selecionado: %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="238"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="239"/>
         <source>unknown architecture</source>
         <translation>arquitetura desconhecida</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="246"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="247"/>
         <source>Component</source>
         <translation>Componente</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="246"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="247"/>
         <source>Category</source>
         <translation>Categoria</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="247"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="248"/>
         <source>Architecture</source>
         <translation>Arquitetura</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="270"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="271"/>
         <source>Showing %1 of %2 detected components.</source>
         <translation>A mostrar %1 de %2 componentes detetados.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="275"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="276"/>
         <source>Warnings: %1</source>
         <translation>Avisos: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="279"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="280"/>
         <source>Missing paths: %1</source>
         <translation>Caminhos em falta: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="284"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="285"/>
         <source>Last scanned: %1</source>
         <translation>Última análise: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="288"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="289"/>
         <source>Detection is informational only. Vanta does not execute detected components by itself and cannot confirm that a game or a fix will work.</source>
         <translation>A deteção é meramente informativa. O Vanta não executa os componentes detetados por si próprio e não pode confirmar que um jogo ou uma correção irá funcionar.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="300"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="307"/>
         <source>OnlineFix files</source>
         <translation>Ficheiros OnlineFix</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="303"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="312"/>
         <source>Detected: %1. Detection never means the fix is functional. Vanta only writes OnlineFix configuration files after creating backups, and applies DLL overrides to the launch environment without storing them.</source>
         <translation>Detetado: %1. A deteção nunca significa que a correção seja funcional. A Vanta só escreve ficheiros de configuração do OnlineFix depois de criar cópias de segurança, e aplica substituições de DLL ao ambiente de início sem as guardar.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="310"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="319"/>
         <source>%1 signature file(s) detected.</source>
         <translation>%1 ficheiro(s) de assinatura detetado(s).</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="316"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="325"/>
         <source>OnlineFix is disabled for this game, so a launch does not apply this configuration.</source>
         <translation>O OnlineFix está desativado para este jogo, por isso um início não aplica esta configuração.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="320"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="329"/>
         <source>Use the OnlineFix dialog to review detection, available launch overrides, and per-game policy.</source>
         <translation>Use a caixa de diálogo do OnlineFix para rever a deteção, as substituições de lançamento disponíveis e a política por jogo.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="338"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="347"/>
         <location filename="../src/ui/MainWindow.cpp" line="730"/>
         <location filename="../src/ui/MainWindow.cpp" line="1501"/>
         <source>Logs…</source>
         <translation>Registos...</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="344"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="353"/>
         <location filename="../src/ui/LogsDialog.cpp" line="98"/>
         <location filename="../src/ui/ModManagerDialog.cpp" line="205"/>
-        <location filename="../src/ui/SettingsDialog.cpp" line="305"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="307"/>
         <source>Open folder</source>
         <translation>Abrir pasta</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="349"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="358"/>
         <source>Open prefix</source>
         <translation>Abrir prefixo</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="367"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="376"/>
         <source>This game has not been scanned yet. Run a scan to inspect executables, components, prefixes, and OnlineFix signatures. Scanning is read-only.</source>
         <translation>Este jogo ainda não foi analisado. Execute uma análise para inspecionar executáveis, componentes, prefixos e assinaturas OnlineFix. A análise é apenas de leitura.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="371"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="380"/>
         <source>No scan has been recorded for this game.</source>
         <translation>Não há nenhuma análise registada para este jogo.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="373"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="382"/>
         <source>A scan is currently running. Results appear when it finishes.</source>
         <translation>Está a decorrer uma análise. Os resultados aparecem quando terminar.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="375"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="384"/>
         <source>No known compatibility components were detected. This is not an error: many games are self-contained or ship files Vanta does not recognize.</source>
         <translation>Não foi detetado nenhum componente de compatibilidade conhecido. Isto não é um erro: muitos jogos são autónomos ou incluem ficheiros que o Vanta não reconhece.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="378"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="387"/>
         <source>%1 compatibility component(s) were detected. Use the game&apos;s runner settings to choose how they should be used; Vanta does not enable them automatically.</source>
         <translation>Foram detetados %1 componente(s) de compatibilidade. Utilize as definições do runner do jogo para escolher como devem ser utilizados; o Vanta não os ativa automaticamente.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="382"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="391"/>
         <source>The installation appears incomplete. Verify the game files and try scanning again.</source>
         <translation>A instalação parece estar incompleta. Verifique os ficheiros do jogo e tente analisar novamente.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="384"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="393"/>
         <source>The selected executable has an architecture that may not work with the configured runner. Check the executable and runner combination.</source>
         <translation>O executável selecionado tem uma arquitetura que pode não funcionar com o runner configurado. Verifique a combinação de executável e runner.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="387"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="396"/>
         <source>Some expected files are missing. Verify that the game folder contains a complete installation.</source>
         <translation>Faltam alguns ficheiros esperados. Verifique se a pasta do jogo contém uma instalação completa.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="390"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="399"/>
         <source>The scan did not complete successfully: %1</source>
         <translation>A análise não foi concluída com êxito: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="391"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="400"/>
         <source>unknown error</source>
         <translation>erro desconhecido</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameDetailsDialog.cpp" line="393"/>
+        <location filename="../src/ui/GameDetailsDialog.cpp" line="402"/>
         <source>No compatibility information is available.</source>
         <translation>Não há informações de compatibilidade disponíveis.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameListView.cpp" line="59"/>
+        <location filename="../src/ui/GameListView.cpp" line="61"/>
         <location filename="../src/ui/LibraryImportDialog.cpp" line="48"/>
         <source>Game</source>
         <translation>Jogo</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameListView.cpp" line="60"/>
+        <location filename="../src/ui/GameListView.cpp" line="62"/>
         <location filename="../src/ui/MainWindow.cpp" line="759"/>
         <location filename="../src/ui/Sidebar.cpp" line="607"/>
         <source>Compatibility</source>
         <translation>Compatibilidade</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameListView.cpp" line="80"/>
+        <location filename="../src/ui/GameListView.cpp" line="82"/>
         <source>★  %1</source>
         <translation>★  %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameListView.cpp" line="111"/>
-        <location filename="../src/ui/GameListView.cpp" line="182"/>
+        <location filename="../src/ui/GameListView.cpp" line="127"/>
+        <location filename="../src/ui/GameListView.cpp" line="211"/>
         <source>%1
 This game is running.</source>
         <translation>%1
 Este jogo está em execução.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameListView.cpp" line="138"/>
+        <location filename="../src/ui/GameListView.cpp" line="154"/>
         <source>The configured executable is missing.</source>
         <translation>O executável configurado está em falta.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameListView.cpp" line="141"/>
+        <location filename="../src/ui/GameListView.cpp" line="157"/>
         <source>Filename signatures associated with OnlineFix were detected. Detection is not proof that a copy is functional.</source>
         <translation>Foram detetadas assinaturas de nomes de ficheiros associadas ao OnlineFix. A deteção não prova que uma cópia seja funcional.</translation>
     </message>
@@ -2677,45 +2677,44 @@ Este jogo está em execução.</translation>
         <translation>Jogado pela última vez: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="330"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="337"/>
         <source>Apply the OnlineFix configuration for this launch. Vanta backs up every file it touches, and detection is not proof that a fix works.</source>
         <translation>Aplicar a configuração do OnlineFix neste lançamento. O Vanta faz uma cópia de segurança de todos os ficheiros que altera, e a deteção não prova que uma correção funcione.</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="98"/>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="263"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="297"/>
         <source>OnlineFix off</source>
         <translation>OnlineFix desativado</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="333"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="340"/>
         <source>More actions for this game</source>
         <translation>Mais ações para este jogo</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="269"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="267"/>
         <source>Running now</source>
         <translation>Em execução</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="273"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="271"/>
         <source>%1 · %2</source>
         <translation>%1 · %2</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="275"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="273"/>
         <source>Executable missing</source>
         <translation>Executável em falta</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="299"/>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="315"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="306"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="322"/>
         <location filename="../src/ui/LogsDialog.cpp" line="52"/>
         <source>Launch</source>
         <translation>Iniciar</translation>
     </message>
     <message>
-        <location filename="../src/ui/GameSelectionBar.cpp" line="311"/>
+        <location filename="../src/ui/GameSelectionBar.cpp" line="318"/>
         <source>The configured executable is missing. Set the game&apos;s executable first.</source>
         <translation>O executável configurado está em falta. Defina primeiro o executável do jogo.</translation>
     </message>
@@ -3181,7 +3180,7 @@ O registo de início tem o comando completo e qualquer saída do processo. Abri-
     </message>
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="735"/>
-        <location filename="../src/ui/SettingsDialog.cpp" line="339"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="341"/>
         <source>Port external libraries…</source>
         <translation>Importar bibliotecas externas...</translation>
     </message>
@@ -3678,62 +3677,62 @@ Run them in the game&apos;s prefix now?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2137"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2143"/>
         <source>Added to favorites.</source>
         <translation>Adicionado aos favoritos.</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2137"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2143"/>
         <source>Removed from favorites.</source>
         <translation>Removido dos favoritos.</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2148"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2154"/>
         <source>Remove game</source>
         <translation>Remover jogo</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2149"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2155"/>
         <source>Remove %1 from the library?</source>
         <translation>Remover %1 da biblioteca?</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2150"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2156"/>
         <source>Game files are not touched. Only the library entry and its cached scan result are removed.</source>
         <translation>Os ficheiros do jogo não são alterados. Apenas a entrada na biblioteca e o resultado da análise em cache são removidos.</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2161"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2167"/>
         <source>The game could not be removed from the library.</source>
         <translation>Não foi possível remover o jogo da biblioteca.</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2166"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2172"/>
         <source>Removed %1.</source>
         <translation>%1 removido.</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2189"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2195"/>
         <source>This game has no configured Wine prefix.</source>
         <translation>Este jogo não tem um prefixo Wine configurado.</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2193"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2199"/>
         <source>The prefix folder does not exist yet and could not be created.</source>
         <translation>A pasta do prefixo ainda não existe e não foi possível criá-la.</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2202"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2208"/>
         <source>The folder no longer exists: %1</source>
         <translation>A pasta já não existe: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2213"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2219"/>
         <source>Quit Vanta</source>
         <translation>Sair da Vanta</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/MainWindow.cpp" line="2214"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2220"/>
         <source>%n game(s) still running. Quit anyway?</source>
         <translation>
             <numerusform>%n jogo ainda em execução. Sair mesmo assim?</numerusform>
@@ -3741,7 +3740,7 @@ Run them in the game&apos;s prefix now?</source>
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="2215"/>
+        <location filename="../src/ui/MainWindow.cpp" line="2221"/>
         <source>Running games will be stopped.</source>
         <translation>Os jogos em execução serão encerrados.</translation>
     </message>
@@ -3804,7 +3803,7 @@ Run them in the game&apos;s prefix now?</source>
     </message>
     <message>
         <location filename="../src/ui/ModManagerDialog.cpp" line="142"/>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="130"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="138"/>
         <source>File</source>
         <translation>Ficheiro</translation>
     </message>
@@ -3858,7 +3857,7 @@ Run them in the game&apos;s prefix now?</source>
     <message>
         <location filename="../src/core/Types.cpp" line="132"/>
         <location filename="../src/ui/ModManagerDialog.cpp" line="276"/>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="109"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="117"/>
         <location filename="../src/ui/Sidebar.cpp" line="595"/>
         <source>Not detected</source>
         <translation>Não detetado</translation>
@@ -4010,185 +4009,185 @@ O Vanta copia cada ficheiro substituído para BepInEx/.vanta-backups antes de es
         <translation>A pasta de mods ainda não existe.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="47"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="48"/>
         <source>OnlineFix launch policy</source>
         <translation>Política de arranque do OnlineFix</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="92"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="93"/>
         <source>OnlineFix support is provided as-is</source>
         <translation>O suporte OnlineFix é fornecido tal como está</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="99"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="107"/>
         <source>Vanta ports the launcher-side behavior of the OnlineFix Linux project. It can detect OnlineFix signature files, apply the configuration changes the fix expects (creating backups first), and compose the required Wine DLL overrides for a single launch. Vanta does not modify game executables, does not download OnlineFix files, and cannot confirm that a fix works. Detection is not proof of functionality.</source>
         <translation>A Vanta reproduz o comportamento do lado do lançador do projeto OnlineFix para Linux. Pode detetar ficheiros de assinatura do OnlineFix, aplicar as alterações de configuração que o fix espera (criando primeiro cópias de segurança) e compor as substituições de DLL do Wine necessárias para um único lançamento. A Vanta não modifica os executáveis dos jogos, não transfere ficheiros do OnlineFix e não pode confirmar que um fix funciona. A deteção não prova a funcionalidade.</translation>
     </message>
     <message>
         <location filename="../src/core/Types.cpp" line="130"/>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="109"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="117"/>
         <location filename="../src/ui/Sidebar.cpp" line="577"/>
         <source>Detected</source>
         <translation>Detetado</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="112"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="120"/>
         <source>%1 file(s)</source>
         <translation>%1 ficheiro(s)</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="126"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="134"/>
         <source>Detected signature files</source>
         <translation>Ficheiros de assinatura detetados</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="130"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="138"/>
         <source>Matched rule</source>
         <translation>Regra correspondente</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="131"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="139"/>
         <source>Size</source>
         <translation>Tamanho</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="154"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="162"/>
         <source>Showing %1 of %2 detected files.</source>
         <translation>A mostrar %1 de %2 ficheiros detetados.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="165"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="173"/>
         <source>Per-game policy</source>
         <translation>Política por jogo</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="171"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="179"/>
         <source>Auto — apply only when OnlineFix files are detected</source>
         <translation>Automático — aplicar apenas quando forem detetados ficheiros do OnlineFix</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="173"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="181"/>
         <source>Force — apply launch overrides even when detection is inconclusive</source>
         <translation>Forçar — aplicar substituições de arranque mesmo quando a deteção não é conclusiva</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="175"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="183"/>
         <source>Disabled — never apply OnlineFix behavior</source>
         <translation>Desativado — nunca aplicar o comportamento do OnlineFix</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="179"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="187"/>
         <source>OnlineFix mode</source>
         <translation>Modo OnlineFix</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="183"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="191"/>
         <source>Optional real application id</source>
         <translation>ID real da aplicação opcional</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="184"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="192"/>
         <source>Real app id</source>
         <translation>App ID real</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="188"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="196"/>
         <source>Optional replacement application id</source>
         <translation>ID de aplicação de substituição opcional</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="189"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="197"/>
         <source>Fake app id</source>
         <translation>App id falso</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="204"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="212"/>
         <source>Auto is the safe default. Force is only useful when detection is inconclusive; it cannot create fix files, it only applies launch configuration. Disabled prevents both prompts and overrides for this game.</source>
         <translation>O modo Automático é a predefinição segura. O modo Forçar só é útil quando a deteção é inconclusiva; não pode criar ficheiros de correção, apenas aplica a configuração de início. O modo Desativado impede tanto os avisos como as substituições para este jogo.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="215"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="223"/>
         <source>File changes on launch</source>
         <translation>Alterações de ficheiros no início</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="222"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="230"/>
         <source>No file writes are planned. Launch overrides may still be applied.</source>
         <translation>Não estão previstas escritas de ficheiros. As substituições de lançamento podem ainda ser aplicadas.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="232"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="240"/>
         <source>Every changed configuration file is backed up beside the original before it is written. Photon launchers receive a Newtonsoft.Json.dll link when the expected data file and Launcher.exe are present. No game executable or DLL is patched.</source>
         <translation>É feita uma cópia de segurança de cada ficheiro de configuração alterado ao lado do original antes de ser escrito. Os lançadores Photon recebem uma ligação Newtonsoft.Json.dll quando o ficheiro de dados esperado e o Launcher.exe estão presentes. Nenhum executável ou DLL do jogo é modificado.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="248"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="256"/>
         <source>Open fix folder</source>
         <translation>Abrir pasta da correção</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="259"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="267"/>
         <source>Save policy</source>
         <translation>Guardar política</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="280"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="288"/>
         <source>Apply OnlineFix for this launch?</source>
         <translation>Aplicar o OnlineFix para este início?</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="288"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="296"/>
         <source>If you continue, Vanta will update OnlineFix INI files when needed, create backups first, and add the required Wine DLL overrides to this launch only. Steam may need to be started and signed in before the game launches. OnlineFix support is not guaranteed to work, and Vanta never modifies game binaries or downloads fix files.</source>
         <translation>Se continuar, o Vanta atualiza os ficheiros INI do OnlineFix quando necessário, cria primeiro cópias de segurança e adiciona as substituições de DLL do Wine necessárias apenas a este arranque. Pode ser necessário iniciar o Steam e a sessão antes de o jogo arrancar. O suporte do OnlineFix não tem funcionamento garantido, e o Vanta nunca modifica binários do jogo nem transfere ficheiros de correção.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="302"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="310"/>
         <source>Configuration files to update</source>
         <translation>Ficheiros de configuração a atualizar</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="312"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="320"/>
         <source>Choose “Launch without OnlineFix” to start the game normally. Vanta will remember only the policy you configure for the game, not any per-launch override.</source>
         <translation>Escolha “Iniciar sem OnlineFix” para arrancar o jogo normalmente. O Vanta memoriza apenas a política que configurar para o jogo, não qualquer substituição específica de um arranque.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="329"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="337"/>
         <source>Launch without OnlineFix</source>
         <translation>Iniciar sem OnlineFix</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="337"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="345"/>
         <source>Apply and launch</source>
         <translation>Aplicar e iniciar</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="353"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="361"/>
         <source>OnlineFix mode is set to Force, but no signature files were detected. Vanta can still add the standard DXVK override chain to this launch, but it cannot create OnlineFix files or make an absent fix work.</source>
         <translation>O modo OnlineFix está definido como Force, mas não foram detetados ficheiros de assinatura. O Vanta pode ainda adicionar a cadeia de substituições DXVK padrão a este lançamento, mas não pode criar ficheiros do OnlineFix nem fazer funcionar uma correção ausente.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="357"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="365"/>
         <source>No OnlineFix signature files were detected for this game.</source>
         <translation>Não foi detetado nenhum ficheiro de assinatura OnlineFix para este jogo.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="359"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="367"/>
         <source>%1 OnlineFix signature file(s) were detected (%2).</source>
         <translation>%1 ficheiro(s) de assinatura OnlineFix detetado(s) (%2).</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="363"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="371"/>
         <source> App IDs: real %1, fake %2.</source>
         <translation> App IDs: real %1, falso %2.</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="364"/>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="365"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="372"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="373"/>
         <source>unknown</source>
         <translation>desconhecido</translation>
     </message>
     <message>
-        <location filename="../src/ui/OnlineFixDialog.cpp" line="367"/>
+        <location filename="../src/ui/OnlineFixDialog.cpp" line="375"/>
         <source> Detection never proves that the fix is functional.</source>
         <translation> A deteção nunca prova que a correção é funcional.</translation>
     </message>
@@ -4599,21 +4598,21 @@ Isto irá remover os ficheiros do runner.</translation>
     </message>
     <message>
         <location filename="../src/ui/SettingsDialog.cpp" line="293"/>
-        <source>Covers come from SteamGridDB. Vanta ships with a working key, so the field can stay empty; paste your own key from steamgriddb.com/profile/preferences/api if you want the lookups to use your account instead. Names are matched fuzzily, so a typo like “Testris” still resolves to “Tetris”.</source>
-        <translation>As capas vêm do SteamGridDB. A Vanta inclui uma chave funcional, por isso o campo pode ficar vazio; cole a sua própria chave de steamgriddb.com/profile/preferences/api se preferir que as pesquisas usem a sua conta. Os nomes são comparados de forma aproximada, por isso um erro como “Testris” ainda é associado a “Tetris”.</translation>
+        <source>Covers are taken from the game&apos;s own Steam library art when Vanta can match the release, and from SteamGridDB otherwise. Vanta ships with a working SteamGridDB key, so the field can stay empty; paste your own key from steamgriddb.com/profile/preferences/api if you want the lookups to use your account instead. Names are matched fuzzily, so a typo like “Testris” still resolves to “Tetris”.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="312"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="314"/>
         <source>Cover folder</source>
         <translation>Pasta das capas</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="313"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="315"/>
         <source>Covers</source>
         <translation>Capas</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="321"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="323"/>
         <source>Library: %1
 Settings: %2
 Scan cache: %3</source>
@@ -4622,52 +4621,52 @@ Definições: %2
 Cache de análise: %3</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="323"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="325"/>
         <source>Data files</source>
         <translation>Ficheiros de dados</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="325"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="327"/>
         <source>Vanta stores everything under the XDG config and cache directories using atomic writes. Library and settings files can be copied to another machine to move your setup.</source>
         <translation>A Vanta guarda tudo nos diretórios de configuração e cache XDG através de escritas atómicas. Os ficheiros da biblioteca e das definições podem ser copiados para outra máquina para transferir a sua configuração.</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="334"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="336"/>
         <source>External library porting</source>
         <translation>Importação de bibliotecas externas</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="336"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="338"/>
         <source>Scan your machine for installed games from Lutris and Heroic Games Launcher, and import them into Vanta automatically.</source>
         <translation>Analise o seu computador à procura de jogos instalados no Lutris e no Heroic Games Launcher e importe-os automaticamente para a Vanta.</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="346"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="348"/>
         <source>Data</source>
         <translation>Dados</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="356"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="358"/>
         <source>Save settings</source>
         <translation>Guardar definições</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="460"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="462"/>
         <source>Select a Wine executable</source>
         <translation>Selecione um executável do Wine</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="468"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="470"/>
         <source>Select a Proton build folder</source>
         <translation>Selecionar uma pasta de build do Proton</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="517"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="519"/>
         <source>Detected Wine builds: %1</source>
         <translation>Compilações de Wine detetadas: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/SettingsDialog.cpp" line="518"/>
+        <location filename="../src/ui/SettingsDialog.cpp" line="520"/>
         <source>Detected Proton builds: %1</source>
         <translation>Compilações Proton detetadas: %1</translation>
     </message>

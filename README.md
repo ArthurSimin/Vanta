@@ -57,11 +57,13 @@ Vanta never adds entries on its own.
   overrides. If Steam is closed when an OnlineFix launch starts, Vanta asks what
   to do instead of starting the client behind your back. See
   [ONLINEFIX.md](ONLINEFIX.md).
-- **Cover art from SteamGridDB.** Missing covers are fetched automatically when a
-  game is added, or chosen by hand from the editor and the context menu. Names are
-  matched fuzzily, so a typo like "Testris" still resolves to "Tetris Ultimate".
-  When a game has several artworks, the picker shows every option as a thumbnail
-  grid with a full-size preview so you choose the one Vanta uses.
+- **Cover art from Steam, then SteamGridDB.** Missing covers are fetched from the
+  game's own Steam library art when Vanta can match the release, and from
+  SteamGridDB otherwise. The picker offers the Steam cover first and the
+  SteamGridDB grids beside it, with a full-size preview so you choose the one
+  Vanta uses. Names are matched fuzzily, so a typo like "Testris" still resolves
+  to "Tetris Ultimate", while a sequel or a spin-off never supplies another game's
+  art.
 - **Real source icons.** Steam, GOG, Epic, EA and Ubisoft entries use the official
   brand marks from bundled SVGs, recoloured to match the active theme.
 - **Themes.** System, Light, Dark and Follow system colors. The System theme
@@ -262,11 +264,13 @@ platform for you, since the library is for games rather than Windows utilities.
 A native Linux binary selects Native instead. Both are only defaults: change the
 runner in the Runner tab whenever you need to.
 
-The cover row has a **SteamGridDB…** button that looks the game name up and opens
-the artwork picker. The search is fuzzy, so "Testris" resolves to "Tetris
-Ultimate"; the picker lists every available grid with its size and author, streams
-thumbnails in as they arrive and previews the selected image full size before you
-commit. Covers are downloaded automatically for new games unless you turn that off
+The cover row has a **Find cover art…** button that looks the game name up on the
+Steam store and SteamGridDB and opens the artwork picker. The game's own Steam
+library art is offered first, followed by every SteamGridDB grid with its size and
+author. The search is fuzzy, so "Testris" resolves to "Tetris Ultimate", while a
+sequel or a spin-off never supplies another game's art. Thumbnails stream in as
+they arrive and the selected image is previewed full size before you commit.
+Covers are downloaded automatically for new games unless you turn that off
 in Settings → Covers.
 
 Double-click a card to launch. Right-click for play/stop, details, edit,
@@ -440,9 +444,10 @@ Vanta makes network requests in exactly four situations:
    **Check for updates…**. The request reads the public GitHub releases API,
    sends no information about you or your library, and writes nothing.
 2. Downloading a runner (GitHub release metadata and the release asset).
-3. Downloading cover art from [SteamGridDB](https://www.steamgriddb.com/), which
-   sends only the game name you asked it to look up. Turn off "Fetch missing
-   cover art automatically" in Settings → Covers to keep lookups entirely manual.
+3. Looking a game name up on the Steam store and
+   [SteamGridDB](https://www.steamgriddb.com/) when fetching cover art, which sends
+   only the name you asked it to look up. Turn off "Fetch missing cover art
+   automatically" in Settings → Covers to keep lookups entirely manual.
 4. Browsing or installing from [Thunderstore](https://thunderstore.io/), which
    sends the community slug, the package or search text you entered, and the
    package downloads themselves. Opening the mod manager alone makes no request.

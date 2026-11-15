@@ -36,8 +36,11 @@ struct CoverArt
 //
 // Automatic fetching asks the Steam store for the app id first and takes the
 // game's own library_600x900 art. SteamGridDB is the fallback when Steam has no
-// matching app or no library art for it, and remains the source the artwork
-// picker uses for customisation.
+// matching app or no library art for it.
+//
+// The artwork picker asks the same Steam store first and offers the game's
+// library art as the first choice, then adds every SteamGridDB grid beside it,
+// so customising starts from the cover automatic fetching would pick.
 //
 // Name resolution is deliberately forgiving: an exact case-insensitive match wins
 // outright, otherwise the closest candidate is chosen by token-aligned similarity,
@@ -46,8 +49,9 @@ struct CoverArt
 // Two entry points are offered:
 //   fetchCover()    - resolve, take the first artwork and save it in one go.
 //   listCoverArt()  - resolve, then report every artwork so a UI can offer a choice.
-// The artwork stage always reports the *resolved* SteamGridDB game id, which is
-// not the same thing as the Vanta game id carried through the signals.
+// A listing option always reports the *resolved* SteamGridDB game id, which is
+// not the same thing as the Vanta game id carried through the signals; the Steam
+// option carries its own store id instead.
 class CoverFetcher : public QObject
 {
     Q_OBJECT
@@ -92,12 +96,17 @@ private:
 
     void searchByName(const QString &gameId, const QString &gameName);
     void searchSteam(const QString &gameId, const QString &gameName);
+    void advanceWithoutSteam(const QString &gameId, const QString &gameName);
+    void fetchSteamArtCandidate(const QString &gameId, const QString &gameName, int appId,
+                                const QString &coverUrl);
+    void continueListingGrids(const QString &gameId, const QString &gameName);
     void searchGridsFallback(const QString &gameId, const QString &gameName);
     void requestGrids(const QString &gameId, const QString &steamGridId, const QString &matchedName);
     void downloadImage(const QString &gameId, const QString &imageUrl, bool fallBackToGrids = false);
     void queueNextFetch();
     void emitFailed(const QString &gameId, const QString &message);
     void emitFinished(const QString &gameId, const QString &coverPath);
+    bool offerSteamArtOnly(const QString &gameId, const QString &matchedName);
     QNetworkRequest makeRequest(const QUrl &url) const;
     QNetworkRequest makePublicRequest(const QUrl &url) const;
     void cleanupReply();
@@ -111,5 +120,8 @@ private:
     QString m_apiKey;
     QString m_pendingGameId;
     QString m_pendingGameName;
+    // The Steam library art found by a listing request, offered as the first
+    // picker choice. Empty in the automatic fetch path.
+    CoverArt m_steamArt;
     Mode m_mode = Mode::SaveFirst;
 };

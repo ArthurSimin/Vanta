@@ -107,6 +107,59 @@ QStringList numberWords(const QStringList &words)
     return numbers;
 }
 
+// Words that describe a re-release of the same game rather than a different
+// title. Anything else the query does not carry is a distinguishing word.
+bool isReleaseQualifier(const QString &word)
+{
+    static const QStringList qualifiers = {
+        QStringLiteral("game"), QStringLiteral("edition"), QStringLiteral("goty"),
+        QStringLiteral("definitive"), QStringLiteral("remastered"), QStringLiteral("complete"),
+        QStringLiteral("deluxe"), QStringLiteral("ultimate"), QStringLiteral("enhanced"),
+        QStringLiteral("special"), QStringLiteral("anniversary"), QStringLiteral("year"),
+        QStringLiteral("classic"), QStringLiteral("hd")};
+    return qualifiers.contains(word);
+}
+
+// Decides whether a Steam search result names the same release as the library
+// entry. Similarity ranks options well, but it is too permissive to decide
+// this on its own: "Dawn of War II" keeps every word of "Dawn of War", and
+// "Neon Geometry Dash" keeps every word of "Geometry Dash", while both still
+// score highly. Automatic fetching therefore requires the two titles to name
+// the same words, allowing only re-release qualifiers on the candidate side.
+bool sameSteamRelease(const QString &query, const QString &candidate)
+{
+    const QStringList queryWords = wordsOf(normalise(query));
+    const QStringList candidateWords = wordsOf(normalise(candidate));
+    if (queryWords.isEmpty() || candidateWords.isEmpty())
+        return false;
+
+    // Every word the candidate adds must describe a re-release. This is what
+    // keeps a sequel or a spin-off from taking the original's place.
+    for (const QString &word : candidateWords) {
+        if (isReleaseQualifier(word))
+            continue;
+        qreal best = 0.0;
+        for (const QString &queryWord : queryWords)
+            best = qMax(best, wordSimilarity(word, queryWord));
+        if (best < 0.82)
+            return false;
+    }
+
+    // The candidate must still carry every meaningful word of the query, so a
+    // shorter prequel never stands in for a numbered entry. One typo is
+    // tolerated, so a misspelt library name still matches its store entry.
+    for (const QString &word : queryWords) {
+        if (isReleaseQualifier(word))
+            continue;
+        qreal best = 0.0;
+        for (const QString &candidateWord : candidateWords)
+            best = qMax(best, wordSimilarity(word, candidateWord));
+        if (best < 0.82)
+            return false;
+    }
+    return true;
+}
+
 // Network errors stringify as the full request URL, which is useless in a dialog.
 // Report the meaningful cause instead.
 QString describeFailure(int status, const QString &fallback)
@@ -450,6 +503,11 @@ void CoverFetcher::searchSteam(const QString &gameId, const QString &gameName)
                 const QString name = entry.value(QStringLiteral("name")).toString();
                 if (id <= 0 || name.isEmpty())
                     continue;
+                // A sequel or a spin-off can outrank the original on
+                // similarity alone, so it is skipped rather than allowed to
+                // block a later valid result.
+                if (!sameSteamRelease(gameName, name))
+                    continue;
                 // Equal scores keep the earlier result, which is Steam's own
                 // relevance order.
                 const int score = similarity(gameName, name);
@@ -458,10 +516,10 @@ void CoverFetcher::searchSteam(const QString &gameId, const QString &gameName)
                     appId = id;
                 }
             }
-            // Only a near-exact title qualifies. The forgiving matcher the
-            // artwork picker uses would otherwise attach a sequel's or a
-            // spin-off's art to a game Steam does not sell.
-            if (appId > 0 && bestScore >= 95) {
+            // sameSteamRelease() already rejected every title that names a
+            // different game, so the best remaining candidate is the one to
+            // use. A miss defers to SteamGridDB.
+            if (appId > 0) {
                 const QString coverUrl =
                     QStringLiteral("https://steamcdn-a.akamaihd.net/steam/apps/%1/library_600x900.jpg")
                         .arg(appId);

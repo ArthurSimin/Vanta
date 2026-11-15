@@ -62,8 +62,9 @@ Vanta never adds entries on its own.
   SteamGridDB otherwise. The picker offers the Steam cover first and the
   SteamGridDB grids beside it, with a full-size preview so you choose the one
   Vanta uses. Names are matched fuzzily, so a typo like "Testris" still resolves
-  to "Tetris Ultimate", while a sequel or a spin-off never supplies another game's
-  art.
+  to "Tetris Ultimate". The Steam match is release-checked, so a sequel, a
+  spin-off or a prequel never supplies another game's Steam art; the SteamGridDB
+  fallback matches by name similarity.
 - **Real source icons.** Steam, GOG, Epic, EA and Ubisoft entries use the official
   brand marks from bundled SVGs, recoloured to match the active theme.
 - **Themes.** System, Light, Dark and Follow system colors. The System theme
@@ -267,9 +268,10 @@ runner in the Runner tab whenever you need to.
 The cover row has a **Find cover art…** button that looks the game name up on the
 Steam store and SteamGridDB and opens the artwork picker. The game's own Steam
 library art is offered first, followed by every SteamGridDB grid with its size and
-author. The search is fuzzy, so "Testris" resolves to "Tetris Ultimate", while a
-sequel or a spin-off never supplies another game's art. Thumbnails stream in as
-they arrive and the selected image is previewed full size before you commit.
+author. The search is fuzzy, so "Testris" resolves to "Tetris Ultimate", and the
+Steam match is release-checked, so a sequel or a spin-off never supplies another
+game's Steam art. Thumbnails stream in as they arrive and the selected image is
+previewed full size before you commit.
 Covers are downloaded automatically for new games unless you turn that off
 in Settings → Covers.
 

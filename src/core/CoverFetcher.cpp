@@ -409,6 +409,10 @@ QNetworkRequest CoverFetcher::makePublicRequest(const QUrl &url) const
     request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Vanta/1.0"));
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                          QNetworkRequest::NoLessSafeRedirectPolicy);
+    // Qt 6.2 leaves the transfer timeout disabled, so a Steam connection that
+    // stalls after opening would block the picker without ever reaching the
+    // SteamGridDB fallback.
+    request.setTransferTimeout(20000);
     return request;
 }
 
@@ -841,6 +845,9 @@ void CoverFetcher::downloadImage(const QString &gameId, const QString &imageUrl,
     request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("Vanta/1.0"));
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                          QNetworkRequest::NoLessSafeRedirectPolicy);
+    // A stalled image download would otherwise hold the fetch queue open. The
+    // caller's error path already falls back to SteamGridDB or reports a miss.
+    request.setTransferTimeout(20000);
 
     m_reply = m_network->get(request);
     connect(m_reply, &QNetworkReply::finished, this, [this, gameId, fallBackToGrids] {

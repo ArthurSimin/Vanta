@@ -4,6 +4,11 @@ cmake_minimum_required(VERSION 3.21)
 # About dialog. Release builds pass -DVANTA_VERSION=<tag without v> so a tagged
 # build reports exactly what was released; otherwise default to 1.6.0.
 set(VANTA_VERSION "1.6.0" CACHE STRING "Version reported by the application")
+# This is a cache entry, so a reused build directory keeps the value it was
+# configured with after a bump. Reconfigure with -U VANTA_VERSION (or use a
+# fresh build directory) to pick up the new default; FORCE is not used because
+# it would also discard an explicit -DVANTA_VERSION from the release workflow
+# and the AUR package.
 
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
